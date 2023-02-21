@@ -21,8 +21,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		quad->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitVertex.cso"), Utils::GetPathFromExe("LitPixel.cso"),
 			Rendering::sceneFB->colorTexture->samples, Rendering::sceneFB->colorTexture->format));
 
-		quad->GetOwner()->GetTransform()->SetPosition(XMFLOAT3(0, 0, 4));
-		quad->GetOwner()->GetTransform()->SetEulerAngles(XMFLOAT3(0, 45, 0));
+		quad->GetOwner()->GetTransform()->SetPosition(XMFLOAT3(0, 0, 3.5f));
 
 		Texture2D* tex = Texture2D::Import(Utils::GetPathFromProject("Images/UV Checker.png"), false);
 		quad->material->SetTexture("t", tex);

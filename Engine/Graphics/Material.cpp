@@ -69,7 +69,6 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 			if (bindDesc.Type == D3D_SIT_TEXTURE)
 			{
 				textureParameters[bindDesc.Name] = numTextures;
-				textures.push_back(nullptr);
 				numTextures++;
 			}
 			if (bindDesc.Type == D3D_SIT_SAMPLER)
@@ -115,14 +114,12 @@ void Material::SetTexture(const std::string& name, Texture* texture)
 	if (!textureParameters.contains(name)) return;
 
 	uint32_t index = textureParameters[name];
-	if (textures[index] == texture) return;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE texDescStartHnd = textureDescHeap->GetCPUDescriptorHandleForHeapStart();
 	UINT incrementSize = Rendering::device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	CD3DX12_CPU_DESCRIPTOR_HANDLE texDescHnd = CD3DX12_CPU_DESCRIPTOR_HANDLE(texDescStartHnd, index, incrementSize);
 
 	Rendering::device->CreateShaderResourceView(texture->textureBuffer.Get(), &texture->srvDesc, texDescHnd);
-	textures[index] = texture;
 }
 
 void Material::SetSampler(const std::string& name, Sampler sampler)

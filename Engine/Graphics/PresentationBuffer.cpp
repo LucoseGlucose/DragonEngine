@@ -44,6 +44,7 @@ PresentationBuffer::PresentationBuffer()
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
 	Utils::ThrowIfFailed(Rendering::device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvDescHeap)));
+	NAME_D3D_OBJECT(rtvDescHeap);
 
 	D3D12_DESCRIPTOR_HEAP_DESC dsHeapDesc{};
 	dsHeapDesc.NumDescriptors = 1;
@@ -51,6 +52,7 @@ PresentationBuffer::PresentationBuffer()
 	dsHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
 	Utils::ThrowIfFailed(Rendering::device->CreateDescriptorHeap(&dsHeapDesc, IID_PPV_ARGS(&dsDescHeap)));
+	NAME_D3D_OBJECT(dsDescHeap);
 
 	View rtvView{};
 	rtvView.rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;

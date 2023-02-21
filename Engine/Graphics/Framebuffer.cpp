@@ -12,6 +12,7 @@ Framebuffer::Framebuffer(XMUINT2 size, DXGI_FORMAT rtvFormat, DXGI_FORMAT dsForm
 	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
 	Utils::ThrowIfFailed(Rendering::device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvDescHeap)));
+	NAME_D3D_OBJECT(rtvDescHeap);
 
 	D3D12_DESCRIPTOR_HEAP_DESC dsHeapDesc{};
 	dsHeapDesc.NumDescriptors = 1;
@@ -19,6 +20,7 @@ Framebuffer::Framebuffer(XMUINT2 size, DXGI_FORMAT rtvFormat, DXGI_FORMAT dsForm
 	dsHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
 	Utils::ThrowIfFailed(Rendering::device->CreateDescriptorHeap(&dsHeapDesc, IID_PPV_ARGS(&dsDescHeap)));
+	NAME_D3D_OBJECT(dsDescHeap);
 
 	View rtvView{};
 	rtvView.rtvDesc.Format = rtvFormat;

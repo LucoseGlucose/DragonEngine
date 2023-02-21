@@ -20,7 +20,7 @@ float3 ToneMapACESFilmic(float3 x)
 float4 main(PS_INPUT input) : SV_TARGET
 {
     float3 sceneColor = t.Sample(s, input.uv).rgb;
-    float3 toneMapped = sceneColor;//ToneMapACESFilmic(sceneColor);
+    float3 toneMapped = ToneMapACESFilmic(sceneColor);
     float3 gammaCorrected = pow(toneMapped, 2.2);
 
     return float4(gammaCorrected, 1);

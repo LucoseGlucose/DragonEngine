@@ -108,8 +108,8 @@
       <ShaderModel>5.1</ShaderModel>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AllResourcesBound>true</AllResourcesBound>
-      <ShaderType>Vertex</ShaderType>
-      <EnableUnboundedDescriptorTables>true</EnableUnboundedDescriptorTables>
+      <ShaderType>Pixel Shader (/ps); Vertex Shader (/vs)</ShaderType>
+      <EnableUnboundedDescriptorTables>false</EnableUnboundedDescriptorTables>
       <DisableOptimizations>true</DisableOptimizations>
     </FxCompile>
   </ItemDefinitionGroup>
@@ -145,8 +145,8 @@
       <DisableOptimizations>false</DisableOptimizations>
       <EnableDebuggingInformation>false</EnableDebuggingInformation>
       <AllResourcesBound>true</AllResourcesBound>
-      <ShaderType>Vertex</ShaderType>
-      <EnableUnboundedDescriptorTables>true</EnableUnboundedDescriptorTables>
+      <ShaderType>Pixel Shader (/ps); Vertex Shader (/vs)</ShaderType>
+      <EnableUnboundedDescriptorTables>false</EnableUnboundedDescriptorTables>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -175,8 +175,8 @@
       <ShaderModel>5.1</ShaderModel>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AllResourcesBound>true</AllResourcesBound>
-      <ShaderType>Vertex</ShaderType>
-      <EnableUnboundedDescriptorTables>true</EnableUnboundedDescriptorTables>
+      <ShaderType>Pixel Shader (/ps); Vertex Shader (/vs)</ShaderType>
+      <EnableUnboundedDescriptorTables>false</EnableUnboundedDescriptorTables>
       <DisableOptimizations>true</DisableOptimizations>
     </FxCompile>
   </ItemDefinitionGroup>
@@ -212,8 +212,8 @@
       <DisableOptimizations>false</DisableOptimizations>
       <EnableDebuggingInformation>false</EnableDebuggingInformation>
       <AllResourcesBound>true</AllResourcesBound>
-      <ShaderType>Vertex</ShaderType>
-      <EnableUnboundedDescriptorTables>true</EnableUnboundedDescriptorTables>
+      <ShaderType>Pixel Shader (/ps); Vertex Shader (/vs)</ShaderType>
+      <EnableUnboundedDescriptorTables>false</EnableUnboundedDescriptorTables>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -249,6 +249,7 @@
     <ClCompile Include="Graphics\Texture2D.cpp" />
     <ClCompile Include="Graphics\RenderTexture.cpp" />
     <ClCompile Include="Graphics\PresentationBuffer.cpp" />
+    <ClCompile Include="Input.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\CameraComponent.h" />
@@ -278,6 +279,7 @@
     <ClInclude Include="Graphics\Texture2D.h" />
     <ClInclude Include="Graphics\RenderTexture.h" />
     <ClInclude Include="Graphics\PresentationBuffer.h" />
+    <ClInclude Include="Input.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\Quad.fbx" />

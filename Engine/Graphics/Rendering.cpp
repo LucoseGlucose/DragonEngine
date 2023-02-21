@@ -66,6 +66,7 @@ void Rendering::Init()
 	}
 
 	Utils::ThrowIfFailed(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)));
+	NAME_D3D_OBJECT(device);
 
 	commandQueue = new CommandQueue();
 	presentationBuffer = new PresentationBuffer();
@@ -112,6 +113,9 @@ void Rendering::Init()
 
 void Rendering::Render()
 {
+	XMUINT2 windowSize = Application::GetUnsignedFramebufferSize();
+	if (windowSize.x == 0 || windowSize.y == 0) return;
+
 	currentRecorder = GetRecorder();
 	currentRecorder->StartRecording();
 
@@ -125,7 +129,7 @@ void Rendering::Render()
 	}
 	delete renderers;
 
-	sceneFB->Blit(postFB, true, DXGI_FORMAT_R16G16B16A16_FLOAT, true, DXGI_FORMAT_R32_FLOAT);
+	sceneFB->Blit(postFB, true, DXGI_FORMAT_R16G16B16A16_FLOAT, false, DXGI_FORMAT_R32_FLOAT);
 
 	currentRecorder->StopRecording();
 	commandQueue->Execute(currentRecorder->list.Get());
@@ -161,7 +165,21 @@ void Rendering::Cleanup()
 
 void Rendering::Resize(XMUINT2 newSize)
 {
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = newSize.x;
+	viewport.Height = newSize.y;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+
+	scissorRect.left = 0;
+	scissorRect.top = 0;
+	scissorRect.right = newSize.x;
+	scissorRect.bottom = newSize.y;
+
 	sceneFB->Resize(newSize);
 	postFB->Resize(newSize);
 	presentationBuffer->Resize(newSize);
+
+	outputObj->material->SetTexture("t", postFB->colorTexture);
 }

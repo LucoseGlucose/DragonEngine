@@ -4,6 +4,7 @@
 #include "Rendering.h"
 #include "TimeManager.h"
 #include "SceneManager.h"
+#include "Input.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
@@ -16,6 +17,7 @@ void Application::Run(const std::function<Scene*(void)>& sceneCreateFunc)
 	window = glfwCreateWindow(1280, 720, "DragonEngine", nullptr, nullptr);
 	glfwSetWindowPos(window, 320, 180);
 
+	Input::Init();
 	Rendering::Init();
 	double lastFrameTime = 0;
 
@@ -28,7 +30,11 @@ void Application::Run(const std::function<Scene*(void)>& sceneCreateFunc)
 		lastFrameTime = glfwGetTime();
 
 		XMUINT2 preWindowSize = GetUnsignedFramebufferSize();
+
 		glfwPollEvents();
+		Input::Update();
+
+		if (Input::GetKeyDown(GLFW_KEY_F11)) SetFullscreen(!fullscreen);
 
 		XMUINT2 postWindowSize = GetUnsignedFramebufferSize();
 		if (postWindowSize.x != preWindowSize.x || postWindowSize.y != preWindowSize.y) Rendering::Resize(postWindowSize);
@@ -38,6 +44,8 @@ void Application::Run(const std::function<Scene*(void)>& sceneCreateFunc)
 		Rendering::Render();
 		glfwSetWindowTitle(window, std::to_string((int)std::round(1.0 / TimeManager::GetDeltaTime())).append(" FPS").c_str());
 	}
+
+	SetFullscreen(false);
 
 	SceneManager::GetActiveScene()->OnEnd();
 	Rendering::Cleanup();
@@ -60,6 +68,20 @@ XMUINT2 Application::GetUnsignedFramebufferSize()
 	return XMUINT2(width, height);
 }
 
+XMINT2 Application::GetWindowSize()
+{
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
+	return XMINT2(width, height);
+}
+
+XMINT2 Application::GetWindowPosition()
+{
+	int x, y;
+	glfwGetWindowPos(window, &x, &y);
+	return XMINT2(x, y);
+}
+
 HWND Application::GetWindowHandle()
 {
 	return glfwGetWin32Window(window);
@@ -79,4 +101,29 @@ std::filesystem::path Application::GetApplicationPath()
 	delete[] path;
 
 	return str;
+}
+
+bool Application::GetFullscreen()
+{
+	return fullscreen;
+}
+
+void Application::SetFullscreen(bool fs)
+{
+	if (fs && !fullscreen)
+	{
+		lastWindowedSize = GetWindowSize();
+		lastWindowedPos = GetWindowPosition();
+
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* vidMode = glfwGetVideoMode(monitor);
+
+		glfwSetWindowMonitor(window, monitor, 0, 0, vidMode->width, vidMode->height, GLFW_DONT_CARE);
+		fullscreen = true;
+	}
+	else if (!fs && fullscreen)
+	{
+		glfwSetWindowMonitor(window, nullptr, lastWindowedPos.x, lastWindowedPos.y, lastWindowedSize.x, lastWindowedSize.y, GLFW_DONT_CARE);
+		fullscreen = false;
+	}
 }

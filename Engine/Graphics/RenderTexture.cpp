@@ -13,6 +13,7 @@ RenderTexture::RenderTexture(XMUINT2 size, DXGI_FORMAT format, D3D12_RESOURCE_FL
 
 	Utils::ThrowIfFailed(Rendering::device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &textureDesc,
 		startingState, &clearValue, IID_PPV_ARGS(&textureBuffer)));
+	NAME_D3D_OBJECT(textureBuffer);
 
 	srvDesc.Format = format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -23,6 +24,7 @@ RenderTexture::RenderTexture(XMUINT2 size, DXGI_FORMAT format, D3D12_RESOURCE_FL
 RenderTexture::RenderTexture(ID3D12Resource** existingResource, View view) : Texture(), descriptor(view)
 {
 	textureBuffer = *existingResource;
+	NAME_D3D_OBJECT(textureBuffer);
 
 	D3D12_RESOURCE_DESC desc = textureBuffer->GetDesc();
 	format = desc.Format;
@@ -42,14 +44,17 @@ void RenderTexture::Resize(XMUINT2 size, D3D12_RESOURCE_STATES startingState)
 	textureBuffer.Reset();
 
 	CD3DX12_HEAP_PROPERTIES heapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-	textureDesc = CD3DX12_RESOURCE_DESC::Tex2D(format, size.x, size.y, 1, 0, samples, 0, flags);
+	textureDesc = CD3DX12_RESOURCE_DESC::Tex2D(format, size.x, size.y, 1, 1, samples, 0, flags);
 
 	Utils::ThrowIfFailed(Rendering::device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &textureDesc,
 		startingState, &clearValue, IID_PPV_ARGS(&textureBuffer)));
+	NAME_D3D_OBJECT(textureBuffer);
 }
 
 void RenderTexture::Resize(XMUINT2 size, ID3D12Resource** existingResource)
 {
 	if (size.x == 0 || size.y == 0) return;
+
 	textureBuffer = *existingResource;
+	NAME_D3D_OBJECT(textureBuffer);
 }

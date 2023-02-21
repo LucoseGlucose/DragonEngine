@@ -15,6 +15,8 @@ ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList, u
     std::vector<D3D12_ROOT_PARAMETER> textureParams{};
     std::vector<D3D12_ROOT_PARAMETER> samplerParams{};
 
+    std::vector<D3D12_DESCRIPTOR_RANGE*> rangePtrs{};
+
     D3D12_SHADER_DESC vertexShaderDesc;
     ComPtr<ID3D12ShaderReflection> vertexShaderReflection;
 
@@ -54,16 +56,18 @@ ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList, u
             }
             if (bindDesc.Type == D3D_SIT_TEXTURE)
             {
-                D3D12_DESCRIPTOR_RANGE descRange{};
-                descRange.BaseShaderRegister = numTextures;
-                descRange.NumDescriptors = 1;
-                descRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-                descRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-                descRange.RegisterSpace = 0;
+                D3D12_DESCRIPTOR_RANGE* descRange = new D3D12_DESCRIPTOR_RANGE();
+                descRange->BaseShaderRegister = numTextures;
+                descRange->NumDescriptors = 1;
+                descRange->OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+                descRange->RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+                descRange->RegisterSpace = 0;
+
+                rangePtrs.push_back(descRange);
 
                 D3D12_ROOT_DESCRIPTOR_TABLE descTable{};
                 descTable.NumDescriptorRanges = 1;
-                descTable.pDescriptorRanges = &descRange;
+                descTable.pDescriptorRanges = descRange;
 
                 D3D12_ROOT_PARAMETER rootParam{};
                 rootParam.DescriptorTable = descTable;
@@ -75,16 +79,18 @@ ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList, u
             }
             if (bindDesc.Type == D3D_SIT_SAMPLER)
             {
-                D3D12_DESCRIPTOR_RANGE descRange{};
-                descRange.BaseShaderRegister = numSamplers;
-                descRange.NumDescriptors = 1;
-                descRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-                descRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
-                descRange.RegisterSpace = 0;
+                D3D12_DESCRIPTOR_RANGE* descRange = new D3D12_DESCRIPTOR_RANGE();
+                descRange->BaseShaderRegister = numSamplers;
+                descRange->NumDescriptors = 1;
+                descRange->OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+                descRange->RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
+                descRange->RegisterSpace = 0;
+
+                rangePtrs.push_back(descRange);
 
                 D3D12_ROOT_DESCRIPTOR_TABLE descTable{};
                 descTable.NumDescriptorRanges = 1;
-                descTable.pDescriptorRanges = &descRange;
+                descTable.pDescriptorRanges = descRange;
 
                 D3D12_ROOT_PARAMETER rootParam{};
                 rootParam.DescriptorTable = descTable;
@@ -125,8 +131,14 @@ ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList, u
 
     Utils::ThrowIfFailed(Rendering::device->CreateRootSignature(0,
         rsBlob->GetBufferPointer(), rsBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
+    NAME_D3D_OBJECT(rootSignature);
 
+    for (size_t i = 0; i < rangePtrs.size(); i++)
+    {
+        delete rangePtrs[i];
+    }
     delete[] ptrCpy;
+
     std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout;
 
     for (size_t i = 0; i < vertexShaderDesc.InputParameters; i++)
@@ -193,6 +205,7 @@ ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList, u
     pipelineDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 
     Utils::ThrowIfFailed(Rendering::device->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&pipeline)));
+    NAME_D3D_OBJECT(pipeline);
 }
 
 ShaderProgram* ShaderProgram::Create(const std::map<SHADER_TYPE, Shader*>& shaderList, uint32_t samples, DXGI_FORMAT format)

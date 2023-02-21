@@ -2,6 +2,12 @@
 
 #include <DirectXMath.h>
 
+#ifdef _DEBUG
+#define NAME_D3D_OBJECT(obj) Utils::ThrowIfFailed(obj->SetName(L#obj))
+#else
+#define NAME_D3D_OBJECT(obj)
+#endif
+
 class Utils
 {
 public:

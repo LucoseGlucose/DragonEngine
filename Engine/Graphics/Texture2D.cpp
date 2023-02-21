@@ -16,6 +16,7 @@ Texture2D::Texture2D(void* data, size_t dataSize, XMUINT2 size, DXGI_FORMAT form
 
 	Utils::ThrowIfFailed(Rendering::device->CreateCommittedResource(&defaultHeapProps, D3D12_HEAP_FLAG_NONE, &textureDesc,
 		D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&textureBuffer)));
+	NAME_D3D_OBJECT(textureBuffer);
 
 	UINT64 textureUploadSize;
 	Rendering::device->GetCopyableFootprints(&textureDesc, 0, 1, 0, nullptr, nullptr, nullptr, &textureUploadSize);
@@ -25,6 +26,7 @@ Texture2D::Texture2D(void* data, size_t dataSize, XMUINT2 size, DXGI_FORMAT form
 
 	Utils::ThrowIfFailed(Rendering::device->CreateCommittedResource(&uploadHeapProps, D3D12_HEAP_FLAG_NONE, &uploadBufferDesc,
 		D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&uploadBuffer)));
+	NAME_D3D_OBJECT(uploadBuffer);
 
 	D3D12_SUBRESOURCE_DATA subResourceData{};
 	subResourceData.pData = data;

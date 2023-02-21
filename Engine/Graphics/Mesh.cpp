@@ -65,11 +65,13 @@ void Mesh::UploadMeshData()
 
 	Utils::ThrowIfFailed(Rendering::device->CreateCommittedResource(&defaultHeapProps, D3D12_HEAP_FLAG_NONE,
 		&vertexResourceDesc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&vertexBuffer)));
+	NAME_D3D_OBJECT(vertexBuffer);
 
 	CD3DX12_HEAP_PROPERTIES uploadHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 
 	Utils::ThrowIfFailed(Rendering::device->CreateCommittedResource(&uploadHeapProps, D3D12_HEAP_FLAG_NONE,
 		&vertexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&vertexUploadBuffer)));
+	NAME_D3D_OBJECT(vertexUploadBuffer);
 
 	D3D12_SUBRESOURCE_DATA vertexData{};
 	vertexData.pData = vertices.data();
@@ -87,9 +89,11 @@ void Mesh::UploadMeshData()
 
 	Utils::ThrowIfFailed(Rendering::device->CreateCommittedResource(&defaultHeapProps, D3D12_HEAP_FLAG_NONE,
 		&indexResourceDesc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&indexBuffer)));
+	NAME_D3D_OBJECT(indexBuffer);
 
 	Utils::ThrowIfFailed(Rendering::device->CreateCommittedResource(&uploadHeapProps, D3D12_HEAP_FLAG_NONE,
 		&indexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&indexUploadBuffer)));
+	NAME_D3D_OBJECT(indexUploadBuffer);
 
 	D3D12_SUBRESOURCE_DATA indexData{};
 	indexData.pData = indices.data();

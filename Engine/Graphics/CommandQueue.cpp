@@ -7,8 +7,10 @@ CommandQueue::CommandQueue()
 {
 	D3D12_COMMAND_QUEUE_DESC cQueueDesc{};
 	Utils::ThrowIfFailed(Rendering::device->CreateCommandQueue(&cQueueDesc, IID_PPV_ARGS(&commandQueue)));
+	NAME_D3D_OBJECT(commandQueue);
 
 	Utils::ThrowIfFailed(Rendering::device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence)));
+	NAME_D3D_OBJECT(fence);
 }
 
 CommandQueue::~CommandQueue()
