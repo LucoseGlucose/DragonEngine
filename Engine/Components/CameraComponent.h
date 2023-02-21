@@ -14,6 +14,20 @@ class CameraComponent : public Component
 public:
 	CameraComponent(SceneObject* owner);
 
+	void CalculateProjection();
+	void CalculateView();
+
+	float GetFOV();
+	void SetFOV(float fov);
+
+	float GetNear();
+	void SetNear(float nearVal);
+
+	float GetFar();
+	void SetFar(float farVal);
+
 	XMFLOAT4X4 GetProjectionMat();
 	XMFLOAT4X4 GetViewMat();
+
+	virtual void OnUpdate() override;
 };

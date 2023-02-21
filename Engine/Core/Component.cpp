@@ -14,6 +14,16 @@ SceneObject* Component::GetOwner()
     return owner;
 }
 
+Transform* Component::GetTransform()
+{
+    return GetOwner()->GetTransform();
+}
+
+void Component::SetTransform(Transform* transform)
+{
+    GetOwner()->SetTransform(transform);
+}
+
 void Component::OnStart()
 {
 

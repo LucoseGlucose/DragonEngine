@@ -20,7 +20,7 @@ std::function<void(RendererComponent*)> RendererComponent::GetSetParamFunc()
 	{
 		XMFLOAT4X4 projMat = Rendering::outputCam->GetProjectionMat();
 		XMFLOAT4X4 viewMat = Rendering::outputCam->GetViewMat();
-		XMFLOAT4X4 modelMat = renderer->GetOwner()->GetTransform()->GetMatrix();
+		XMFLOAT4X4 modelMat = renderer->GetTransform()->GetMatrix();
 
 		XMMATRIX multiplied = DirectX::XMLoadFloat4x4(&modelMat) * DirectX::XMLoadFloat4x4(&viewMat) * DirectX::XMLoadFloat4x4(&projMat);
 

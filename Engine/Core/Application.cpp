@@ -34,15 +34,14 @@ void Application::Run(const std::function<Scene*(void)>& sceneCreateFunc)
 		glfwPollEvents();
 		Input::Update();
 
-		if (Input::GetKeyDown(GLFW_KEY_F11)) SetFullscreen(!fullscreen);
-
 		XMUINT2 postWindowSize = GetUnsignedFramebufferSize();
 		if (postWindowSize.x != preWindowSize.x || postWindowSize.y != preWindowSize.y) Rendering::Resize(postWindowSize);
+
+		if (Input::GetKeyDown(GLFW_KEY_F11)) SetFullscreen(!fullscreen);
 
 		SceneManager::GetActiveScene()->OnUpdate();
 		
 		Rendering::Render();
-		glfwSetWindowTitle(window, std::to_string((int)std::round(1.0 / TimeManager::GetDeltaTime())).append(" FPS").c_str());
 	}
 
 	SetFullscreen(false);
@@ -119,11 +118,15 @@ void Application::SetFullscreen(bool fs)
 		const GLFWvidmode* vidMode = glfwGetVideoMode(monitor);
 
 		glfwSetWindowMonitor(window, monitor, 0, 0, vidMode->width, vidMode->height, GLFW_DONT_CARE);
+
+		Rendering::Resize(GetUnsignedFramebufferSize());
 		fullscreen = true;
 	}
 	else if (!fs && fullscreen)
 	{
 		glfwSetWindowMonitor(window, nullptr, lastWindowedPos.x, lastWindowedPos.y, lastWindowedSize.x, lastWindowedSize.y, GLFW_DONT_CARE);
+
+		Rendering::Resize(GetUnsignedFramebufferSize());
 		fullscreen = false;
 	}
 }

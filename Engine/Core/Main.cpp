@@ -6,6 +6,7 @@
 #include "Material.h"
 #include "Texture2D.h"
 #include "Rendering.h"
+#include "CameraControllerComponent.h"
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
@@ -15,6 +16,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 		CameraComponent* cam = scene->AddObject(new SceneObject("Camera"))->AddComponent<CameraComponent>();
 		Rendering::outputCam = cam;
+		cam->GetOwner()->AddComponent<CameraControllerComponent>();
 
 		RendererComponent* quad = scene->AddObject(new SceneObject("Quad"))->AddComponent<RendererComponent>();
 		quad->mesh = new Mesh(Utils::GetPathFromProject("Models/Quad.fbx"));

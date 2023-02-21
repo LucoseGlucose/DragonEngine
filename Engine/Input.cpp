@@ -3,9 +3,17 @@
 
 #include <GLFW/glfw3.h>
 
+void Input::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	//glfwSetWindowTitle(Application::window, std::to_string(yoffset).c_str());
+
+	scrolled = true;
+	scrollValue = yoffset;
+}
+
 void Input::Init()
 {
-
+	glfwSetScrollCallback(Application::window, ScrollCallback);
 }
 
 void Input::Update()
@@ -23,6 +31,15 @@ void Input::Update()
 	{
 		mouseMap[i] = GetMouseButton(i);
 	}
+
+	if (scrolled) scrolled = false;
+	else scrollValue = 0.0f;
+
+	lastMousePos = mousePos;
+
+	double x, y;
+	glfwGetCursorPos(Application::window, &x, &y);
+	mousePos = XMFLOAT2(x, y);
 }
 
 bool Input::GetKey(int key)
@@ -42,10 +59,7 @@ bool Input::GetKeyUp(int key)
 
 XMFLOAT2 Input::GetMousePosition()
 {
-	double x, y;
-	glfwGetCursorPos(Application::window, &x, &y);
-
-	return XMFLOAT2(x, y);
+	return mousePos;
 }
 
 bool Input::GetMouseButton(int button)
@@ -61,4 +75,14 @@ bool Input::GetMouseButtonDown(int button)
 bool Input::GetMouseButtonUp(int button)
 {
 	return !mouseMap[button] && prevMouseMap[button];
+}
+
+float Input::GetMouseScrollDelta()
+{
+	return scrollValue;
+}
+
+XMFLOAT2 Input::GetMousePosDelta()
+{
+	return XMFLOAT2(mousePos.x - lastMousePos.x, mousePos.y - lastMousePos.y);
 }

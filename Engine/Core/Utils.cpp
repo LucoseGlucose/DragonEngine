@@ -62,7 +62,7 @@ std::filesystem::path Utils::GetPathFromExe(std::filesystem::path path)
 	std::filesystem::path exePath = Application::GetApplicationPath();
 	exePath.remove_filename();
 
-	return exePath.append(path.string());
+	return std::filesystem::canonical(exePath.append(path.string()));
 }
 
 std::filesystem::path Utils::GetPathFromProject(std::filesystem::path path)
@@ -71,7 +71,7 @@ std::filesystem::path Utils::GetPathFromProject(std::filesystem::path path)
 	exePath.remove_filename();
 
 	std::filesystem::path projPath = std::filesystem::canonical(exePath.append("../../Engine/"));
-	return projPath.append(path.string());
+	return std::filesystem::canonical(projPath.append(path.string()));
 }
 
 std::filesystem::path Utils::GetPathFromSolution(std::filesystem::path path)
@@ -80,5 +80,5 @@ std::filesystem::path Utils::GetPathFromSolution(std::filesystem::path path)
 	exePath.remove_filename();
 
 	std::filesystem::path projPath = std::filesystem::canonical(exePath.append("../../"));
-	return projPath.append(path.string());
+	return std::filesystem::canonical(projPath.append(path.string()));
 }

@@ -165,6 +165,8 @@ void Rendering::Cleanup()
 
 void Rendering::Resize(XMUINT2 newSize)
 {
+	commandQueue->WaitForAllCommands();
+
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
 	viewport.Width = newSize.x;
@@ -182,4 +184,5 @@ void Rendering::Resize(XMUINT2 newSize)
 	presentationBuffer->Resize(newSize);
 
 	outputObj->material->SetTexture("t", postFB->colorTexture);
+	outputCam->CalculateProjection();
 }
