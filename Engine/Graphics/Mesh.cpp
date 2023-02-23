@@ -122,9 +122,9 @@ void Mesh::UploadMeshData()
 	indexBufferView.Format = DXGI_FORMAT_R32_UINT;
 }
 
-void Mesh::Draw()
+void Mesh::Draw(CommandRecorder* recorder)
 {
-	Rendering::currentRecorder->list->IASetVertexBuffers(0, 1, &vertexBufferView);
-	Rendering::currentRecorder->list->IASetIndexBuffer(&indexBufferView);
-	Rendering::currentRecorder->list->DrawIndexedInstanced(indices.size(), 1, 0, 0, 0);
+	recorder->list->IASetVertexBuffers(0, 1, &vertexBufferView);
+	recorder->list->IASetIndexBuffer(&indexBufferView);
+	recorder->list->DrawIndexedInstanced(indices.size(), 1, 0, 0, 0);
 }

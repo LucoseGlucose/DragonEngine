@@ -137,28 +137,28 @@ void Material::SetSampler(const std::string& name, Sampler sampler)
 	samplers[index] = sampler;
 }
 
-void Material::Bind()
+void Material::Bind(CommandRecorder* recorder)
 {
-	Rendering::currentRecorder->list->SetPipelineState(shader->pipeline.Get());
-	Rendering::currentRecorder->list->SetGraphicsRootSignature(shader->rootSignature.Get());
+	recorder->list->SetPipelineState(shader->pipeline.Get());
+	recorder->list->SetGraphicsRootSignature(shader->rootSignature.Get());
 
 	std::vector<ID3D12DescriptorHeap*> descHeaps{};
 
 	if (textureParameters.size() > 0) descHeaps.push_back(textureDescHeap.Get());
 	if (samplerParameters.size() > 0) descHeaps.push_back(samplerDescHeap.Get());
 
-	if (descHeaps.size() > 0) Rendering::currentRecorder->list->SetDescriptorHeaps(descHeaps.size(), descHeaps.data());
+	if (descHeaps.size() > 0) recorder->list->SetDescriptorHeaps(descHeaps.size(), descHeaps.data());
 
 	for (size_t i = 0; i < parameterBuffers.size(); i++)
 	{
-		Rendering::currentRecorder->list->SetGraphicsRootConstantBufferView(i, parameterBuffers[i]->GetGPUVirtualAddress());
+		recorder->list->SetGraphicsRootConstantBufferView(i, parameterBuffers[i]->GetGPUVirtualAddress());
 	}
 
 	if (textureParameters.size() > 0)
-		Rendering::currentRecorder->list->SetGraphicsRootDescriptorTable(
+		recorder->list->SetGraphicsRootDescriptorTable(
 			parameterBuffers.size(), textureDescHeap->GetGPUDescriptorHandleForHeapStart());
 
 	if (samplerParameters.size() > 0)
-		Rendering::currentRecorder->list->SetGraphicsRootDescriptorTable(
+		recorder->list->SetGraphicsRootDescriptorTable(
 			parameterBuffers.size() + 1, samplerDescHeap->GetGPUDescriptorHandleForHeapStart());
 }

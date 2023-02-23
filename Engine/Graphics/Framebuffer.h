@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RenderTexture.h"
+#include "CommandRecorder.h"
 
 class Framebuffer
 {
@@ -19,6 +20,6 @@ public:
 	float clearDepth = 1.0f;
 
 	void Resize(XMUINT2 newSize);
-	void Setup();
-	void Blit(Framebuffer* fb, bool color, DXGI_FORMAT colorFormat, bool depthStencil, DXGI_FORMAT dsFormat);
+	void Setup(CommandRecorder* recorder);
+	void Blit(CommandRecorder* recorder, Framebuffer* fb, bool color, DXGI_FORMAT colorFormat, bool depthStencil, DXGI_FORMAT dsFormat);
 };

@@ -64,22 +64,22 @@ void Framebuffer::Resize(XMUINT2 newSize)
 	Rendering::device->CreateDepthStencilView(depthStencilTexture->textureBuffer.Get(), &depthStencilTexture->descriptor.dsDesc, dsvDescHandle);
 }
 
-void Framebuffer::Setup()
+void Framebuffer::Setup(CommandRecorder* recorder)
 {
-	Rendering::currentRecorder->list->RSSetViewports(1, &Rendering::viewport);
-	Rendering::currentRecorder->list->RSSetScissorRects(1, &Rendering::scissorRect);
-	Rendering::currentRecorder->list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	recorder->list->RSSetViewports(1, &Rendering::viewport);
+	recorder->list->RSSetScissorRects(1, &Rendering::scissorRect);
+	recorder->list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	UINT handleSize = Rendering::device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvCPUHandle = rtvDescHeap->GetCPUDescriptorHandleForHeapStart();
 	D3D12_CPU_DESCRIPTOR_HANDLE dsCPUHandle = dsDescHeap->GetCPUDescriptorHandleForHeapStart();
 
-	Rendering::currentRecorder->list->OMSetRenderTargets(1, &rtvCPUHandle, false, &dsCPUHandle);
-	Rendering::currentRecorder->list->ClearRenderTargetView(rtvCPUHandle, &clearColor.x, 0, nullptr);
-	Rendering::currentRecorder->list->ClearDepthStencilView(dsCPUHandle, D3D12_CLEAR_FLAG_DEPTH, clearDepth, 0, 0, nullptr);
+	recorder->list->OMSetRenderTargets(1, &rtvCPUHandle, false, &dsCPUHandle);
+	recorder->list->ClearRenderTargetView(rtvCPUHandle, &clearColor.x, 0, nullptr);
+	recorder->list->ClearDepthStencilView(dsCPUHandle, D3D12_CLEAR_FLAG_DEPTH, clearDepth, 0, 0, nullptr);
 }
 
-void Framebuffer::Blit(Framebuffer* fb, bool color, DXGI_FORMAT colorFormat, bool depthStencil, DXGI_FORMAT dsFormat)
+void Framebuffer::Blit(CommandRecorder* recorder, Framebuffer* fb, bool color, DXGI_FORMAT colorFormat, bool depthStencil, DXGI_FORMAT dsFormat)
 {
 	if (colorTexture->samples < 2)
 	{
@@ -92,9 +92,9 @@ void Framebuffer::Blit(Framebuffer* fb, bool color, DXGI_FORMAT colorFormat, boo
 				D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
 
 			CD3DX12_RESOURCE_BARRIER initialBarriers[2] = { toCopySrc, toCopyDest };
-			Rendering::currentRecorder->list->ResourceBarrier(2, initialBarriers);
+			recorder->list->ResourceBarrier(2, initialBarriers);
 
-			Rendering::currentRecorder->list->CopyResource(fb->colorTexture->textureBuffer.Get(), colorTexture->textureBuffer.Get());
+			recorder->list->CopyResource(fb->colorTexture->textureBuffer.Get(), colorTexture->textureBuffer.Get());
 
 			CD3DX12_RESOURCE_BARRIER fromSrcToRT = CD3DX12_RESOURCE_BARRIER::Transition(colorTexture->textureBuffer.Get(),
 				D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -103,7 +103,7 @@ void Framebuffer::Blit(Framebuffer* fb, bool color, DXGI_FORMAT colorFormat, boo
 				D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 			CD3DX12_RESOURCE_BARRIER afterBarriers[2] = { fromSrcToRT, fromDestToRT };
-			Rendering::currentRecorder->list->ResourceBarrier(2, afterBarriers);
+			recorder->list->ResourceBarrier(2, afterBarriers);
 		}
 		if (depthStencil)
 		{
@@ -114,9 +114,9 @@ void Framebuffer::Blit(Framebuffer* fb, bool color, DXGI_FORMAT colorFormat, boo
 				D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_COPY_DEST);
 
 			CD3DX12_RESOURCE_BARRIER initialBarriers[2] = { toCopySrc, toCopyDest };
-			Rendering::currentRecorder->list->ResourceBarrier(2, initialBarriers);
+			recorder->list->ResourceBarrier(2, initialBarriers);
 
-			Rendering::currentRecorder->list->CopyResource(fb->depthStencilTexture->textureBuffer.Get(),
+			recorder->list->CopyResource(fb->depthStencilTexture->textureBuffer.Get(),
 				depthStencilTexture->textureBuffer.Get());
 
 			CD3DX12_RESOURCE_BARRIER fromSrcToDW = CD3DX12_RESOURCE_BARRIER::Transition(depthStencilTexture->textureBuffer.Get(),
@@ -126,7 +126,7 @@ void Framebuffer::Blit(Framebuffer* fb, bool color, DXGI_FORMAT colorFormat, boo
 				D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
 			CD3DX12_RESOURCE_BARRIER afterBarriers[2] = { fromSrcToDW, fromDestToDW };
-			Rendering::currentRecorder->list->ResourceBarrier(2, afterBarriers);
+			recorder->list->ResourceBarrier(2, afterBarriers);
 		}
 	}
 	else
@@ -140,9 +140,9 @@ void Framebuffer::Blit(Framebuffer* fb, bool color, DXGI_FORMAT colorFormat, boo
 				D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_RESOLVE_DEST);
 
 			CD3DX12_RESOURCE_BARRIER initialBarriers[2] = { toResolveSrc, toResolveDest };
-			Rendering::currentRecorder->list->ResourceBarrier(2, initialBarriers);
+			recorder->list->ResourceBarrier(2, initialBarriers);
 
-			Rendering::currentRecorder->list->ResolveSubresource(fb->colorTexture->textureBuffer.Get(),
+			recorder->list->ResolveSubresource(fb->colorTexture->textureBuffer.Get(),
 				0, colorTexture->textureBuffer.Get(), 0, colorFormat);
 
 			CD3DX12_RESOURCE_BARRIER fromSrcToRT = CD3DX12_RESOURCE_BARRIER::Transition(colorTexture->textureBuffer.Get(),
@@ -152,7 +152,7 @@ void Framebuffer::Blit(Framebuffer* fb, bool color, DXGI_FORMAT colorFormat, boo
 				D3D12_RESOURCE_STATE_RESOLVE_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 			CD3DX12_RESOURCE_BARRIER afterBarriers[2] = { fromSrcToRT, fromDestToRT };
-			Rendering::currentRecorder->list->ResourceBarrier(2, afterBarriers);
+			recorder->list->ResourceBarrier(2, afterBarriers);
 		}
 		if (depthStencil)
 		{
@@ -163,9 +163,9 @@ void Framebuffer::Blit(Framebuffer* fb, bool color, DXGI_FORMAT colorFormat, boo
 				D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_RESOLVE_DEST);
 
 			CD3DX12_RESOURCE_BARRIER initialBarriers[2] = { toResolveSrc, toResolveDest };
-			Rendering::currentRecorder->list->ResourceBarrier(2, initialBarriers);
+			recorder->list->ResourceBarrier(2, initialBarriers);
 
-			Rendering::currentRecorder->list->ResolveSubresource(fb->depthStencilTexture->textureBuffer.Get(),
+			recorder->list->ResolveSubresource(fb->depthStencilTexture->textureBuffer.Get(),
 				0, depthStencilTexture->textureBuffer.Get(), 0, dsFormat);
 
 			CD3DX12_RESOURCE_BARRIER fromSrcToDW = CD3DX12_RESOURCE_BARRIER::Transition(depthStencilTexture->textureBuffer.Get(),
@@ -175,7 +175,7 @@ void Framebuffer::Blit(Framebuffer* fb, bool color, DXGI_FORMAT colorFormat, boo
 				D3D12_RESOURCE_STATE_RESOLVE_DEST, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
 			CD3DX12_RESOURCE_BARRIER afterBarriers[2] = { fromSrcToDW, fromDestToDW };
-			Rendering::currentRecorder->list->ResourceBarrier(2, afterBarriers);
+			recorder->list->ResourceBarrier(2, afterBarriers);
 		}
 	}
 }

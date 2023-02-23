@@ -52,7 +52,7 @@ D3D12_SAMPLER_DESC Utils::GetDefaultSampler()
 	sampler.Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
 	sampler.MaxAnisotropy = 8;
 	sampler.MinLOD = 0;
-	sampler.MaxLOD = 0;
+	sampler.MaxLOD = 16;
 
 	return sampler;
 }
@@ -81,4 +81,11 @@ std::filesystem::path Utils::GetPathFromSolution(std::filesystem::path path)
 
 	std::filesystem::path projPath = std::filesystem::canonical(exePath.append("../../"));
 	return std::filesystem::canonical(projPath.append(path.string()));
+}
+
+uint32_t Utils::GetMipCount(uint32_t width, uint32_t height)
+{
+	uint32_t highBit;
+	_BitScanReverse((unsigned long*)&highBit, width | height);
+	return highBit + 1;
 }

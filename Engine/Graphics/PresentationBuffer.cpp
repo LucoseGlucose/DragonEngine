@@ -128,36 +128,36 @@ void PresentationBuffer::Resize(XMUINT2 newSize)
 	Rendering::device->CreateDepthStencilView(depthStencilTexture->textureBuffer.Get(), &depthStencilTexture->descriptor.dsDesc, dsvDescHandle);
 }
 
-void PresentationBuffer::Setup()
+void PresentationBuffer::Setup(CommandRecorder* recorder)
 {
 	uint32_t frameIndex = swapchain->GetCurrentBackBufferIndex();
 
-	Rendering::currentRecorder->list->RSSetViewports(1, &Rendering::viewport);
-	Rendering::currentRecorder->list->RSSetScissorRects(1, &Rendering::scissorRect);
-	Rendering::currentRecorder->list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	recorder->list->RSSetViewports(1, &Rendering::viewport);
+	recorder->list->RSSetScissorRects(1, &Rendering::scissorRect);
+	recorder->list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	CD3DX12_RESOURCE_BARRIER transitionToRT = CD3DX12_RESOURCE_BARRIER::Transition(
 		colorTextures[frameIndex]->textureBuffer.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	Rendering::currentRecorder->list->ResourceBarrier(1, &transitionToRT);
+	recorder->list->ResourceBarrier(1, &transitionToRT);
 
 	UINT handleSize = Rendering::device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvCPUHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		rtvDescHeap->GetCPUDescriptorHandleForHeapStart(), frameIndex, handleSize);
 	CD3DX12_CPU_DESCRIPTOR_HANDLE dsCPUHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(dsDescHeap->GetCPUDescriptorHandleForHeapStart());
 
-	Rendering::currentRecorder->list->OMSetRenderTargets(1, &rtvCPUHandle, false, &dsCPUHandle);
-	Rendering::currentRecorder->list->ClearRenderTargetView(rtvCPUHandle, &clearColor.x, 0, nullptr);
-	Rendering::currentRecorder->list->ClearDepthStencilView(dsCPUHandle, D3D12_CLEAR_FLAG_DEPTH, clearDepth, 0, 0, nullptr);
+	recorder->list->OMSetRenderTargets(1, &rtvCPUHandle, false, &dsCPUHandle);
+	recorder->list->ClearRenderTargetView(rtvCPUHandle, &clearColor.x, 0, nullptr);
+	recorder->list->ClearDepthStencilView(dsCPUHandle, D3D12_CLEAR_FLAG_DEPTH, clearDepth, 0, 0, nullptr);
 }
 
-void PresentationBuffer::Present()
+void PresentationBuffer::Present(CommandRecorder* recorder)
 {
 	uint32_t frameIndex = swapchain->GetCurrentBackBufferIndex();
 
 	CD3DX12_RESOURCE_BARRIER transitionToPresent = CD3DX12_RESOURCE_BARRIER::Transition(
 		colorTextures[frameIndex]->textureBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	Rendering::currentRecorder->list->ResourceBarrier(1, &transitionToPresent);
+	recorder->list->ResourceBarrier(1, &transitionToPresent);
 
-	Rendering::currentRecorder->Execute();
+	recorder->Execute();
 	Utils::ThrowIfFailed(swapchain->Present(0, 0));
 }

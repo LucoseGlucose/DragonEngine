@@ -31,12 +31,12 @@ std::function<void(RendererComponent*)> RendererComponent::GetSetParamFunc()
 	};
 }
 
-void RendererComponent::Render()
+void RendererComponent::Render(CommandRecorder* recorder)
 {
 	if (mesh == nullptr || material == nullptr) return;
 
 	GetSetParamFunc()(this);
 
-	material->Bind();
-	mesh->Draw();
+	material->Bind(recorder);
+	mesh->Draw(recorder);
 }

@@ -18,16 +18,16 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		Rendering::outputCam = cam;
 		cam->GetOwner()->AddComponent<CameraControllerComponent>();
 
-		RendererComponent* quad = scene->AddObject(new SceneObject("Quad"))->AddComponent<RendererComponent>();
-		quad->mesh = new Mesh(Utils::GetPathFromProject("Models/Quad.fbx"));
-		quad->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitVertex.cso"), Utils::GetPathFromExe("LitPixel.cso"),
+		RendererComponent* cube = scene->AddObject(new SceneObject("Cube"))->AddComponent<RendererComponent>();
+		cube->mesh = new Mesh(Utils::GetPathFromProject("Models/Cube.fbx"));
+		cube->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitVertex.cso"), Utils::GetPathFromExe("LitPixel.cso"),
 			Rendering::sceneFB->colorTexture->samples, Rendering::sceneFB->colorTexture->format));
 
-		quad->GetOwner()->GetTransform()->SetPosition(XMFLOAT3(0, 0, 3.5f));
+		cube->GetOwner()->GetTransform()->SetPosition(XMFLOAT3(0, 0, 3.5f));
 
-		Texture2D* tex = Texture2D::Import(Utils::GetPathFromProject("Images/UV Checker.png"), false);
-		quad->material->SetTexture("t", tex);
-		quad->material->SetSampler("s", Utils::GetDefaultSampler());
+		Texture2D* tex = Texture2D::Import(Utils::GetPathFromProject("Images/UV Checker.png"), false, true);
+		cube->material->SetTexture("t", tex);
+		cube->material->SetSampler("s", Utils::GetDefaultSampler());
 
 		return scene;
 	};

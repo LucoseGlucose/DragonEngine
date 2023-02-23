@@ -2,6 +2,7 @@
 
 #include "ShaderProgram.h"
 #include "Texture.h"
+#include "CommandRecorder.h"
 
 #include <DirectXMath.h>
 
@@ -32,5 +33,5 @@ public:
 	void SetTexture(const std::string& name, Texture* texture);
 	void SetSampler(const std::string& name, Sampler sampler);
 
-	void Bind();
+	void Bind(CommandRecorder* recorder);
 };

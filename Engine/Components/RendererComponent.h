@@ -15,5 +15,5 @@ public:
 
 	virtual std::function<void(RendererComponent*)> GetSetParamFunc();
 
-	virtual void Render();
+	virtual void Render(CommandRecorder* recorder);
 };

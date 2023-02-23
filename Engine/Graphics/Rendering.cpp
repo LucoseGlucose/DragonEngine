@@ -101,8 +101,10 @@ void Rendering::Init()
 	scissorRect.right = windowSize.x;
 	scissorRect.bottom = windowSize.y;
 
+	quadMesh = new Mesh(Utils::GetPathFromProject("Models/Quad.fbx"));
+
 	outputObj = (new SceneObject("Render Output"))->AddComponent<RendererComponent>();
-	outputObj->mesh = new Mesh(Utils::GetPathFromProject("Models/Quad.fbx"));
+	outputObj->mesh = quadMesh;
 
 	outputObj->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputVertex.cso"),
 		Utils::GetPathFromExe("OutputPixel.cso"), 1, DXGI_FORMAT_R8G8B8A8_UNORM));
@@ -116,35 +118,33 @@ void Rendering::Render()
 	XMUINT2 windowSize = Application::GetUnsignedFramebufferSize();
 	if (windowSize.x == 0 || windowSize.y == 0) return;
 
-	currentRecorder = GetRecorder();
-	currentRecorder->StartRecording();
+	CommandRecorder* recorder = GetRecorder();
+	recorder->StartRecording();
 
-	sceneFB->Setup();
+	sceneFB->Setup(recorder);
 
 	std::vector<RendererComponent*>* renderers = SceneManager::GetActiveScene()->FindComponents<RendererComponent>();
 	for (size_t i = 0; i < renderers->size(); i++)
 	{
 		RendererComponent* renderer = renderers->at(i);
-		renderer->Render();
+		renderer->Render(recorder);
 	}
 	delete renderers;
 
-	sceneFB->Blit(postFB, true, DXGI_FORMAT_R16G16B16A16_FLOAT, false, DXGI_FORMAT_R32_FLOAT);
+	sceneFB->Blit(recorder, postFB, true, DXGI_FORMAT_R16G16B16A16_FLOAT, false, DXGI_FORMAT_R32_FLOAT);
 
-	currentRecorder->StopRecording();
-	commandQueue->Execute(currentRecorder->list.Get());
+	recorder->StopRecording();
+	commandQueue->Execute(recorder->list.Get());
 
-	RecycleRecorder(currentRecorder);
-	currentRecorder = GetRecorder();
-	currentRecorder->StartRecording();
+	RecycleRecorder(recorder);
+	recorder = GetRecorder();
+	recorder->StartRecording();
 
-	presentationBuffer->Setup();
-	outputObj->Render();
-	presentationBuffer->Present();
+	presentationBuffer->Setup(recorder);
+	outputObj->Render(recorder);
+	presentationBuffer->Present(recorder);
 
-	RecycleRecorder(currentRecorder);
-	currentRecorder = nullptr;
-
+	RecycleRecorder(recorder);
 	WaitForNextFrame();
 }
 

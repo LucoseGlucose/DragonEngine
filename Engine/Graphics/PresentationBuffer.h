@@ -1,8 +1,7 @@
 #pragma once
 
 #include "RenderTexture.h"
-
-using namespace Microsoft::WRL;
+#include "CommandRecorder.h"
 
 class PresentationBuffer
 {
@@ -21,6 +20,6 @@ public:
 	float clearDepth = 1.0f;
 
 	void Resize(XMUINT2 newSize);
-	void Setup();
-	void Present();
+	void Setup(CommandRecorder* recorder);
+	void Present(CommandRecorder* recorder);
 };

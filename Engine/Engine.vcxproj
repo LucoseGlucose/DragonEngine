@@ -70,6 +70,18 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <MultiProcFXC>true</MultiProcFXC>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <MultiProcFXC>true</MultiProcFXC>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <MultiProcFXC>true</MultiProcFXC>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <MultiProcFXC>true</MultiProcFXC>
+  </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <VcpkgUseStatic>false</VcpkgUseStatic>
   </PropertyGroup>
@@ -108,9 +120,11 @@
       <ShaderModel>5.1</ShaderModel>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AllResourcesBound>true</AllResourcesBound>
-      <ShaderType>Pixel Shader (/ps); Vertex Shader (/vs)</ShaderType>
-      <EnableUnboundedDescriptorTables>false</EnableUnboundedDescriptorTables>
+      <ShaderType>
+      </ShaderType>
+      <EnableUnboundedDescriptorTables>true</EnableUnboundedDescriptorTables>
       <DisableOptimizations>true</DisableOptimizations>
+      <EntryPointName>main</EntryPointName>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -145,8 +159,10 @@
       <DisableOptimizations>false</DisableOptimizations>
       <EnableDebuggingInformation>false</EnableDebuggingInformation>
       <AllResourcesBound>true</AllResourcesBound>
-      <ShaderType>Pixel Shader (/ps); Vertex Shader (/vs)</ShaderType>
-      <EnableUnboundedDescriptorTables>false</EnableUnboundedDescriptorTables>
+      <ShaderType>
+      </ShaderType>
+      <EnableUnboundedDescriptorTables>true</EnableUnboundedDescriptorTables>
+      <EntryPointName>main</EntryPointName>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -175,9 +191,11 @@
       <ShaderModel>5.1</ShaderModel>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AllResourcesBound>true</AllResourcesBound>
-      <ShaderType>Pixel Shader (/ps); Vertex Shader (/vs)</ShaderType>
-      <EnableUnboundedDescriptorTables>false</EnableUnboundedDescriptorTables>
+      <ShaderType>
+      </ShaderType>
+      <EnableUnboundedDescriptorTables>true</EnableUnboundedDescriptorTables>
       <DisableOptimizations>true</DisableOptimizations>
+      <EntryPointName>main</EntryPointName>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -212,8 +230,10 @@
       <DisableOptimizations>false</DisableOptimizations>
       <EnableDebuggingInformation>false</EnableDebuggingInformation>
       <AllResourcesBound>true</AllResourcesBound>
-      <ShaderType>Pixel Shader (/ps); Vertex Shader (/vs)</ShaderType>
-      <EnableUnboundedDescriptorTables>false</EnableUnboundedDescriptorTables>
+      <ShaderType>
+      </ShaderType>
+      <EnableUnboundedDescriptorTables>true</EnableUnboundedDescriptorTables>
+      <EntryPointName>main</EntryPointName>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -250,7 +270,7 @@
     <ClCompile Include="Graphics\Texture2D.cpp" />
     <ClCompile Include="Graphics\RenderTexture.cpp" />
     <ClCompile Include="Graphics\PresentationBuffer.cpp" />
-    <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Core\Input.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\CameraComponent.h" />
@@ -281,9 +301,10 @@
     <ClInclude Include="Graphics\Texture2D.h" />
     <ClInclude Include="Graphics\RenderTexture.h" />
     <ClInclude Include="Graphics\PresentationBuffer.h" />
-    <ClInclude Include="Input.h" />
+    <ClInclude Include="Core\Input.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Models\Cube.fbx" />
     <None Include="Models\Quad.fbx" />
   </ItemGroup>
   <ItemGroup>
@@ -297,6 +318,18 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\MipmapPixel.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\MipmapVertex.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="Shaders\OutputPixel.hlsl">

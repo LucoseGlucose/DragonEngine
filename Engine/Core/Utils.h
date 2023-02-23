@@ -24,6 +24,8 @@ public:
 	static std::filesystem::path GetPathFromProject(std::filesystem::path path);
 	static std::filesystem::path GetPathFromSolution(std::filesystem::path path);
 
+	static uint32_t GetMipCount(uint32_t width, uint32_t height);
+
 	template<typename T>
 	static void RemoveFromVector(std::vector<T>* vec, const T& item)
 	{

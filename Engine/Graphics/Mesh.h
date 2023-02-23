@@ -1,6 +1,7 @@
 #pragma once
 
 #include <assimp/postprocess.h>
+#include "CommandRecorder.h"
 
 struct VertexData
 {
@@ -28,7 +29,7 @@ public:
 	D3D12_INDEX_BUFFER_VIEW indexBufferView;
 
 	void UploadMeshData();
-	void Draw();
+	void Draw(CommandRecorder* recorder);
 
 	static const int importFlags = aiProcess_ConvertToLeftHanded | aiProcess_JoinIdenticalVertices
 		| aiProcess_OptimizeMeshes | aiProcess_Triangulate | aiProcess_CalcTangentSpace;

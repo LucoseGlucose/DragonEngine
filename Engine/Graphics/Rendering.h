@@ -22,11 +22,11 @@ public:
 	static inline Framebuffer* postFB{};
 
 	static inline std::queue<CommandRecorder*> cmdRecorders{};
-	static inline CommandRecorder* currentRecorder{};
 
 	static inline D3D12_VIEWPORT viewport{};
 	static inline D3D12_RECT scissorRect{};
 
+	static inline Mesh* quadMesh{};
 	static inline RendererComponent* outputObj{};
 
 	static inline CameraComponent* outputCam{};

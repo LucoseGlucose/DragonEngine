@@ -96,7 +96,7 @@
     <ClCompile Include="Components\CameraComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Input.cpp">
+    <ClCompile Include="Core\Input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Components\CameraControllerComponent.cpp">
@@ -185,7 +185,7 @@
     <ClInclude Include="Components\CameraComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Input.h">
+    <ClInclude Include="Core\Input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Components\CameraControllerComponent.h">
@@ -194,12 +194,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\Quad.fbx" />
+    <None Include="Models\Cube.fbx" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\LitPixel.hlsl" />
     <FxCompile Include="Shaders\LitVertex.hlsl" />
     <FxCompile Include="Shaders\OutputVertex.hlsl" />
     <FxCompile Include="Shaders\OutputPixel.hlsl" />
+    <FxCompile Include="Shaders\MipmapPixel.hlsl" />
+    <FxCompile Include="Shaders\MipmapVertex.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\UV Checker.png">
