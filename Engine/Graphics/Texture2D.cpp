@@ -6,9 +6,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-Texture2D::Texture2D(void* data, size_t dataSize, XMUINT2 size, DXGI_FORMAT format, uint32_t bytesPerPixel, uint32_t mipCount)
-	: Texture(), size(size), mipCount(mipCount)
+Texture2D::Texture2D(void* data, XMUINT2 size, uint32_t bytesPerPixel, uint32_t mipCount, bool sRGB)
+	: Texture(), size(size), mipCount(mipCount), sRGB(sRGB)
 {
+	DXGI_FORMAT format = sRGB ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM;
+
 	CommandRecorder* recorder = Rendering::GetRecorder();
 	recorder->StartRecording();
 
@@ -62,8 +64,10 @@ Texture2D* Texture2D::Import(const std::filesystem::path& file, bool sRGB, bool 
 
 	uint32_t mipCount = generateMips ? Utils::GetMipCount(width, height) : 1;
 
-	return new Texture2D(imageData, sizeof(imageData), XMUINT2(width, height),
-		sRGB ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM, 4, mipCount);
+	Texture2D* tex = new Texture2D(imageData, XMUINT2(width, height), 4, mipCount, sRGB);
+
+	stbi_image_free(imageData);
+	return tex;
 }
 
 void Texture2D::GenerateMipMaps(CommandRecorder* recorder)
@@ -75,8 +79,11 @@ void Texture2D::GenerateMipMaps(CommandRecorder* recorder)
 	Material* downsampleMat = new Material(ShaderProgram::Create(Utils::GetPathFromExe("MipmapVertex.cso"),
 		Utils::GetPathFromExe("MipmapPixel.cso"), 1, DXGI_FORMAT_R8G8B8A8_UNORM));
 
-	downsampleMat->SetSampler("s", Utils::GetDefaultSampler());
-	downsampleMat->SetTexture("t", this);
+	DXGI_FORMAT format = sRGB ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM;
+	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+	downsampleMat->SetTexture("t_texture", this);
+	downsampleMat->SetSampler("s_sampler", Utils::GetDefaultSampler());
 
 	Rendering::viewport.Width = size.x;
 	Rendering::viewport.Height = size.y;
@@ -95,7 +102,7 @@ void Texture2D::GenerateMipMaps(CommandRecorder* recorder)
 		fbs[mip - 1] = fb;
 
 		fb->Setup(recorder);
-		downsampleMat->SetParameter("currentMip", &mip, sizeof(uint32_t));
+		downsampleMat->SetParameter("p_currentMip", &mip, sizeof(uint32_t));
 
 		downsampleMat->Bind(recorder);
 		Rendering::quadMesh->Draw(recorder);
@@ -135,5 +142,6 @@ void Texture2D::GenerateMipMaps(CommandRecorder* recorder)
 		delete fbs[i];
 	}
 
+	srvDesc.Format = format;
 	Rendering::viewport = startViewport;
 }

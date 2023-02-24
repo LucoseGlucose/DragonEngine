@@ -4,15 +4,10 @@ struct PS_INPUT
     float2 uv : TEXCOORD;
 };
 
-Texture2D<float4> t : register(t0);
-SamplerState s : register(s0);
-
-cbuffer PixelParams : register(b1)
-{
-    float4 color = float4(1, 1, 1, 1);
-}
+Texture2D<float4> t_texture : register(t0);
+SamplerState s_sampler : register(s0);
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    return t.Sample(s, input.uv) * color;
+    return t_texture.Sample(s_sampler, input.uv);
 }

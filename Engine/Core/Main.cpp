@@ -7,6 +7,8 @@
 #include "Texture2D.h"
 #include "Rendering.h"
 #include "CameraControllerComponent.h"
+#include "SkyboxObject.h"
+#include "TextureCubemap.h"
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
@@ -25,9 +27,25 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 		cube->GetOwner()->GetTransform()->SetPosition(XMFLOAT3(0, 0, 3.5f));
 
-		Texture2D* tex = Texture2D::Import(Utils::GetPathFromProject("Images/UV Checker.png"), false, true);
-		cube->material->SetTexture("t", tex);
-		cube->material->SetSampler("s", Utils::GetDefaultSampler());
+		Texture2D* tex = Texture2D::Import(Utils::GetPathFromProject("Images/UV Checker.png"), true, true);
+		cube->material->SetTexture("t_texture", tex);
+		cube->material->SetSampler("s_sampler", Utils::GetDefaultSampler());
+
+		RendererComponent* skybox = scene->AddObject(new SkyboxObject("Skybox"))->GetComponent<RendererComponent>();
+		skybox->material->SetSampler("s_sampler", Utils::GetDefaultSampler());
+
+		std::array<std::filesystem::path, 6> paths =
+		{
+			Utils::GetPathFromProject("Images/Six sided skybox/right.jpg"),
+			Utils::GetPathFromProject("Images/Six sided skybox/left.jpg"),
+			Utils::GetPathFromProject("Images/Six sided skybox/top.jpg"),
+			Utils::GetPathFromProject("Images/Six sided skybox/bottom.jpg"),
+			Utils::GetPathFromProject("Images/Six sided skybox/front.jpg"),
+			Utils::GetPathFromProject("Images/Six sided skybox/back.jpg"),
+		};
+
+		TextureCubemap* cubemap = TextureCubemap::Import(paths, true);
+		skybox->material->SetTexture("t_texture", cubemap);
 
 		return scene;
 	};

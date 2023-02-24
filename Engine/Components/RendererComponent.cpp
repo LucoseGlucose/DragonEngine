@@ -5,18 +5,7 @@
 
 RendererComponent::RendererComponent(SceneObject* owner) : Component(owner)
 {
-
-}
-
-RendererComponent::~RendererComponent()
-{
-	delete mesh;
-	delete material;
-}
-
-std::function<void(RendererComponent*)> RendererComponent::GetSetParamFunc()
-{
-	return [](RendererComponent* renderer)
+	shaderParamFunc = [](RendererComponent* renderer)
 	{
 		XMFLOAT4X4 projMat = Rendering::outputCam->GetProjectionMat();
 		XMFLOAT4X4 viewMat = Rendering::outputCam->GetViewMat();
@@ -27,15 +16,21 @@ std::function<void(RendererComponent*)> RendererComponent::GetSetParamFunc()
 		XMFLOAT4X4 mvpMat;
 		DirectX::XMStoreFloat4x4(&mvpMat, DirectX::XMMatrixTranspose(multiplied));
 
-		renderer->material->SetParameter("mvpMat", &mvpMat, sizeof(mvpMat));
+		renderer->material->SetParameter("p_mvpMat", &mvpMat, sizeof(mvpMat));
 	};
+}
+
+RendererComponent::~RendererComponent()
+{
+	delete mesh;
+	delete material;
 }
 
 void RendererComponent::Render(CommandRecorder* recorder)
 {
 	if (mesh == nullptr || material == nullptr) return;
 
-	GetSetParamFunc()(this);
+	shaderParamFunc(this);
 
 	material->Bind(recorder);
 	mesh->Draw(recorder);

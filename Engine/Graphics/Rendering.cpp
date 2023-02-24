@@ -109,8 +109,8 @@ void Rendering::Init()
 	outputObj->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputVertex.cso"),
 		Utils::GetPathFromExe("OutputPixel.cso"), 1, DXGI_FORMAT_R8G8B8A8_UNORM));
 
-	outputObj->material->SetSampler("s", Utils::GetDefaultSampler());
-	outputObj->material->SetTexture("t", postFB->colorTexture);
+	outputObj->material->SetSampler("s_sampler", Utils::GetDefaultSampler());
+	outputObj->material->SetTexture("t_sceneTexture", postFB->colorTexture);
 }
 
 void Rendering::Render()
@@ -183,6 +183,6 @@ void Rendering::Resize(XMUINT2 newSize)
 	postFB->Resize(newSize);
 	presentationBuffer->Resize(newSize);
 
-	outputObj->material->SetTexture("t", postFB->colorTexture);
+	outputObj->material->SetTexture("t_sceneTexture", postFB->colorTexture);
 	outputCam->CalculateProjection();
 }

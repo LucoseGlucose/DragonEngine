@@ -102,6 +102,12 @@
     <ClCompile Include="Components\CameraControllerComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\TextureCubemap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\SkyboxObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graphics\d3dx12.h">
@@ -191,10 +197,17 @@
     <ClInclude Include="Components\CameraControllerComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\TextureCubemap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\SkyboxObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\Quad.fbx" />
     <None Include="Models\Cube.fbx" />
+    <None Include="Models\Inverted Cube.fbx" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\LitPixel.hlsl" />
@@ -203,9 +216,29 @@
     <FxCompile Include="Shaders\OutputPixel.hlsl" />
     <FxCompile Include="Shaders\MipmapPixel.hlsl" />
     <FxCompile Include="Shaders\MipmapVertex.hlsl" />
+    <FxCompile Include="Shaders\SkyboxVertex.hlsl" />
+    <FxCompile Include="Shaders\SkyboxPixel.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\UV Checker.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\Six sided skybox\back.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\Six sided skybox\bottom.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\Six sided skybox\front.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\Six sided skybox\left.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\Six sided skybox\right.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\Six sided skybox\top.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

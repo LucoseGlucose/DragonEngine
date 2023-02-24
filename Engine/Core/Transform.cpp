@@ -53,7 +53,7 @@ XMFLOAT3 Transform::GetEulerAngles()
 XMFLOAT3 Transform::GetForward()
 {
 	XMVECTOR rotVec = DirectX::XMLoadFloat4(&rotation);
-	XMVECTOR fwdVec = XMVector3Transform(DirectX::g_XMIdentityR2, XMMatrixRotationQuaternion(rotVec));
+	XMVECTOR fwdVec = XMVector3Rotate(DirectX::g_XMIdentityR2, rotVec);
 
 	XMFLOAT3 fwd;
 	DirectX::XMStoreFloat3(&fwd, fwdVec);
@@ -64,7 +64,7 @@ XMFLOAT3 Transform::GetForward()
 XMFLOAT3 Transform::GetUp()
 {
 	XMVECTOR rotVec = DirectX::XMLoadFloat4(&rotation);
-	XMVECTOR upVec = XMVector3Transform(DirectX::g_XMIdentityR1, XMMatrixRotationQuaternion(rotVec));
+	XMVECTOR upVec = XMVector3Rotate(DirectX::g_XMIdentityR1, rotVec);
 
 	XMFLOAT3 up;
 	DirectX::XMStoreFloat3(&up, upVec);
@@ -75,7 +75,7 @@ XMFLOAT3 Transform::GetUp()
 XMFLOAT3 Transform::GetRight()
 {
 	XMVECTOR rotVec = DirectX::XMLoadFloat4(&rotation);
-	XMVECTOR rightVec = XMVector3Transform(DirectX::g_XMIdentityR0, XMMatrixRotationQuaternion(rotVec));
+	XMVECTOR rightVec = XMVector3Rotate(DirectX::g_XMIdentityR0, rotVec);
 
 	XMFLOAT3 right;
 	DirectX::XMStoreFloat3(&right, rightVec);

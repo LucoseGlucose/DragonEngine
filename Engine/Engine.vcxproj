@@ -100,7 +100,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Core;$(ProjectDir)Graphics;$(ProjectDir)Components;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Core;$(ProjectDir)Graphics;$(ProjectDir)Components;$(ProjectDir)Objects;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
@@ -135,7 +135,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Core;$(ProjectDir)Graphics;$(ProjectDir)Components;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Core;$(ProjectDir)Graphics;$(ProjectDir)Components;$(ProjectDir)Objects;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
@@ -171,7 +171,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Core;$(ProjectDir)Graphics;$(ProjectDir)Components;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Core;$(ProjectDir)Graphics;$(ProjectDir)Components;$(ProjectDir)Objects;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
@@ -206,7 +206,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Core;$(ProjectDir)Graphics;$(ProjectDir)Components;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)Core;$(ProjectDir)Graphics;$(ProjectDir)Components;$(ProjectDir)Objects;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
@@ -244,6 +244,7 @@
     <ClCompile Include="Graphics\Framebuffer.cpp" />
     <ClCompile Include="Graphics\CommandQueue.cpp" />
     <ClCompile Include="Core\Application.cpp" />
+    <ClCompile Include="Graphics\TextureCubemap.cpp" />
     <ClCompile Include="ImGui\imgui_impl_dx12.cpp" />
     <ClCompile Include="ImGui\imgui_impl_glfw.cpp" />
     <ClCompile Include="Core\Main.cpp" />
@@ -271,6 +272,7 @@
     <ClCompile Include="Graphics\RenderTexture.cpp" />
     <ClCompile Include="Graphics\PresentationBuffer.cpp" />
     <ClCompile Include="Core\Input.cpp" />
+    <ClCompile Include="Objects\SkyboxObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\CameraComponent.h" />
@@ -286,6 +288,7 @@
     <ClInclude Include="Graphics\Shader.h" />
     <ClInclude Include="Graphics\ShaderProgram.h" />
     <ClInclude Include="Graphics\Material.h" />
+    <ClInclude Include="Graphics\TextureCubemap.h" />
     <ClInclude Include="ImGui\imgui_impl_dx12.h" />
     <ClInclude Include="ImGui\imgui_impl_glfw.h" />
     <ClInclude Include="Core\Scene.h" />
@@ -302,9 +305,11 @@
     <ClInclude Include="Graphics\RenderTexture.h" />
     <ClInclude Include="Graphics\PresentationBuffer.h" />
     <ClInclude Include="Core\Input.h" />
+    <ClInclude Include="Objects\SkyboxObject.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\Cube.fbx" />
+    <None Include="Models\Inverted Cube.fbx" />
     <None Include="Models\Quad.fbx" />
   </ItemGroup>
   <ItemGroup>
@@ -344,8 +349,26 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
+    <FxCompile Include="Shaders\SkyboxPixel.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\SkyboxVertex.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Images\Six sided skybox\back.jpg" />
+    <Image Include="Images\Six sided skybox\bottom.jpg" />
+    <Image Include="Images\Six sided skybox\front.jpg" />
+    <Image Include="Images\Six sided skybox\left.jpg" />
+    <Image Include="Images\Six sided skybox\right.jpg" />
+    <Image Include="Images\Six sided skybox\top.jpg" />
     <Image Include="Images\UV Checker.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

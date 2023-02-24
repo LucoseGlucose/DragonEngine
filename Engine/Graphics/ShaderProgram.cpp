@@ -189,6 +189,9 @@ ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList, u
     DXGI_SAMPLE_DESC sampleDesc{};
     sampleDesc.Count = samples;
 
+    CD3DX12_DEPTH_STENCIL_DESC dsDesc = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+    dsDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
     D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineDesc{};
     pipelineDesc.InputLayout = inputLayoutDesc;
     pipelineDesc.pRootSignature = rootSignature.Get();
@@ -201,7 +204,7 @@ ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList, u
     pipelineDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
     pipelineDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
     pipelineDesc.NumRenderTargets = 1;
-    pipelineDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+    pipelineDesc.DepthStencilState = dsDesc;
     pipelineDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 
     Utils::ThrowIfFailed(Rendering::device->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&pipeline)));

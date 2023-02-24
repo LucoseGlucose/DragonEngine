@@ -13,7 +13,7 @@ public:
 	Mesh* mesh;
 	Material* material;
 
-	virtual std::function<void(RendererComponent*)> GetSetParamFunc();
+	std::function<void(RendererComponent*)> shaderParamFunc;
 
 	virtual void Render(CommandRecorder* recorder);
 };
