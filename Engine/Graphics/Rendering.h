@@ -43,4 +43,7 @@ public:
 	static void Cleanup();
 
 	static void Resize(XMUINT2 newSize);
+
+	static void SetViewportSize(XMUINT2 size);
+	static void ResetViewportSize();
 };

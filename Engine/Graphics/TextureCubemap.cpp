@@ -3,6 +3,7 @@
 
 #include "stb_image.h"
 #include "Rendering.h"
+#include "Texture2D.h"
 
 TextureCubemap::TextureCubemap(std::array<void*, 6> data, XMUINT2 size, DXGI_FORMAT format, uint32_t bytesPerPixel)
 	: Texture(), size(size)
@@ -79,4 +80,13 @@ TextureCubemap* TextureCubemap::Import(const std::array<std::filesystem::path, 6
 	}
 
 	return tex;
+}
+
+TextureCubemap* TextureCubemap::ImportHDR(const std::filesystem::path& file)
+{
+	Texture2D* equirect = Texture2D::ImportHDR(file);
+
+
+
+	return nullptr;
 }

@@ -186,3 +186,17 @@ void Rendering::Resize(XMUINT2 newSize)
 	outputObj->material->SetTexture("t_sceneTexture", postFB->colorTexture);
 	outputCam->CalculateProjection();
 }
+
+void Rendering::SetViewportSize(XMUINT2 size)
+{
+	viewport.Width = size.x;
+	viewport.Height = size.y;
+}
+
+void Rendering::ResetViewportSize()
+{
+	XMUINT2 size = Application::GetUnsignedFramebufferSize();
+
+	viewport.Width = size.x;
+	viewport.Height = size.y;
+}

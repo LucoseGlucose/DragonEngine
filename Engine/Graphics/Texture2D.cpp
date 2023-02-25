@@ -6,11 +6,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-Texture2D::Texture2D(void* data, XMUINT2 size, uint32_t bytesPerPixel, uint32_t mipCount, bool sRGB)
-	: Texture(), size(size), mipCount(mipCount), sRGB(sRGB)
+Texture2D::Texture2D(void* data, XMUINT2 size, uint32_t bytesPerPixel, uint32_t mipCount, DXGI_FORMAT format)
+	: Texture(), size(size), mipCount(mipCount), format(format)
 {
-	DXGI_FORMAT format = sRGB ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM;
-
 	CommandRecorder* recorder = Rendering::GetRecorder();
 	recorder->StartRecording();
 
@@ -63,30 +61,53 @@ Texture2D* Texture2D::Import(const std::filesystem::path& file, bool sRGB, bool 
 	BYTE* imageData = stbi_load(file.string().c_str(), &width, &height, &numComponents, 4);
 
 	uint32_t mipCount = generateMips ? Utils::GetMipCount(width, height) : 1;
+	DXGI_FORMAT format = sRGB ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM;
 
-	Texture2D* tex = new Texture2D(imageData, XMUINT2(width, height), 4, mipCount, sRGB);
+	Texture2D* tex = new Texture2D(imageData, XMUINT2(width, height), 4, mipCount, format);
 
 	stbi_image_free(imageData);
 	return tex;
 }
 
+Texture2D* Texture2D::ImportHDR(const std::filesystem::path& file)
+{
+	int width, height, numComponents;
+	XMFLOAT3* imageData = (XMFLOAT3*)stbi_loadf(file.string().c_str(), &width, &height, &numComponents, 0);
+
+	XMFLOAT4* rgbaData = new XMFLOAT4[width * height];
+	for (size_t x = 0; x < width; x++)
+	{
+		for (size_t y = 0; y < height; y++)
+		{
+			XMFLOAT3 color = imageData[x + y * width];
+			rgbaData[x + y * width] = XMFLOAT4(color.x, color.y, color.z, 1.0f);
+		}
+	}
+
+	Texture2D* tex = new Texture2D(rgbaData, XMUINT2(width, height), 16, 1, DXGI_FORMAT_R32G32B32A32_FLOAT);
+
+	delete[] rgbaData;
+	stbi_image_free(imageData);
+
+	return tex;
+}
+
 void Texture2D::GenerateMipMaps(CommandRecorder* recorder)
 {
-	CD3DX12_CLEAR_VALUE rtClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_R8G8B8A8_UNORM, Colors::Black.f);
+	DXGI_FORMAT linearFormat = Utils::GetLinearFormat(format);
+
+	CD3DX12_CLEAR_VALUE rtClear = CD3DX12_CLEAR_VALUE(linearFormat, Colors::Black.f);
 	CD3DX12_CLEAR_VALUE dsClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_D32_FLOAT, 1.0f, 0);
 
-	D3D12_VIEWPORT startViewport = Rendering::viewport;
 	Material* downsampleMat = new Material(ShaderProgram::Create(Utils::GetPathFromExe("MipmapVertex.cso"),
-		Utils::GetPathFromExe("MipmapPixel.cso"), 1, DXGI_FORMAT_R8G8B8A8_UNORM));
+		Utils::GetPathFromExe("MipmapPixel.cso"), 1, linearFormat));
 
-	DXGI_FORMAT format = sRGB ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM;
-	srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	srvDesc.Format = linearFormat;
 
 	downsampleMat->SetTexture("t_texture", this);
 	downsampleMat->SetSampler("s_sampler", Utils::GetDefaultSampler());
 
-	Rendering::viewport.Width = size.x;
-	Rendering::viewport.Height = size.y;
+	Rendering::SetViewportSize(size);
 
 	Framebuffer** fbs = new Framebuffer*[mipCount - 1];
 
@@ -97,8 +118,11 @@ void Texture2D::GenerateMipMaps(CommandRecorder* recorder)
 		Rendering::viewport.Width = Rendering::viewport.Width * .5f;
 		Rendering::viewport.Height = Rendering::viewport.Height * .5f;
 
+		Rendering::viewport.Width = (std::max)(Rendering::viewport.Width, 1.f);
+		Rendering::viewport.Height = (std::max)(Rendering::viewport.Height, 1.f);
+
 		Framebuffer* fb = new Framebuffer(XMUINT2(Rendering::viewport.Width, Rendering::viewport.Height),
-			DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);
+			linearFormat, DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);
 		fbs[mip - 1] = fb;
 
 		fb->Setup(recorder);
@@ -143,5 +167,5 @@ void Texture2D::GenerateMipMaps(CommandRecorder* recorder)
 	}
 
 	srvDesc.Format = format;
-	Rendering::viewport = startViewport;
+	Rendering::ResetViewportSize();
 }

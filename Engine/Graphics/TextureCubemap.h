@@ -11,4 +11,5 @@ public:
 	ComPtr<ID3D12Resource> uploadBuffer;
 
 	static TextureCubemap* Import(const std::array<std::filesystem::path, 6>& files, bool sRGB);
+	static TextureCubemap* ImportHDR(const std::filesystem::path& file);
 };

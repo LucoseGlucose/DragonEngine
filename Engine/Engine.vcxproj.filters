@@ -208,6 +208,7 @@
     <None Include="Models\Quad.fbx" />
     <None Include="Models\Cube.fbx" />
     <None Include="Models\Inverted Cube.fbx" />
+    <None Include="Images\limpopo_golf_course_4k.hdr" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\LitPixel.hlsl" />
@@ -218,6 +219,8 @@
     <FxCompile Include="Shaders\MipmapVertex.hlsl" />
     <FxCompile Include="Shaders\SkyboxVertex.hlsl" />
     <FxCompile Include="Shaders\SkyboxPixel.hlsl" />
+    <FxCompile Include="Shaders\EquirectToCubemapVertex.hlsl" />
+    <FxCompile Include="Shaders\EquirectToCubemapPixel.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\UV Checker.png">

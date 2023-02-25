@@ -22,12 +22,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 		RendererComponent* cube = scene->AddObject(new SceneObject("Cube"))->AddComponent<RendererComponent>();
 		cube->mesh = new Mesh(Utils::GetPathFromProject("Models/Cube.fbx"));
-		cube->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitVertex.cso"), Utils::GetPathFromExe("LitPixel.cso"),
+		cube->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("EquirectToCubemapVertex.cso"), Utils::GetPathFromExe("EquirectToCubemapPixel.cso"),
 			Rendering::sceneFB->colorTexture->samples, Rendering::sceneFB->colorTexture->format));
 
 		cube->GetOwner()->GetTransform()->SetPosition(XMFLOAT3(0, 0, 3.5f));
 
-		Texture2D* tex = Texture2D::Import(Utils::GetPathFromProject("Images/UV Checker.png"), true, true);
+		Texture2D* tex = Texture2D::ImportHDR(Utils::GetPathFromProject("Images/limpopo_golf_course_4k.hdr"));
 		cube->material->SetTexture("t_texture", tex);
 		cube->material->SetSampler("s_sampler", Utils::GetDefaultSampler());
 

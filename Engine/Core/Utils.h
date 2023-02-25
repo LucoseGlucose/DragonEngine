@@ -26,6 +26,10 @@ public:
 
 	static uint32_t GetMipCount(uint32_t width, uint32_t height);
 
+	static DXGI_FORMAT GetSRGBFormat(DXGI_FORMAT linear);
+	static DXGI_FORMAT GetLinearFormat(DXGI_FORMAT srgb);
+	static bool IsFormatSRGB(DXGI_FORMAT format);
+
 	template<typename T>
 	static void RemoveFromVector(std::vector<T>* vec, const T& item)
 	{

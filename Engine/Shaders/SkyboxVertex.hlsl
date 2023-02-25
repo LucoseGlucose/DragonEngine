@@ -23,7 +23,7 @@ VS_OUTPUT main(VS_INPUT input)
     VS_OUTPUT output;
 
     output.position = mul(float4(input.position, 1.0f), p_mvpMat).xyww;
-    output.skyboxPosition = float4(input.position, 0.0f);
+    output.skyboxPosition = float4(input.position, 1.0f);
     
     return output;
 }
