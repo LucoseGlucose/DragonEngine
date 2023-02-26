@@ -41,3 +41,8 @@ void CommandRecorder::Execute()
 	StopRecording();
 	Rendering::commandQueue->Execute(list.Get());
 }
+
+bool CommandRecorder::IsRecording()
+{
+	return recording;
+}

@@ -29,12 +29,15 @@ Texture2D::Texture2D(void* data, XMUINT2 size, uint32_t bytesPerPixel, uint32_t 
 		D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&uploadBuffer)));
 	NAME_D3D_OBJECT(uploadBuffer);
 
-	D3D12_SUBRESOURCE_DATA subResourceData{};
-	subResourceData.pData = data;
-	subResourceData.RowPitch = bytesPerPixel * size.x;
-	subResourceData.SlicePitch = bytesPerPixel * size.x * size.y;
+	if (data != nullptr)
+	{
+		D3D12_SUBRESOURCE_DATA subResourceData{};
+		subResourceData.pData = data;
+		subResourceData.RowPitch = bytesPerPixel * size.x;
+		subResourceData.SlicePitch = bytesPerPixel * size.x * size.y;
 
-	UpdateSubresources(recorder->list.Get(), textureBuffer.Get(), uploadBuffer.Get(), 0, 0, 1, &subResourceData);
+		UpdateSubresources(recorder->list.Get(), textureBuffer.Get(), uploadBuffer.Get(), 0, 0, 1, &subResourceData);
+	}
 
 	CD3DX12_RESOURCE_BARRIER shaderResourceTransition = CD3DX12_RESOURCE_BARRIER::Transition(textureBuffer.Get(),
 		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
@@ -45,7 +48,7 @@ Texture2D::Texture2D(void* data, XMUINT2 size, uint32_t bytesPerPixel, uint32_t 
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = mipCount;
 
-	if (mipCount > 1) GenerateMipMaps(recorder);
+	if (mipCount > 1 && data != nullptr) GenerateMipMaps(recorder);
 	else
 	{
 		recorder->Execute();
@@ -108,7 +111,6 @@ void Texture2D::GenerateMipMaps(CommandRecorder* recorder)
 	downsampleMat->SetSampler("s_sampler", Utils::GetDefaultSampler());
 
 	Rendering::SetViewportSize(size);
-
 	Framebuffer** fbs = new Framebuffer*[mipCount - 1];
 
 	for (uint32_t mip = 1; mip < mipCount; mip++)
@@ -120,6 +122,9 @@ void Texture2D::GenerateMipMaps(CommandRecorder* recorder)
 
 		Rendering::viewport.Width = (std::max)(Rendering::viewport.Width, 1.f);
 		Rendering::viewport.Height = (std::max)(Rendering::viewport.Height, 1.f);
+
+		Rendering::scissorRect.right = Rendering::viewport.Width;
+		Rendering::scissorRect.bottom = Rendering::viewport.Height;
 
 		Framebuffer* fb = new Framebuffer(XMUINT2(Rendering::viewport.Width, Rendering::viewport.Height),
 			linearFormat, DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);

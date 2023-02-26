@@ -21,6 +21,7 @@ CommandRecorder* Rendering::GetRecorder()
 
 void Rendering::RecycleRecorder(CommandRecorder* recorder)
 {
+	if (recorder->IsRecording()) recorder->Execute();
 	cmdRecorders.push(recorder);
 }
 
@@ -191,6 +192,9 @@ void Rendering::SetViewportSize(XMUINT2 size)
 {
 	viewport.Width = size.x;
 	viewport.Height = size.y;
+
+	scissorRect.right = size.x;
+	scissorRect.bottom = size.y;
 }
 
 void Rendering::ResetViewportSize()
@@ -199,4 +203,7 @@ void Rendering::ResetViewportSize()
 
 	viewport.Width = size.x;
 	viewport.Height = size.y;
+
+	scissorRect.right = size.x;
+	scissorRect.bottom = size.y;
 }

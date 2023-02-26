@@ -16,4 +16,6 @@ public:
 	void StartRecording();
 	void StopRecording();
 	void Execute();
+
+	bool IsRecording();
 };
