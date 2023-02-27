@@ -110,7 +110,6 @@ void Rendering::Init()
 	outputObj->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputVertex.cso"),
 		Utils::GetPathFromExe("OutputPixel.cso"), 1, DXGI_FORMAT_R8G8B8A8_UNORM));
 
-	outputObj->material->SetSampler("s_sampler", Utils::GetDefaultSampler());
 	outputObj->material->SetTexture("t_sceneTexture", postFB->colorTexture);
 }
 
@@ -125,6 +124,8 @@ void Rendering::Render()
 	sceneFB->Setup(recorder);
 
 	std::vector<RendererComponent*>* renderers = SceneManager::GetActiveScene()->FindComponents<RendererComponent>();
+	lights = SceneManager::GetActiveScene()->FindComponents<LightComponent>();
+
 	for (size_t i = 0; i < renderers->size(); i++)
 	{
 		RendererComponent* renderer = renderers->at(i);

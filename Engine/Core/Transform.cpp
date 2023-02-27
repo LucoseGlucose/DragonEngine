@@ -375,3 +375,20 @@ void Transform::SetLocalEulerAngles(XMFLOAT3 angles)
 
 	SetLocalRotation(rot);
 }
+
+float Transform::GetDistance(Transform* other, bool estimation)
+{
+	XMFLOAT3 otherPos = other->GetPosition();
+	XMFLOAT3 pos = GetPosition();
+
+	XMVECTOR otherPosVec = DirectX::XMLoadFloat3(&otherPos);
+	XMVECTOR posVec = DirectX::XMLoadFloat3(&pos);
+
+	XMVECTOR subtractedVec = posVec - otherPosVec;
+	XMVECTOR distanceVec = estimation ? XMVector3LengthEst(subtractedVec) : XMVector3Length(subtractedVec);
+
+	float distance;
+	DirectX::XMStoreFloat(&distance, distanceVec);
+
+	return distance;
+}

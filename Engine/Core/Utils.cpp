@@ -1,7 +1,12 @@
 #include "stdafx.h"
+#include "Utils.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+
+#include "Rendering.h"
+#include "RendererComponent.h"
+#include "LightComponent.h"
 
 void Utils::ThrowIfFailed(HRESULT result)
 {
@@ -163,4 +168,50 @@ bool Utils::IsFormatSRGB(DXGI_FORMAT format)
 	}
 
 	return false;
+}
+
+std::function<void(RendererComponent*)> Utils::GetLitShaderParamFunc()
+{
+	return [](RendererComponent* renderer)
+	{
+		XMFLOAT4X4 projMat = Rendering::outputCam->GetProjectionMat();
+		XMFLOAT4X4 viewMat = Rendering::outputCam->GetViewMat();
+		XMFLOAT4X4 modelMat = renderer->GetTransform()->GetMatrix();
+
+		XMMATRIX multiplied = DirectX::XMLoadFloat4x4(&modelMat) * DirectX::XMLoadFloat4x4(&viewMat) * DirectX::XMLoadFloat4x4(&projMat);
+
+		XMFLOAT4X4 mvpMat;
+		DirectX::XMStoreFloat4x4(&mvpMat, DirectX::XMMatrixTranspose(multiplied));
+
+		renderer->material->SetParameter("p_mvpMat", &mvpMat, sizeof(mvpMat));
+
+		std::vector<LightComponent*> lights = *Rendering::lights;
+		std::map<LightComponent*, float> distances{};
+
+		for (size_t i = 0; i < lights.size(); i++)
+		{
+			distances[lights[i]] = lights[i]->GetTransform()->GetDistance(renderer->GetTransform(), true);
+		}
+
+		std::sort(lights.begin(), lights.end(), [distances](LightComponent* l1, LightComponent* l2)
+			{ return distances.at(l1) < distances.at(l2); });
+
+		LightData lightData[5]{};
+		for (size_t i = 0; i < (std::min)((int)lights.size(), 5); i++)
+		{
+			LightData data{};
+			LightComponent* light = lights[i];
+
+			data.type = light->GetLightType();
+			data.color = light->GetOutput();
+			data.falloff = light->falloff;
+			data.position = light->GetTransform()->GetPosition();
+			data.direction = light->GetTransform()->GetForward();
+			data.radius = light->radius;
+
+			lightData[i] = data;
+		}
+
+		renderer->material->SetParameter("p_lights", lightData, sizeof(lightData));
+	};
 }

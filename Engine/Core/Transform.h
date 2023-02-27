@@ -62,4 +62,6 @@ public:
 
 	XMFLOAT3 GetLocalEulerAngles();
 	void SetLocalEulerAngles(XMFLOAT3 angles);
+
+	float GetDistance(Transform* other, bool estimation);
 };

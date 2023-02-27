@@ -108,7 +108,6 @@ void Texture2D::GenerateMipMaps(CommandRecorder* recorder)
 	srvDesc.Format = linearFormat;
 
 	downsampleMat->SetTexture("t_texture", this);
-	downsampleMat->SetSampler("s_sampler", Utils::GetDefaultSampler());
 
 	Rendering::SetViewportSize(size);
 	Framebuffer** fbs = new Framebuffer*[mipCount - 1];
@@ -173,4 +172,24 @@ void Texture2D::GenerateMipMaps(CommandRecorder* recorder)
 
 	srvDesc.Format = format;
 	Rendering::ResetViewportSize();
+}
+
+Texture2D* Texture2D::GetWhiteTexture()
+{
+	if (whiteTexture != nullptr) return whiteTexture;
+
+	uint32_t white = 0xffffffff;
+	whiteTexture = new Texture2D(&white, XMUINT2(1, 1), 4, 1, DXGI_FORMAT_R8G8B8A8_UNORM);
+
+	return whiteTexture;
+}
+
+Texture2D* Texture2D::GetNormalTexture()
+{
+	if (normalTexture != nullptr) return normalTexture;
+
+	uint32_t normal = 0x0f0fffff;
+	normalTexture = new Texture2D(&normal, XMUINT2(1, 1), 4, 1, DXGI_FORMAT_R8G8B8A8_UNORM);
+
+	return normalTexture;
 }

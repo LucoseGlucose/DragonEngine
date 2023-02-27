@@ -30,6 +30,8 @@ public:
 	static DXGI_FORMAT GetLinearFormat(DXGI_FORMAT srgb);
 	static bool IsFormatSRGB(DXGI_FORMAT format);
 
+	static std::function<void(class RendererComponent*)> GetLitShaderParamFunc();
+
 	template<typename T>
 	static void RemoveFromVector(std::vector<T>* vec, const T& item)
 	{

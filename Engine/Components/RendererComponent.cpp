@@ -5,19 +5,7 @@
 
 RendererComponent::RendererComponent(SceneObject* owner) : Component(owner)
 {
-	shaderParamFunc = [](RendererComponent* renderer)
-	{
-		XMFLOAT4X4 projMat = Rendering::outputCam->GetProjectionMat();
-		XMFLOAT4X4 viewMat = Rendering::outputCam->GetViewMat();
-		XMFLOAT4X4 modelMat = renderer->GetTransform()->GetMatrix();
-
-		XMMATRIX multiplied = DirectX::XMLoadFloat4x4(&modelMat) * DirectX::XMLoadFloat4x4(&viewMat) * DirectX::XMLoadFloat4x4(&projMat);
-
-		XMFLOAT4X4 mvpMat;
-		DirectX::XMStoreFloat4x4(&mvpMat, DirectX::XMMatrixTranspose(multiplied));
-
-		renderer->material->SetParameter("p_mvpMat", &mvpMat, sizeof(mvpMat));
-	};
+	shaderParamFunc = Utils::GetLitShaderParamFunc();
 }
 
 RendererComponent::~RendererComponent()

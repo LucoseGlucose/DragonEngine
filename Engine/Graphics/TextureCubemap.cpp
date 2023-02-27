@@ -117,7 +117,6 @@ TextureCubemap* TextureCubemap::ImportHDR(const std::filesystem::path& file)
 	DirectX::XMStoreFloat4x4(&matrices[5], XMMatrixTranspose(XMMatrixLookToLH(zeroVec, g_XMNegIdentityR2.v, g_XMIdentityR1.v)));
 
 	material->SetTexture("t_texture", equirect);
-	material->SetSampler("s_sampler", Utils::GetDefaultSampler());
 
 	Rendering::SetViewportSize(size);
 	std::array<Framebuffer*, 6> fbs{};

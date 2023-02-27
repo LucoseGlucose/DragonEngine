@@ -4,10 +4,6 @@
 #include "Texture.h"
 #include "CommandRecorder.h"
 
-#include <DirectXMath.h>
-
-using namespace DirectX;
-
 typedef D3D12_SAMPLER_DESC Sampler;
 
 class Material

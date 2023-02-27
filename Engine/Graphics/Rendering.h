@@ -8,6 +8,7 @@
 #include "Framebuffer.h"
 #include "CameraComponent.h"
 #include "RendererComponent.h"
+#include "LightComponent.h"
 
 class Rendering
 {
@@ -30,6 +31,7 @@ public:
 	static inline RendererComponent* outputObj{};
 
 	static inline CameraComponent* outputCam{};
+	static inline std::vector<LightComponent*>* lights{};
 
 	static inline UINT64 fenceValues[2]{};
 

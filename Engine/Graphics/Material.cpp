@@ -2,6 +2,8 @@
 #include "Material.h"
 
 #include "Rendering.h"
+#include "Texture2D.h"
+
 #include <d3d12shader.h>
 #include <d3dcompiler.h>
 
@@ -10,6 +12,8 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 	uint32_t numConstantBuffers = 0;
 	uint32_t numTextures = 0;
 	uint32_t numSamplers = 0;
+
+	std::vector<std::tuple<std::string, char>> defaultTextures{};
 
 	for (size_t i = 0; i < 2; i++)
 	{
@@ -70,11 +74,14 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 			{
 				textureParameters[bindDesc.Name] = numTextures;
 				numTextures++;
+
+				std::string varName = bindDesc.Name;
+				defaultTextures.push_back(std::tuple<std::string, char>(varName, varName.back()));
 			}
 			if (bindDesc.Type == D3D_SIT_SAMPLER)
 			{
 				samplerParameters[bindDesc.Name] = numSamplers;
-				samplers.push_back(Sampler());
+				samplers.push_back(Utils::GetDefaultSampler());
 				numSamplers++;
 			}
 		}
@@ -88,6 +95,13 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 		textureHeapDesc.NumDescriptors = numTextures;
 
 		Utils::ThrowIfFailed(Rendering::device->CreateDescriptorHeap(&textureHeapDesc, IID_PPV_ARGS(&textureDescHeap)));
+	}
+
+	for (size_t i = 0; i < defaultTextures.size(); i++)
+	{
+		char code = get<1>(defaultTextures[i]);
+		if (code == 'W') SetTexture(get<0>(defaultTextures[i]), Texture2D::GetWhiteTexture());
+		if (code == 'N') SetTexture(get<0>(defaultTextures[i]), Texture2D::GetNormalTexture());
 	}
 
 	if (samplerParameters.size() > 0)

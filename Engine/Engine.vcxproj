@@ -239,6 +239,7 @@
   <ItemGroup>
     <ClCompile Include="Components\CameraComponent.cpp" />
     <ClCompile Include="Components\CameraControllerComponent.cpp" />
+    <ClCompile Include="Components\LightComponent.cpp" />
     <ClCompile Include="Graphics\CommandRecorder.cpp" />
     <ClCompile Include="Core\Component.cpp" />
     <ClCompile Include="Graphics\Framebuffer.cpp" />
@@ -277,6 +278,7 @@
   <ItemGroup>
     <ClInclude Include="Components\CameraComponent.h" />
     <ClInclude Include="Components\CameraControllerComponent.h" />
+    <ClInclude Include="Components\LightComponent.h" />
     <ClInclude Include="Graphics\CommandRecorder.h" />
     <ClInclude Include="Core\Component.h" />
     <ClInclude Include="Graphics\Framebuffer.h" />
