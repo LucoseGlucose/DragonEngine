@@ -152,6 +152,8 @@ void Rendering::Render()
 
 void Rendering::Cleanup()
 {
+	commandQueue->WaitForAllCommands();
+
 	while (!cmdRecorders.empty())
 	{
 		delete cmdRecorders.front();

@@ -1,7 +1,7 @@
 struct PS_INPUT
 {
     float4 position : SV_Position;
-    float4 skyboxPosition : COLOR;
+    float3 skyboxPosition : POSITION;
 };
 
 TextureCube<float4> t_texture : register(t0);

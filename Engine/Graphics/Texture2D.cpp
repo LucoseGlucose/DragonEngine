@@ -188,8 +188,8 @@ Texture2D* Texture2D::GetNormalTexture()
 {
 	if (normalTexture != nullptr) return normalTexture;
 
-	uint32_t normal = 0x0f0fffff;
-	normalTexture = new Texture2D(&normal, XMUINT2(1, 1), 4, 1, DXGI_FORMAT_R8G8B8A8_UNORM);
+	BYTE col[4] = { 127, 127, 255, 255 };
+	normalTexture = new Texture2D(col, XMUINT2(1, 1), 4, 1, DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	return normalTexture;
 }

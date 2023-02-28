@@ -13,12 +13,6 @@ CommandRecorder::CommandRecorder()
 	NAME_D3D_OBJECT(list);
 }
 
-CommandRecorder::~CommandRecorder()
-{
-	Execute();
-	Rendering::commandQueue->WaitForAllCommands();
-}
-
 void CommandRecorder::StartRecording()
 {
 	if (recording) Execute();

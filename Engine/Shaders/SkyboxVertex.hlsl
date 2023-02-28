@@ -10,7 +10,7 @@ struct VS_INPUT
 struct VS_OUTPUT
 {
     float4 position : SV_Position;
-    float4 skyboxPosition : COLOR;
+    float3 skyboxPosition : POSITION;
 };
 
 cbuffer VertexParams : register(b0)

@@ -40,13 +40,6 @@ XMFLOAT3 Utils::QuatToEulerAngles(XMFLOAT4 quat)
 	return XMFLOAT3(XMConvertToDegrees(pitch), XMConvertToDegrees(yaw), XMConvertToDegrees(roll));
 }
 
-bool Utils::SamplersEqual(D3D12_SAMPLER_DESC& s1, D3D12_SAMPLER_DESC& s2)
-{
-	return (int)s1.AddressU == (int)s2.AddressU && (int)s1.AddressV == (int)s2.AddressV && (int)s1.AddressW == (int)s2.AddressW
-		&& s1.BorderColor == s2.BorderColor && (int)s1.ComparisonFunc == (int)s2.ComparisonFunc && (int)s1.Filter == (int)s2.Filter
-		&& s1.MaxAnisotropy == s2.MaxAnisotropy && s1.MaxLOD == s2.MaxLOD && s1.MinLOD == s2.MinLOD && s1.MipLODBias == s2.MipLODBias;
-}
-
 D3D12_SAMPLER_DESC Utils::GetDefaultSampler()
 {
 	D3D12_SAMPLER_DESC sampler{};
@@ -178,12 +171,21 @@ std::function<void(RendererComponent*)> Utils::GetLitShaderParamFunc()
 		XMFLOAT4X4 viewMat = Rendering::outputCam->GetViewMat();
 		XMFLOAT4X4 modelMat = renderer->GetTransform()->GetMatrix();
 
-		XMMATRIX multiplied = DirectX::XMLoadFloat4x4(&modelMat) * DirectX::XMLoadFloat4x4(&viewMat) * DirectX::XMLoadFloat4x4(&projMat);
+		XMMATRIX modelMatMat = DirectX::XMLoadFloat4x4(&modelMat);
+		XMMATRIX multiplied = modelMatMat * DirectX::XMLoadFloat4x4(&viewMat) * DirectX::XMLoadFloat4x4(&projMat);
 
 		XMFLOAT4X4 mvpMat;
 		DirectX::XMStoreFloat4x4(&mvpMat, DirectX::XMMatrixTranspose(multiplied));
 
 		renderer->material->SetParameter("p_mvpMat", &mvpMat, sizeof(mvpMat));
+
+		XMFLOAT4X4 shaderModelMat;
+		DirectX::XMStoreFloat4x4(&shaderModelMat, DirectX::XMMatrixTranspose(modelMatMat));
+
+		renderer->material->SetParameter("p_modelMat", &shaderModelMat, sizeof(shaderModelMat));
+
+		XMFLOAT3 cameraPosition = Rendering::outputCam->GetTransform()->GetPosition();
+		renderer->material->SetParameter("p_cameraPosition", &cameraPosition, sizeof(XMFLOAT3));
 
 		std::vector<LightComponent*> lights = *Rendering::lights;
 		std::map<LightComponent*, float> distances{};
@@ -197,12 +199,20 @@ std::function<void(RendererComponent*)> Utils::GetLitShaderParamFunc()
 			{ return distances.at(l1) < distances.at(l2); });
 
 		LightData lightData[5]{};
-		for (size_t i = 0; i < (std::min)((int)lights.size(), 5); i++)
+		for (size_t i = 0; i < 5; i++)
 		{
 			LightData data{};
+
+			if (i >= lights.size())
+			{
+				data.color = XMFLOAT3(0.f, 0.f, 0.f);
+
+				lightData[i] = data;
+				continue;
+			}
+
 			LightComponent* light = lights[i];
 
-			data.type = light->GetLightType();
 			data.color = light->GetOutput();
 			data.falloff = light->falloff;
 			data.position = light->GetTransform()->GetPosition();

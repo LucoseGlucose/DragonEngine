@@ -8,7 +8,6 @@ class CommandRecorder
 
 public:
 	CommandRecorder();
-	~CommandRecorder();
 
 	ComPtr<ID3D12CommandAllocator> allocator;
 	ComPtr<ID3D12GraphicsCommandList> list;

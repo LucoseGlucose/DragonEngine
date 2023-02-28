@@ -23,7 +23,6 @@ public:
 
 	std::map<std::string, uint32_t> samplerParameters{};
 	ComPtr<ID3D12DescriptorHeap> samplerDescHeap;
-	std::vector<Sampler> samplers{};
 
 	void SetParameter(const std::string& name, void* data, size_t size);
 	void SetTexture(const std::string& name, Texture* texture);

@@ -14,6 +14,7 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 	uint32_t numSamplers = 0;
 
 	std::vector<std::tuple<std::string, char>> defaultTextures{};
+	std::vector<std::string> defaultSamplers{};
 
 	for (size_t i = 0; i < 2; i++)
 	{
@@ -81,7 +82,7 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 			if (bindDesc.Type == D3D_SIT_SAMPLER)
 			{
 				samplerParameters[bindDesc.Name] = numSamplers;
-				samplers.push_back(Utils::GetDefaultSampler());
+				defaultSamplers.push_back(bindDesc.Name);
 				numSamplers++;
 			}
 		}
@@ -113,6 +114,11 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 
 		Utils::ThrowIfFailed(Rendering::device->CreateDescriptorHeap(&samplerHeapDesc, IID_PPV_ARGS(&samplerDescHeap)));
 	}
+
+	for (size_t i = 0; i < defaultSamplers.size(); i++)
+	{
+		SetSampler(defaultSamplers[i], Utils::GetDefaultSampler());
+	}
 }
 
 void Material::SetParameter(const std::string& name, void* data, size_t size)
@@ -141,14 +147,12 @@ void Material::SetSampler(const std::string& name, Sampler sampler)
 	if (!samplerParameters.contains(name)) return;
 
 	uint32_t index = samplerParameters[name];
-	if (Utils::SamplersEqual(samplers[index], sampler)) return;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE samplerDescStartHnd = samplerDescHeap->GetCPUDescriptorHandleForHeapStart();
 	UINT incrementSize = Rendering::device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	CD3DX12_CPU_DESCRIPTOR_HANDLE samplerDescHnd = CD3DX12_CPU_DESCRIPTOR_HANDLE(samplerDescStartHnd, index, incrementSize);
 
 	Rendering::device->CreateSampler(&sampler, samplerDescHnd);
-	samplers[index] = sampler;
 }
 
 void Material::Bind(CommandRecorder* recorder)
@@ -168,11 +172,17 @@ void Material::Bind(CommandRecorder* recorder)
 		recorder->list->SetGraphicsRootConstantBufferView(i, parameterBuffers[i]->GetGPUVirtualAddress());
 	}
 
-	if (textureParameters.size() > 0)
-		recorder->list->SetGraphicsRootDescriptorTable(
-			parameterBuffers.size(), textureDescHeap->GetGPUDescriptorHandleForHeapStart());
+	for (size_t i = 0; i < textureParameters.size(); i++)
+	{
+		CD3DX12_GPU_DESCRIPTOR_HANDLE descHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(textureDescHeap->GetGPUDescriptorHandleForHeapStart(),
+			i, Rendering::device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		recorder->list->SetGraphicsRootDescriptorTable(parameterBuffers.size() + i, descHandle);
+	}
 
-	if (samplerParameters.size() > 0)
-		recorder->list->SetGraphicsRootDescriptorTable(
-			parameterBuffers.size() + 1, samplerDescHeap->GetGPUDescriptorHandleForHeapStart());
+	for (size_t i = 0; i < samplerParameters.size(); i++)
+	{
+		CD3DX12_GPU_DESCRIPTOR_HANDLE descHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(samplerDescHeap->GetGPUDescriptorHandleForHeapStart(),
+			i, Rendering::device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER));
+		recorder->list->SetGraphicsRootDescriptorTable(parameterBuffers.size() + textureParameters.size() + i, descHandle);
+	}
 }
