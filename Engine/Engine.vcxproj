@@ -239,7 +239,9 @@
   <ItemGroup>
     <ClCompile Include="Components\CameraComponent.cpp" />
     <ClCompile Include="Components\CameraControllerComponent.cpp" />
+    <ClCompile Include="Components\DirectionalLightComponent.cpp" />
     <ClCompile Include="Components\LightComponent.cpp" />
+    <ClCompile Include="Components\PointLightComponent.cpp" />
     <ClCompile Include="Graphics\CommandRecorder.cpp" />
     <ClCompile Include="Core\Component.cpp" />
     <ClCompile Include="Graphics\Framebuffer.cpp" />
@@ -278,7 +280,9 @@
   <ItemGroup>
     <ClInclude Include="Components\CameraComponent.h" />
     <ClInclude Include="Components\CameraControllerComponent.h" />
+    <ClInclude Include="Components\DirectionalLightComponent.h" />
     <ClInclude Include="Components\LightComponent.h" />
+    <ClInclude Include="Components\PointLightComponent.h" />
     <ClInclude Include="Graphics\CommandRecorder.h" />
     <ClInclude Include="Core\Component.h" />
     <ClInclude Include="Graphics\Framebuffer.h" />
@@ -313,7 +317,10 @@
     <None Include="Images\limpopo_golf_course_4k.hdr" />
     <None Include="Models\Cube.fbx" />
     <None Include="Models\Inverted Cube.fbx" />
+    <None Include="Models\Monkey.fbx" />
     <None Include="Models\Quad.fbx" />
+    <None Include="Models\Smooth Monkey.fbx" />
+    <None Include="Models\Sphere.fbx" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\EquirectToCubemapPixel.hlsl">
@@ -378,12 +385,15 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Images\brickwall.jpg" />
+    <Image Include="Images\brickwall_normal.jpg" />
     <Image Include="Images\Six sided skybox\back.jpg" />
     <Image Include="Images\Six sided skybox\bottom.jpg" />
     <Image Include="Images\Six sided skybox\front.jpg" />
     <Image Include="Images\Six sided skybox\left.jpg" />
     <Image Include="Images\Six sided skybox\right.jpg" />
     <Image Include="Images\Six sided skybox\top.jpg" />
+    <Image Include="Images\test_normal.jpg" />
     <Image Include="Images\UV Checker.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -111,6 +111,12 @@
     <ClCompile Include="Components\LightComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Components\PointLightComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\DirectionalLightComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graphics\d3dx12.h">
@@ -209,12 +215,21 @@
     <ClInclude Include="Components\LightComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Components\PointLightComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\DirectionalLightComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\Quad.fbx" />
     <None Include="Models\Cube.fbx" />
     <None Include="Models\Inverted Cube.fbx" />
     <None Include="Images\limpopo_golf_course_4k.hdr" />
+    <None Include="Models\Sphere.fbx" />
+    <None Include="Models\Smooth Monkey.fbx" />
+    <None Include="Models\Monkey.fbx" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\LitPixel.hlsl" />
@@ -248,6 +263,15 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Images\Six sided skybox\top.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\brickwall.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\brickwall_normal.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\test_normal.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

@@ -10,7 +10,6 @@ struct PS_INPUT
 cbuffer SurfaceParameters : register(b1)
 {
     float4 p_albedo = float4(1.f, 1.f, 1.f, 1.f);
-    float p_alphaClip = 1.f;
     float p_roughness = .5f;
     float p_metallic = .5f;
     float p_normalStrength = 1.f;
@@ -21,11 +20,11 @@ cbuffer SurfaceParameters : register(b1)
 struct Light
 {
     float3 color;
-    float pad0;
+    float type;
     float3 position;
-    float pad1;
+    float pad0;
     float3 direction;
-    float pad2;
+    float pad1;
     float2 falloff;
     float2 radius;
 };
@@ -75,19 +74,37 @@ float3 fresnelSchlick(float3 F0, float cosTheta)
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
+void CalcLightData(in PS_INPUT input, in Light light, out float3 radiance, out float3 dir)
+{
+    if (light.type == 1)
+    {
+        float3 toLight = light.position - input.worldPosition;
+        dir = normalize(toLight);
+        
+        float distance = length(toLight);
+        float attenuation = 1.f / (1 + light.falloff.x * distance + light.falloff.y * (distance * distance));
+        radiance = light.color * attenuation;
+    }
+    if (light.type == 2)
+    {
+        dir = -normalize(light.direction);
+        radiance = light.color;
+    }
+}
+
 float4 main(PS_INPUT input) : SV_TARGET
 {
     float4 albedo = t_albedoW.Sample(s_sampler, input.uv) * p_albedo;
     float alpha = albedo.a;
     
-    if (alpha < p_alphaClip) discard;
     float3 albedoColor = albedo.rgb;
     
     float metallic = t_metallicW.Sample(s_sampler, input.uv).r * p_metallic;
     float roughness = t_roughnessW.Sample(s_sampler, input.uv).r * p_roughness;
 
     float3 normal = normalize(t_normalN.Sample(s_sampler, input.uv).xyz * 2.f - 1.f);
-    normal.xy *= p_normalStrength;
+    normal.x *= -p_normalStrength;
+    normal.y *= p_normalStrength;
     normal = normalize(mul(normal, input.tangentMatrix));
     
     float3 viewDirection = normalize(p_cameraPosition - input.worldPosition);
@@ -101,18 +118,15 @@ float4 main(PS_INPUT input) : SV_TARGET
     for (int i = 0; i < 5; i++)
     {
         Light light = p_lights[i];
-        if (!all(light.color)) continue;
+        if (light.type == 0) continue;
 
-        float3 toLight = light.position - input.worldPosition;
-        float3 lightDirection = normalize(toLight);
+        float3 radiance;
+        float3 lightDir;
+        CalcLightData(input, light, radiance, lightDir);
         
-        float distance = length(toLight);
-        float attenuation = 1.f / (1 + light.falloff.x * distance + light.falloff.y * (distance * distance));
-        float3 lightColor = light.color * attenuation;
+        float3 halfVector = normalize(lightDir + viewDirection);
         
-        float3 halfVector = normalize(lightDirection + viewDirection);
-        
-        float surfaceLightAngle = max(0.f, dot(normal, lightDirection));
+        float surfaceLightAngle = max(0.f, dot(normal, lightDir));
         float surfaceHalfAngle = max(0.f, dot(normal, halfVector));
 
         float3 fresnel = fresnelSchlick(fresnelReflectance, max(0.f, dot(halfVector, viewDirection)));
@@ -125,7 +139,7 @@ float4 main(PS_INPUT input) : SV_TARGET
         float3 specularBRDF = (fresnel * normalDistribution * geometricAttenuation)
             / max(Epsilon, 4.f * surfaceLightAngle * surfaceViewAngle);
         
-        directLighting += (diffuseBRDF + specularBRDF) * lightColor * surfaceLightAngle;
+        directLighting += (diffuseBRDF + specularBRDF) * radiance * surfaceLightAngle;
     }
     
     return float4(directLighting, alpha);

@@ -13,3 +13,15 @@ XMFLOAT3 LightComponent::GetOutput()
 
 	return output;
 }
+
+float LightComponent::GetLightType()
+{
+	return 0;
+}
+
+void LightComponent::GetLightData(LightData* data)
+{
+	data->type = GetLightType();
+	data->color = GetOutput();
+	data->position = GetTransform()->GetPosition();
+}

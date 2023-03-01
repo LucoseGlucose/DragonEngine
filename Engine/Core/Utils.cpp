@@ -212,12 +212,7 @@ std::function<void(RendererComponent*)> Utils::GetLitShaderParamFunc()
 			}
 
 			LightComponent* light = lights[i];
-
-			data.color = light->GetOutput();
-			data.falloff = light->falloff;
-			data.position = light->GetTransform()->GetPosition();
-			data.direction = light->GetTransform()->GetForward();
-			data.radius = light->radius;
+			light->GetLightData(&data);
 
 			lightData[i] = data;
 		}
