@@ -12,4 +12,5 @@ public:
 
 	static TextureCubemap* Import(const std::array<std::filesystem::path, 6>& files, bool sRGB);
 	static TextureCubemap* ImportHDR(const std::filesystem::path& file);
+	static TextureCubemap* ComputeDiffuseIrradiance(TextureCubemap* skybox, XMUINT2 size);
 };

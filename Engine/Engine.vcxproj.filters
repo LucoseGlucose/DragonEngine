@@ -242,6 +242,7 @@
     <FxCompile Include="Shaders\SkyboxPixel.hlsl" />
     <FxCompile Include="Shaders\EquirectToCubemapVertex.hlsl" />
     <FxCompile Include="Shaders\EquirectToCubemapPixel.hlsl" />
+    <FxCompile Include="Shaders\IrradiancePixel.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\UV Checker.png">

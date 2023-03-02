@@ -81,7 +81,7 @@ void Rendering::Init()
 	postFB = new Framebuffer(Application::GetUnsignedFramebufferSize(), DXGI_FORMAT_R16G16B16A16_FLOAT,
 		DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);
 
-	for (size_t i = 0; i < 8; i++)
+	for (size_t i = 0; i < 32; i++)
 	{
 		CommandRecorder* rec = new CommandRecorder();
 		cmdRecorders.push(rec);

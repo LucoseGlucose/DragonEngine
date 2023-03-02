@@ -43,7 +43,6 @@ Mesh::Mesh(std::filesystem::path path) : vertices(), indices()
 void Mesh::UploadMeshData()
 {
 	if (vertices.empty()) Utils::CrashWithMessage(L"Mesh is empty!");
-	Rendering::commandQueue->WaitForAllCommands();
 
 	if (vertexBuffer != nullptr) vertexBuffer->Release();
 	if (vertexUploadBuffer != nullptr) vertexUploadBuffer->Release();
@@ -109,8 +108,6 @@ void Mesh::UploadMeshData()
 	recorder->list->ResourceBarrier(_countof(barriers), barriers);
 
 	recorder->Execute();
-
-	Rendering::commandQueue->WaitForAllCommands();
 	Rendering::RecycleRecorder(recorder);
 
 	vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();

@@ -27,12 +27,25 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		LightComponent* light = scene->AddObject(new SceneObject("Light"))->AddComponent<DirectionalLightComponent>();
 		light->GetTransform()->SetPosition(XMFLOAT3(2.f, 2.5f, -1.5f));
 		light->GetTransform()->SetEulerAngles(XMFLOAT3(55.f, 45.f, 0.f));
-		light->strength = 3.f;
+		light->strength = 2.f;
 
 		RendererComponent* mesh = scene->AddObject(new SceneObject("Mesh"))->AddComponent<RendererComponent>();
-		mesh->mesh = new Mesh(Utils::GetPathFromProject("Models/Smooth Monkey.fbx"));
+		mesh->mesh = new Mesh(Utils::GetPathFromProject("Models/Cube.fbx"));
 		mesh->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitVertex.cso"), Utils::GetPathFromExe("LitPixel.cso"),
 			Rendering::sceneFB->colorTexture->samples, Rendering::sceneFB->colorTexture->format));
+
+		//XMFLOAT4 brown = XMFLOAT4(.2f, .05f, 0.f, 1.f);
+		//mesh->material->SetParameter("p_albedo", &brown, sizeof(brown));
+
+		Sampler sampler = Utils::GetDefaultSampler();
+		sampler.Filter = D3D12_FILTER_ANISOTROPIC;
+		//mesh->material->SetSampler("s_sampler", sampler);
+
+		Texture2D* bricks = Texture2D::Import(Utils::GetPathFromProject("Images/brickwall.jpg"), true, true);
+		//mesh->material->SetTexture("t_albedoW", bricks);
+
+		Texture2D* normal = Texture2D::Import(Utils::GetPathFromProject("Images/brickwall_normal.jpg"), false, false);
+		//mesh->material->SetTexture("t_normalN", normal);
 
 		float metallic = .1f;
 		mesh->material->SetParameter("p_metallic", &metallic, sizeof(float));
@@ -43,6 +56,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		RendererComponent* skybox = scene->AddObject(new SkyboxObject("Skybox"))->GetComponent<RendererComponent>();
 
 		TextureCubemap* cubemap = TextureCubemap::ImportHDR(Utils::GetPathFromProject("Images/limpopo_golf_course_4k.hdr"));
+		TextureCubemap* irradiance = TextureCubemap::ComputeDiffuseIrradiance(cubemap, XMUINT2(1, 1));
+
 		skybox->material->SetTexture("t_texture", cubemap);
 
 		return scene;

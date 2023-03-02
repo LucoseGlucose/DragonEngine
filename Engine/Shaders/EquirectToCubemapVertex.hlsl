@@ -10,7 +10,7 @@ struct VS_INPUT
 struct VS_OUTPUT
 {
     float4 position : SV_Position;
-    float4 localPosition : COLOR;
+    float3 localPosition : POSITION;
 };
 
 cbuffer VertexParams : register(b0)
@@ -23,7 +23,7 @@ VS_OUTPUT main(VS_INPUT input)
     VS_OUTPUT output;
 
     output.position = mul(float4(input.position, 1.0f), p_mvpMat);
-    output.localPosition = float4(input.position, 1.0f);
+    output.localPosition = input.position;
     
     return output;
 }

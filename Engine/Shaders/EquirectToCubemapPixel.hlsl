@@ -1,7 +1,7 @@
 struct PS_INPUT
 {
     float4 position : SV_Position;
-    float4 localPosition : COLOR;
+    float3 localPosition : POSITION;
 };
 
 Texture2D<float4> t_texture : register(t0);
@@ -12,7 +12,7 @@ static const float TwoPI = 2 * PI;
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    float3 v = normalize(input.localPosition.xyz);
+    float3 v = normalize(input.localPosition);
     
     float phi = atan2(v.z, v.x);
     float theta = acos(v.y);

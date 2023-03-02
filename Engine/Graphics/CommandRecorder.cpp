@@ -15,7 +15,7 @@ CommandRecorder::CommandRecorder()
 
 void CommandRecorder::StartRecording()
 {
-	if (recording) Execute();
+	if (recording) return;
 	recording = true;
 
 	Utils::ThrowIfFailed(allocator->Reset());
@@ -25,8 +25,8 @@ void CommandRecorder::StartRecording()
 void CommandRecorder::StopRecording()
 {
 	if (!recording) return;
-
 	recording = false;
+
 	list->Close();
 }
 
