@@ -9,6 +9,7 @@
 #include "CameraComponent.h"
 #include "RendererComponent.h"
 #include "LightComponent.h"
+#include "SkyboxObject.h"
 
 class Rendering
 {
@@ -29,6 +30,7 @@ public:
 
 	static inline Mesh* quadMesh{};
 	static inline RendererComponent* outputObj{};
+	static inline SkyboxObject* skyboxObj{};
 
 	static inline CameraComponent* outputCam{};
 	static inline std::vector<LightComponent*>* lights{};

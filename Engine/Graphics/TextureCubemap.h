@@ -14,6 +14,7 @@ public:
 	DXGI_FORMAT format;
 
 	void GenerateMipMaps();
+	static XMFLOAT4X4* GetCubemapMatrices();
 
 	static TextureCubemap* Import(const std::array<std::filesystem::path, 6>& files, bool sRGB, bool generateMips);
 	static TextureCubemap* ImportHDR(const std::filesystem::path& file, bool generateMips);

@@ -49,11 +49,7 @@ Texture2D::Texture2D(void* data, XMUINT2 size, uint32_t bytesPerPixel, uint32_t 
 	srvDesc.Texture2D.MipLevels = mipCount;
 
 	if (mipCount > 1 && data != nullptr) GenerateMipMaps(recorder);
-	else
-	{
-		recorder->Execute();
-		Rendering::commandQueue->WaitForAllCommands();
-	}
+	else recorder->Execute();
 
 	Rendering::RecycleRecorder(recorder);
 }
@@ -185,4 +181,13 @@ Texture2D* Texture2D::GetNormalTexture()
 	normalTexture = new Texture2D(col, XMUINT2(1, 1), 4, 1, DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	return normalTexture;
+}
+
+Texture2D* Texture2D::GetBRDFTexture()
+{
+	if (brdfTexture != nullptr) return brdfTexture;
+
+	brdfTexture = Import(Utils::GetPathFromProject("Images/BRDF LUT.png"), false, false);
+
+	return brdfTexture;
 }

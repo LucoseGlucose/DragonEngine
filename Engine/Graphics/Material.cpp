@@ -74,6 +74,7 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 			if (bindDesc.Type == D3D_SIT_TEXTURE)
 			{
 				textureParameters[bindDesc.Name] = numTextures;
+				cachedTextures[bindDesc.Name] = nullptr;
 				numTextures++;
 
 				std::string varName = bindDesc.Name;
@@ -101,8 +102,10 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 	for (size_t i = 0; i < defaultTextures.size(); i++)
 	{
 		char code = get<1>(defaultTextures[i]);
+
 		if (code == 'W') SetTexture(get<0>(defaultTextures[i]), Texture2D::GetWhiteTexture());
 		if (code == 'N') SetTexture(get<0>(defaultTextures[i]), Texture2D::GetNormalTexture());
+		if (code == 'L') SetTexture(get<0>(defaultTextures[i]), Texture2D::GetBRDFTexture());
 	}
 
 	if (samplerParameters.size() > 0)
@@ -131,7 +134,7 @@ void Material::SetParameter(const std::string& name, void* data, size_t size)
 
 void Material::SetTexture(const std::string& name, Texture* texture)
 {
-	if (!textureParameters.contains(name)) return;
+	if (!textureParameters.contains(name) || cachedTextures[name] == texture) return;
 
 	uint32_t index = textureParameters[name];
 
@@ -140,6 +143,7 @@ void Material::SetTexture(const std::string& name, Texture* texture)
 	CD3DX12_CPU_DESCRIPTOR_HANDLE texDescHnd = CD3DX12_CPU_DESCRIPTOR_HANDLE(texDescStartHnd, index, incrementSize);
 
 	Rendering::device->CreateShaderResourceView(texture->textureBuffer.Get(), &texture->srvDesc, texDescHnd);
+	cachedTextures[name] = texture;
 }
 
 void Material::SetSampler(const std::string& name, Sampler sampler)
@@ -153,6 +157,19 @@ void Material::SetSampler(const std::string& name, Sampler sampler)
 	CD3DX12_CPU_DESCRIPTOR_HANDLE samplerDescHnd = CD3DX12_CPU_DESCRIPTOR_HANDLE(samplerDescStartHnd, index, incrementSize);
 
 	Rendering::device->CreateSampler(&sampler, samplerDescHnd);
+}
+
+void Material::UpdateTexture(const std::string& name, Texture* texture)
+{
+	if (!textureParameters.contains(name) || cachedTextures[name] != texture) return;
+
+	uint32_t index = textureParameters[name];
+
+	D3D12_CPU_DESCRIPTOR_HANDLE texDescStartHnd = textureDescHeap->GetCPUDescriptorHandleForHeapStart();
+	UINT incrementSize = Rendering::device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE texDescHnd = CD3DX12_CPU_DESCRIPTOR_HANDLE(texDescStartHnd, index, incrementSize);
+
+	Rendering::device->CreateShaderResourceView(texture->textureBuffer.Get(), &texture->srvDesc, texDescHnd);
 }
 
 void Material::Bind(CommandRecorder* recorder)

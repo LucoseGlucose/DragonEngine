@@ -218,5 +218,8 @@ std::function<void(RendererComponent*)> Utils::GetLitShaderParamFunc()
 		}
 
 		renderer->material->SetParameter("p_lights", lightData, sizeof(lightData));
+
+		renderer->material->SetTexture("t_irradiance", Rendering::skyboxObj->irradiance);
+		renderer->material->SetTexture("t_specularReflections", Rendering::skyboxObj->specular);
 	};
 }

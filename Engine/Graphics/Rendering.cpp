@@ -111,6 +111,11 @@ void Rendering::Init()
 		Utils::GetPathFromExe("OutputPixel.cso"), 1, DXGI_FORMAT_R8G8B8A8_UNORM));
 
 	outputObj->material->SetTexture("t_sceneTexture", postFB->colorTexture);
+
+	skyboxObj = new SkyboxObject("Skybox");
+	skyboxObj->skybox = TextureCubemap::ImportHDR(Utils::GetPathFromProject("Images/limpopo_golf_course_4k.hdr"), true);
+	skyboxObj->irradiance = TextureCubemap::ComputeDiffuseIrradiance(skyboxObj->skybox, XMUINT2(32, 32));
+	skyboxObj->specular = TextureCubemap::ComputeAmbientSpecular(skyboxObj->skybox, XMUINT2(256, 256), 5);
 }
 
 void Rendering::Render()
@@ -133,6 +138,7 @@ void Rendering::Render()
 	}
 	delete renderers;
 
+	skyboxObj->GetRenderer()->Render(recorder);
 	sceneFB->Blit(recorder, postFB, true, DXGI_FORMAT_R16G16B16A16_FLOAT, false, DXGI_FORMAT_R32_FLOAT);
 
 	recorder->StopRecording();

@@ -20,4 +20,11 @@ public:
 	virtual void OnStart();
 	virtual void OnUpdate();
 	virtual void OnEnd();
+
+	template<typename T>
+	T* GetOwner()
+	{
+		T* casted = dynamic_cast<T*>(owner);
+		return casted;
+	}
 };

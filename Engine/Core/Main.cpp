@@ -49,20 +49,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		float roughness = .95f;
 		mesh->material->SetParameter("p_roughness", &roughness, sizeof(float));
 
-		RendererComponent* skybox = scene->AddObject(new SkyboxObject("Skybox"))->GetComponent<RendererComponent>();
-
-		TextureCubemap* cubemap = TextureCubemap::ImportHDR(Utils::GetPathFromProject("Images/limpopo_golf_course_4k.hdr"), true);
-		skybox->material->SetTexture("t_texture", cubemap);
-
-		TextureCubemap* irradiance = TextureCubemap::ComputeDiffuseIrradiance(cubemap, XMUINT2(32, 32));
-		mesh->material->SetTexture("t_irradiance", irradiance);
-
-		TextureCubemap* specular = TextureCubemap::ComputeAmbientSpecular(cubemap, XMUINT2(256, 256), 5);
-		mesh->material->SetTexture("t_specularReflections", specular);
-
-		Texture2D* brdf = Texture2D::Import(Utils::GetPathFromProject("Images/BRDF LUT.png"), false, false);
-		mesh->material->SetTexture("t_brdfLUT", brdf);
-
 		return scene;
 	};
 

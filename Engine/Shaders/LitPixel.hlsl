@@ -45,7 +45,7 @@ Texture2D<float4> t_EmissiveW : register(t5);
 
 TextureCube<float4> t_irradiance : register(t6);
 TextureCube<float4> t_specularReflections : register(t7);
-Texture2D<float4> t_brdfLUT : register(t8);
+Texture2D<float4> t_brdfLUTL : register(t8);
 
 SamplerState s_sampler : register(s0);
 
@@ -165,7 +165,7 @@ float4 main(PS_INPUT input) : SV_TARGET
     float3 specularIrradiance = t_specularReflections.SampleLevel(s_sampler, specularReflectionVector,
         roughness * specularTextureLevels).rgb;
     
-    float2 specularBRDF = t_brdfLUT.SampleLevel(s_sampler, float2(surfaceViewAngle, roughness), 0.f).rg;
+    float2 specularBRDF = t_brdfLUTL.SampleLevel(s_sampler, float2(surfaceViewAngle, roughness), 0.f).rg;
     
     float3 specularIBL = (fresnelReflectance * specularBRDF.x + specularBRDF.y * (1.f - roughness)) * specularIrradiance;
 

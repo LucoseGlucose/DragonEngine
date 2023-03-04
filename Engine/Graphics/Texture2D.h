@@ -7,6 +7,7 @@ class Texture2D : public Texture
 {
 	static inline Texture2D* whiteTexture{};
 	static inline Texture2D* normalTexture{};
+	static inline Texture2D* brdfTexture{};
 
 public:
 	Texture2D(void* data, XMUINT2 size, uint32_t bytesPerPixel, uint32_t mipCount, DXGI_FORMAT format);
@@ -22,4 +23,5 @@ public:
 
 	static Texture2D* GetWhiteTexture();
 	static Texture2D* GetNormalTexture();
+	static Texture2D* GetBRDFTexture();
 };
