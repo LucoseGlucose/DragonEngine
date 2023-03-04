@@ -8,13 +8,13 @@ static const float PI = 3.141592;
 static const float TwoPI = 2 * PI;
 static const float Epsilon = 0.00001;
 
+static const uint NumSamples = 128 * 1024;
+static const float InvNumSamples = 1.0 / float(NumSamples);
+
+static const float SkyboxMipLevel = 4.f;
+
 TextureCube t_skybox : register(t0);
 SamplerState s_sampler : register(s0);
-
-cbuffer Samples : register(b0)
-{
-    int sampleCount = 1;
-}
 
 float radicalInverse_VdC(uint bits)
 {
@@ -25,9 +25,9 @@ float radicalInverse_VdC(uint bits)
     bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
     return float(bits) * 2.3283064365386963e-10;
 }
-float2 sampleHammersley(uint i, float invSampleCount)
+float2 sampleHammersley(uint i)
 {
-    return float2(i * invSampleCount, radicalInverse_VdC(i));
+    return float2(i * InvNumSamples, radicalInverse_VdC(i));
 }
 
 float3 sampleHemisphere(float u1, float u2)
@@ -52,22 +52,21 @@ float3 tangentToWorld(const float3 v, const float3 N, const float3 S, const floa
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    float invSampleCount = 1.0 / float(sampleCount);
     float3 N = normalize(input.localPosition);
 	
     float3 S, T;
     computeBasisVectors(N, S, T);
     
     float3 irradiance = 0.0;
-    for (uint i = 0; i < sampleCount; ++i)
+    for (float i = 0; i < NumSamples; ++i)
     {
-        float2 u = sampleHammersley(i, invSampleCount);
+        float2 u = sampleHammersley(i);
         float3 Li = tangentToWorld(sampleHemisphere(u.x, u.y), N, S, T);
         float cosTheta = max(0.0, dot(Li, N));
         
-        irradiance += 2.0 * t_skybox.Sample(s_sampler, Li).rgb * cosTheta;
+        irradiance += 2.0 * t_skybox.SampleLevel(s_sampler, Li, SkyboxMipLevel).rgb * cosTheta;
     }
-    irradiance /= float(sampleCount);
+    irradiance /= float(NumSamples);
 
     return float4(irradiance, 1.0);
 }

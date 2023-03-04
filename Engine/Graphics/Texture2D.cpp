@@ -109,21 +109,14 @@ void Texture2D::GenerateMipMaps(CommandRecorder* recorder)
 
 	downsampleMat->SetTexture("t_texture", this);
 
-	Rendering::SetViewportSize(size);
 	Framebuffer** fbs = new Framebuffer*[mipCount - 1];
 
 	for (uint32_t mip = 1; mip < mipCount; mip++)
 	{
 		if (mip != 1) recorder->StartRecording();
 
-		Rendering::viewport.Width = Rendering::viewport.Width * .5f;
-		Rendering::viewport.Height = Rendering::viewport.Height * .5f;
-
-		Rendering::viewport.Width = (std::max)(Rendering::viewport.Width, 1.f);
-		Rendering::viewport.Height = (std::max)(Rendering::viewport.Height, 1.f);
-
-		Rendering::scissorRect.right = Rendering::viewport.Width;
-		Rendering::scissorRect.bottom = Rendering::viewport.Height;
+		XMUINT2 mipSize = XMUINT2(size.x * std::powf(.5f, mip), size.y * std::powf(.5f, mip));
+		Rendering::SetViewportSize(mipSize);
 
 		Framebuffer* fb = new Framebuffer(XMUINT2(Rendering::viewport.Width, Rendering::viewport.Height),
 			linearFormat, DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);

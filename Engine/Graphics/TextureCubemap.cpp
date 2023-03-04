@@ -6,13 +6,13 @@
 #include "Texture2D.h"
 #include "SkyboxObject.h"
 
-TextureCubemap::TextureCubemap(std::array<void*, 6> data, XMUINT2 size, DXGI_FORMAT format, uint32_t bytesPerPixel)
-	: Texture(), size(size)
+TextureCubemap::TextureCubemap(std::array<void*, 6> data, XMUINT2 size, DXGI_FORMAT format, uint32_t bytesPerPixel, uint32_t mipCount)
+	: Texture(), size(size), mipCount(mipCount), format(format)
 {
 	CommandRecorder* recorder = Rendering::GetRecorder();
 	recorder->StartRecording();
 
-	textureDesc = CD3DX12_RESOURCE_DESC::Tex2D(format, size.x, size.y, 6, 1);
+	textureDesc = CD3DX12_RESOURCE_DESC::Tex2D(format, size.x, size.y, 6, mipCount);
 	CD3DX12_HEAP_PROPERTIES defaultHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 
 	Utils::ThrowIfFailed(Rendering::device->CreateCommittedResource(&defaultHeapProps, D3D12_HEAP_FLAG_NONE, &textureDesc,
@@ -61,15 +61,110 @@ TextureCubemap::TextureCubemap(std::array<void*, 6> data, XMUINT2 size, DXGI_FOR
 	srvDesc.Format = format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
-	srvDesc.TextureCube.MipLevels = 1;
+	srvDesc.TextureCube.MipLevels = mipCount;
 
 	recorder->Execute();
 	Rendering::commandQueue->WaitForAllCommands();
 
+	if (mipCount > 1 && data[0] != nullptr) GenerateMipMaps();
+
 	Rendering::RecycleRecorder(recorder);
 }
 
-TextureCubemap* TextureCubemap::Import(const std::array<std::filesystem::path, 6>& files, bool sRGB)
+void TextureCubemap::GenerateMipMaps()
+{
+	DXGI_FORMAT linearFormat = Utils::GetLinearFormat(format);
+
+	CD3DX12_CLEAR_VALUE rtClear = CD3DX12_CLEAR_VALUE(linearFormat, Colors::Black.f);
+	CD3DX12_CLEAR_VALUE dsClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_D32_FLOAT, 1.0f, 0);
+
+	Material* downsampleMat = new Material(ShaderProgram::Create(Utils::GetPathFromExe("CubemapVertex.cso"),
+		Utils::GetPathFromExe("MipmapCubePixel.cso"), 1, linearFormat));
+
+	srvDesc.Format = linearFormat;
+
+	downsampleMat->SetTexture("t_texture", this);
+
+	XMMATRIX projection = XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90.f), 1.f, .1f, 10.f);
+	XMFLOAT3 zero = XMFLOAT3(0.f, 0.f, 0.f);
+	XMVECTOR zeroVec = DirectX::XMLoadFloat3(&zero);
+
+	XMFLOAT4X4* matrices = new XMFLOAT4X4[6];
+	DirectX::XMStoreFloat4x4(&matrices[0], XMMatrixTranspose(XMMatrixLookToLH(zeroVec, g_XMIdentityR0.v, g_XMIdentityR1.v) * projection));
+	DirectX::XMStoreFloat4x4(&matrices[1], XMMatrixTranspose(XMMatrixLookToLH(zeroVec, g_XMNegIdentityR0.v, g_XMIdentityR1.v) * projection));
+	DirectX::XMStoreFloat4x4(&matrices[2], XMMatrixTranspose(XMMatrixLookToLH(zeroVec, g_XMIdentityR1.v, g_XMNegIdentityR2.v) * projection));
+	DirectX::XMStoreFloat4x4(&matrices[3], XMMatrixTranspose(XMMatrixLookToLH(zeroVec, g_XMNegIdentityR1.v, g_XMIdentityR2.v) * projection));
+	DirectX::XMStoreFloat4x4(&matrices[4], XMMatrixTranspose(XMMatrixLookToLH(zeroVec, g_XMIdentityR2.v, g_XMIdentityR1.v) * projection));
+	DirectX::XMStoreFloat4x4(&matrices[5], XMMatrixTranspose(XMMatrixLookToLH(zeroVec, g_XMNegIdentityR2.v, g_XMIdentityR1.v) * projection));
+
+	for (float mip = 1; mip < mipCount; mip++)
+	{
+		std::array<Framebuffer*, 6> fbs{};
+
+		XMUINT2 mipSize = XMUINT2(size.x * std::powf(.5f, mip), size.y * std::powf(.5f, mip));
+		Rendering::SetViewportSize(mipSize);
+
+		for (size_t i = 0; i < 6; i++)
+		{
+			CommandRecorder* recorder = Rendering::GetRecorder();
+			recorder->StartRecording();
+
+			Framebuffer* fb = new Framebuffer(mipSize, linearFormat, DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);
+			fbs[i] = fb;
+
+			fb->Setup(recorder);
+
+			downsampleMat->SetParameter("p_mvpMat", &matrices[i], sizeof(XMFLOAT4X4));
+			downsampleMat->SetParameter("p_currentMip", &mip, sizeof(float));
+
+			uint32_t subresource = D3D12CalcSubresource(mip, i, 0, mipCount, 6);
+
+			downsampleMat->Bind(recorder);
+			SkyboxObject::skyboxMesh->Draw(recorder);
+
+			CD3DX12_RESOURCE_BARRIER copySrcTransition = CD3DX12_RESOURCE_BARRIER::Transition(fb->colorTexture->textureBuffer.Get(),
+				D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
+
+			CD3DX12_RESOURCE_BARRIER copyDestTransition = CD3DX12_RESOURCE_BARRIER::Transition(textureBuffer.Get(),
+				D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST, subresource);
+
+			CD3DX12_RESOURCE_BARRIER copyBarriers[2] = { copySrcTransition, copyDestTransition };
+			recorder->list->ResourceBarrier(2, copyBarriers);
+
+			D3D12_TEXTURE_COPY_LOCATION dest{};
+			dest.pResource = textureBuffer.Get();
+			dest.SubresourceIndex = subresource;
+			dest.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+
+			D3D12_TEXTURE_COPY_LOCATION src{};
+			src.pResource = fb->colorTexture->textureBuffer.Get();
+			src.SubresourceIndex = 0;
+			src.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+
+			recorder->list->CopyTextureRegion(&dest, 0, 0, 0, &src, nullptr);
+
+			CD3DX12_RESOURCE_BARRIER srvTransition = CD3DX12_RESOURCE_BARRIER::Transition(textureBuffer.Get(),
+				D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, subresource);
+
+			recorder->list->ResourceBarrier(1, &srvTransition);
+
+			recorder->Execute();
+			Rendering::commandQueue->WaitForAllCommands();
+			Rendering::RecycleRecorder(recorder);
+		}
+
+		for (size_t i = 0; i < 6; i++)
+		{
+			delete fbs[i];
+		}
+	}
+
+	Rendering::ResetViewportSize();
+
+	srvDesc.Format = format;
+}
+
+TextureCubemap* TextureCubemap::Import(const std::array<std::filesystem::path, 6>& files, bool sRGB, bool generateMips)
 {
 	std::array<void*, 6> dataPtrs{};
 	int width, height, numComponents;
@@ -80,8 +175,9 @@ TextureCubemap* TextureCubemap::Import(const std::array<std::filesystem::path, 6
 		dataPtrs[i] = imageData;
 	}
 
+	uint32_t mipCount = generateMips ? Utils::GetMipCount(width, height) : 1;
 	TextureCubemap* tex = new TextureCubemap(dataPtrs, XMUINT2(width, height),
-		sRGB ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM, 4);
+		sRGB ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM, 4, mipCount);
 
 	for (size_t i = 0; i < 6; i++)
 	{
@@ -91,18 +187,19 @@ TextureCubemap* TextureCubemap::Import(const std::array<std::filesystem::path, 6
 	return tex;
 }
 
-TextureCubemap* TextureCubemap::ImportHDR(const std::filesystem::path& file)
+TextureCubemap* TextureCubemap::ImportHDR(const std::filesystem::path& file, bool generateMips)
 {
 	Texture2D* equirect = Texture2D::ImportHDR(file);
 
 	CD3DX12_CLEAR_VALUE rtClear = CD3DX12_CLEAR_VALUE(equirect->format, Colors::Black.f);
 	CD3DX12_CLEAR_VALUE dsClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_D32_FLOAT, 1.0f, 0);
 
-	Material* material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("EquirectToCubemapVertex.cso"),
+	Material* material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("CubemapVertex.cso"),
 		Utils::GetPathFromExe("EquirectToCubemapPixel.cso"), 1, equirect->format));
 
 	XMUINT2 size = XMUINT2(equirect->size.x / 2, equirect->size.y);
-	TextureCubemap* cubemap = new TextureCubemap(std::array<void*, 6>{}, size, DXGI_FORMAT_R32G32B32A32_FLOAT, 16);
+	uint32_t mipCount = generateMips ? Utils::GetMipCount(size.x, size.y) : 1;
+	TextureCubemap* cubemap = new TextureCubemap(std::array<void*, 6>{}, size, DXGI_FORMAT_R32G32B32A32_FLOAT, 16, mipCount);
 
 	XMMATRIX projection = XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90.f), 1.f, .1f, 10.f);
 	XMFLOAT3 zero = XMFLOAT3(0.f, 0.f, 0.f);
@@ -128,6 +225,94 @@ TextureCubemap* TextureCubemap::ImportHDR(const std::filesystem::path& file)
 		recorder->StartRecording();
 
 		Framebuffer* fb = new Framebuffer(size, DXGI_FORMAT_R32G32B32A32_FLOAT, DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);
+		fbs[i] = fb;
+
+		fb->Setup(recorder);
+		material->SetParameter("p_mvpMat", &matrices[i], sizeof(XMFLOAT4X4));
+
+		material->Bind(recorder);
+		SkyboxObject::skyboxMesh->Draw(recorder);
+
+		uint32_t subresource = D3D12CalcSubresource(0, i, 0, mipCount, 6);
+
+		CD3DX12_RESOURCE_BARRIER copySrcTransition = CD3DX12_RESOURCE_BARRIER::Transition(fb->colorTexture->textureBuffer.Get(),
+			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
+
+		CD3DX12_RESOURCE_BARRIER copyDestTransition = CD3DX12_RESOURCE_BARRIER::Transition(cubemap->textureBuffer.Get(),
+			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST, subresource);
+
+		CD3DX12_RESOURCE_BARRIER copyBarriers[2] = { copySrcTransition, copyDestTransition };
+		recorder->list->ResourceBarrier(2, copyBarriers);
+
+		D3D12_TEXTURE_COPY_LOCATION dest{};
+		dest.pResource = cubemap->textureBuffer.Get();
+		dest.SubresourceIndex = subresource;
+		dest.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+
+		D3D12_TEXTURE_COPY_LOCATION src{};
+		src.pResource = fb->colorTexture->textureBuffer.Get();
+		src.SubresourceIndex = 0;
+		src.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+
+		recorder->list->CopyTextureRegion(&dest, 0, 0, 0, &src, nullptr);
+
+		CD3DX12_RESOURCE_BARRIER srvTransition = CD3DX12_RESOURCE_BARRIER::Transition(cubemap->textureBuffer.Get(),
+			D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, subresource);
+
+		recorder->list->ResourceBarrier(1, &srvTransition);
+
+		recorder->Execute();
+		Rendering::commandQueue->WaitForAllCommands();
+	}
+
+	for (size_t i = 0; i < 6; i++)
+	{
+		delete fbs[i];
+	}
+
+	if (mipCount > 1) cubemap->GenerateMipMaps();
+
+	Rendering::ResetViewportSize();
+	Rendering::RecycleRecorder(recorder);
+
+	delete equirect;
+	return cubemap;
+}
+
+TextureCubemap* TextureCubemap::ComputeDiffuseIrradiance(TextureCubemap* skybox, XMUINT2 size)
+{
+	CD3DX12_CLEAR_VALUE rtClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_R16G16B16A16_FLOAT, Colors::Black.f);
+	CD3DX12_CLEAR_VALUE dsClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_D32_FLOAT, 1.0f, 0);
+
+	Material* material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("CubemapVertex.cso"),
+		Utils::GetPathFromExe("IrradiancePixel.cso"), 1, DXGI_FORMAT_R16G16B16A16_FLOAT));
+
+	TextureCubemap* cubemap = new TextureCubemap(std::array<void*, 6>{}, size, DXGI_FORMAT_R16G16B16A16_FLOAT, 8, 1);
+
+	XMMATRIX projection = XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90.f), 1.f, .1f, 10.f);
+	XMFLOAT3 zero = XMFLOAT3(0.f, 0.f, 0.f);
+	XMVECTOR zeroVec = DirectX::XMLoadFloat3(&zero);
+
+	XMFLOAT4X4* matrices = new XMFLOAT4X4[6];
+	DirectX::XMStoreFloat4x4(&matrices[0], XMMatrixTranspose(XMMatrixLookToLH(zeroVec, g_XMIdentityR0.v, g_XMIdentityR1.v) * projection));
+	DirectX::XMStoreFloat4x4(&matrices[1], XMMatrixTranspose(XMMatrixLookToLH(zeroVec, g_XMNegIdentityR0.v, g_XMIdentityR1.v) * projection));
+	DirectX::XMStoreFloat4x4(&matrices[2], XMMatrixTranspose(XMMatrixLookToLH(zeroVec, g_XMIdentityR1.v, g_XMNegIdentityR2.v) * projection));
+	DirectX::XMStoreFloat4x4(&matrices[3], XMMatrixTranspose(XMMatrixLookToLH(zeroVec, g_XMNegIdentityR1.v, g_XMIdentityR2.v) * projection));
+	DirectX::XMStoreFloat4x4(&matrices[4], XMMatrixTranspose(XMMatrixLookToLH(zeroVec, g_XMIdentityR2.v, g_XMIdentityR1.v) * projection));
+	DirectX::XMStoreFloat4x4(&matrices[5], XMMatrixTranspose(XMMatrixLookToLH(zeroVec, g_XMNegIdentityR2.v, g_XMIdentityR1.v) * projection));
+
+	material->SetTexture("t_skybox", skybox);
+
+	Rendering::SetViewportSize(size);
+	std::array<Framebuffer*, 6> fbs{};
+
+	CommandRecorder* recorder = Rendering::GetRecorder();
+
+	for (size_t i = 0; i < 6; i++)
+	{
+		recorder->StartRecording();
+
+		Framebuffer* fb = new Framebuffer(size, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);
 		fbs[i] = fb;
 
 		fb->Setup(recorder);
@@ -174,19 +359,18 @@ TextureCubemap* TextureCubemap::ImportHDR(const std::filesystem::path& file)
 	Rendering::ResetViewportSize();
 	Rendering::RecycleRecorder(recorder);
 
-	delete equirect;
 	return cubemap;
 }
 
-TextureCubemap* TextureCubemap::ComputeDiffuseIrradiance(TextureCubemap* skybox, XMUINT2 size)
+TextureCubemap* TextureCubemap::ComputeAmbientSpecular(TextureCubemap* skybox, XMUINT2 size, uint32_t mipCount)
 {
-	CD3DX12_CLEAR_VALUE rtClear = CD3DX12_CLEAR_VALUE(skybox->srvDesc.Format, Colors::Black.f);
+	CD3DX12_CLEAR_VALUE rtClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_R16G16B16A16_FLOAT, Colors::Black.f);
 	CD3DX12_CLEAR_VALUE dsClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_D32_FLOAT, 1.0f, 0);
 
-	Material* material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("EquirectToCubemapVertex.cso"),
-		Utils::GetPathFromExe("IrradiancePixel.cso"), 1, skybox->srvDesc.Format));
+	Material* material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("CubemapVertex.cso"),
+		Utils::GetPathFromExe("AmbientSpecularPixel.cso"), 1, DXGI_FORMAT_R16G16B16A16_FLOAT));
 
-	TextureCubemap* cubemap = new TextureCubemap(std::array<void*, 6>{}, size, DXGI_FORMAT_R32G32B32A32_FLOAT, 16);
+	TextureCubemap* cubemap = new TextureCubemap(std::array<void*, 6>{}, size, DXGI_FORMAT_R16G16B16A16_FLOAT, 8, mipCount);
 
 	XMMATRIX projection = XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(90.f), 1.f, .1f, 10.f);
 	XMFLOAT3 zero = XMFLOAT3(0.f, 0.f, 0.f);
@@ -202,57 +386,71 @@ TextureCubemap* TextureCubemap::ComputeDiffuseIrradiance(TextureCubemap* skybox,
 
 	material->SetTexture("t_skybox", skybox);
 
-	Rendering::SetViewportSize(size);
-	std::array<Framebuffer*, 6> fbs{};
-
 	CommandRecorder* recorder = Rendering::GetRecorder();
 
-	for (size_t i = 0; i < 6; i++)
+	for (float mip = 0; mip < mipCount; mip++)
 	{
-		recorder->StartRecording();
+		std::array<Framebuffer*, 6> fbs{};
 
-		Framebuffer* fb = new Framebuffer(size, DXGI_FORMAT_R32G32B32A32_FLOAT, DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);
-		fbs[i] = fb;
+		XMUINT2 mipSize = XMUINT2(size.x * std::powf(.5f, mip), size.y * std::powf(.5f, mip));
+		Rendering::SetViewportSize(mipSize);
 
-		fb->Setup(recorder);
-		material->SetParameter("p_mvpMat", &matrices[i], sizeof(XMFLOAT4X4));
+		for (size_t i = 0; i < 6; i++)
+		{
+			recorder->StartRecording();
 
-		material->Bind(recorder);
-		SkyboxObject::skyboxMesh->Draw(recorder);
+			Framebuffer* fb = new Framebuffer(mipSize, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);
+			fbs[i] = fb;
 
-		CD3DX12_RESOURCE_BARRIER copySrcTransition = CD3DX12_RESOURCE_BARRIER::Transition(fb->colorTexture->textureBuffer.Get(),
-			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
+			fb->Setup(recorder);
 
-		CD3DX12_RESOURCE_BARRIER copyDestTransition = CD3DX12_RESOURCE_BARRIER::Transition(cubemap->textureBuffer.Get(),
-			D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST, i);
+			material->SetParameter("p_mvpMat", &matrices[i], sizeof(XMFLOAT4X4));
 
-		CD3DX12_RESOURCE_BARRIER copyBarriers[2] = { copySrcTransition, copyDestTransition };
-		recorder->list->ResourceBarrier(2, copyBarriers);
+			float resolution = skybox->size.x;
+			material->SetParameter("p_resolution", &resolution, sizeof(float));
 
-		D3D12_TEXTURE_COPY_LOCATION dest{};
-		dest.pResource = cubemap->textureBuffer.Get();
-		dest.SubresourceIndex = i;
-		dest.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+			float roughness = (1.f / (mipCount - 1)) * mip;
+			material->SetParameter("p_roughness", &roughness, sizeof(float));
 
-		D3D12_TEXTURE_COPY_LOCATION src{};
-		src.pResource = fb->colorTexture->textureBuffer.Get();
-		src.SubresourceIndex = 0;
-		src.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+			uint32_t subresource = D3D12CalcSubresource(mip, i, 0, mipCount, 6);
 
-		recorder->list->CopyTextureRegion(&dest, 0, 0, 0, &src, nullptr);
+			material->Bind(recorder);
+			SkyboxObject::skyboxMesh->Draw(recorder);
 
-		CD3DX12_RESOURCE_BARRIER srvTransition = CD3DX12_RESOURCE_BARRIER::Transition(cubemap->textureBuffer.Get(),
-			D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, i);
+			CD3DX12_RESOURCE_BARRIER copySrcTransition = CD3DX12_RESOURCE_BARRIER::Transition(fb->colorTexture->textureBuffer.Get(),
+				D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
-		recorder->list->ResourceBarrier(1, &srvTransition);
+			CD3DX12_RESOURCE_BARRIER copyDestTransition = CD3DX12_RESOURCE_BARRIER::Transition(cubemap->textureBuffer.Get(),
+				D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST, subresource);
 
-		recorder->Execute();
-		Rendering::commandQueue->WaitForAllCommands();
-	}
+			CD3DX12_RESOURCE_BARRIER copyBarriers[2] = { copySrcTransition, copyDestTransition };
+			recorder->list->ResourceBarrier(2, copyBarriers);
 
-	for (size_t i = 0; i < 6; i++)
-	{
-		delete fbs[i];
+			D3D12_TEXTURE_COPY_LOCATION dest{};
+			dest.pResource = cubemap->textureBuffer.Get();
+			dest.SubresourceIndex = subresource;
+			dest.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+
+			D3D12_TEXTURE_COPY_LOCATION src{};
+			src.pResource = fb->colorTexture->textureBuffer.Get();
+			src.SubresourceIndex = 0;
+			src.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+
+			recorder->list->CopyTextureRegion(&dest, 0, 0, 0, &src, nullptr);
+
+			CD3DX12_RESOURCE_BARRIER srvTransition = CD3DX12_RESOURCE_BARRIER::Transition(cubemap->textureBuffer.Get(),
+				D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, subresource);
+
+			recorder->list->ResourceBarrier(1, &srvTransition);
+
+			recorder->Execute();
+			Rendering::commandQueue->WaitForAllCommands();
+		}
+
+		for (size_t i = 0; i < 6; i++)
+		{
+			delete fbs[i];
+		}
 	}
 
 	Rendering::ResetViewportSize();

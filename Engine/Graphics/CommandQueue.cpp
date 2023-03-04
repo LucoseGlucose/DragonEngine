@@ -7,7 +7,7 @@ CommandQueue::CommandQueue()
 {
 	D3D12_COMMAND_QUEUE_DESC cQueueDesc{};
 	cQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-	cQueueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_DISABLE_GPU_TIMEOUT;
+	//cQueueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_DISABLE_GPU_TIMEOUT;
 
 	Utils::ThrowIfFailed(Rendering::device->CreateCommandQueue(&cQueueDesc, IID_PPV_ARGS(&commandQueue)));
 	NAME_D3D_OBJECT(commandQueue);

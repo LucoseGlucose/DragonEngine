@@ -240,9 +240,11 @@
     <FxCompile Include="Shaders\MipmapVertex.hlsl" />
     <FxCompile Include="Shaders\SkyboxVertex.hlsl" />
     <FxCompile Include="Shaders\SkyboxPixel.hlsl" />
-    <FxCompile Include="Shaders\EquirectToCubemapVertex.hlsl" />
+    <FxCompile Include="Shaders\CubemapVertex.hlsl" />
     <FxCompile Include="Shaders\EquirectToCubemapPixel.hlsl" />
     <FxCompile Include="Shaders\IrradiancePixel.hlsl" />
+    <FxCompile Include="Shaders\AmbientSpecularPixel.hlsl" />
+    <FxCompile Include="Shaders\MipmapCubePixel.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\UV Checker.png">
@@ -273,6 +275,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Images\test_normal.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\BRDF LUT.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

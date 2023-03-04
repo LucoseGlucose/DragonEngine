@@ -25,7 +25,9 @@ void CameraControllerComponent::OnUpdate()
 	}
 
 	XMFLOAT2 posDelta = Input::GetMousePosDelta();
-	if (posDelta.x == 0.f && posDelta.y == 0.f) return;
+
+	XMVECTOR posDeltaVec = XMVector2ClampLength(DirectX::XMLoadFloat2(&posDelta), 0.f, 20.f);
+	DirectX::XMStoreFloat2(&posDelta, posDeltaVec);
 
 	if (Input::GetMouseButton(GLFW_MOUSE_BUTTON_MIDDLE))
 	{

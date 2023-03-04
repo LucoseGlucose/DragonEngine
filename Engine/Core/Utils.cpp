@@ -47,7 +47,7 @@ D3D12_SAMPLER_DESC Utils::GetDefaultSampler()
 	sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
-	sampler.Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+	sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	sampler.MaxAnisotropy = 8;
 	sampler.MinLOD = 0;
 	sampler.MaxLOD = 16;

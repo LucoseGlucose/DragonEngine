@@ -33,6 +33,7 @@ cbuffer WorldParameters : register(b2)
 {
     float3 p_cameraPosition;
     Light p_lights[5];
+    float3 ambientColor = float3(1.f, 1.f, 1.f);
 }
 
 Texture2D<float4> t_albedoW : register(t0);
@@ -41,6 +42,10 @@ Texture2D<float4> t_metallicW : register(t2);
 Texture2D<float4> t_normalN : register(t3);
 Texture2D<float4> t_AOW : register(t4);
 Texture2D<float4> t_EmissiveW : register(t5);
+
+TextureCube<float4> t_irradiance : register(t6);
+TextureCube<float4> t_specularReflections : register(t7);
+Texture2D<float4> t_brdfLUT : register(t8);
 
 SamplerState s_sampler : register(s0);
 
@@ -72,6 +77,13 @@ float gaSchlickGGX(float cosLi, float cosLo, float roughness)
 float3 fresnelSchlick(float3 F0, float cosTheta)
 {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+uint querySpecularTextureLevels()
+{
+    uint width, height, levels;
+    t_specularReflections.GetDimensions(0, width, height, levels);
+    return levels;
 }
 
 void CalcLightData(in PS_INPUT input, in Light light, out float3 radiance, out float3 dir)
@@ -142,5 +154,28 @@ float4 main(PS_INPUT input) : SV_TARGET
         directLighting += (diffuseBRDF + specularBRDF) * radiance * surfaceLightAngle;
     }
     
-    return float4(directLighting, alpha);
+    float3 ambientLighting = 0.f;
+    float3 irradiance = t_irradiance.Sample(s_sampler, normal).rgb;
+
+    float3 fresnel = fresnelSchlick(fresnelReflectance, surfaceViewAngle);
+    float3 kd = lerp(1.f - fresnel, 0.f, metallic);
+    float3 diffuseIBL = kd * albedoColor * irradiance;
+    
+    uint specularTextureLevels = querySpecularTextureLevels();
+    float3 specularIrradiance = t_specularReflections.SampleLevel(s_sampler, specularReflectionVector,
+        roughness * specularTextureLevels).rgb;
+    
+    float2 specularBRDF = t_brdfLUT.SampleLevel(s_sampler, float2(surfaceViewAngle, roughness), 0.f).rg;
+    
+    float3 specularIBL = (fresnelReflectance * specularBRDF.x + specularBRDF.y * (1.f - roughness)) * specularIrradiance;
+
+    ambientLighting = diffuseIBL + specularIBL;
+    ambientLighting *= ambientColor;
+    
+    float ao = t_AOW.Sample(s_sampler, input.uv).r * p_aoStrength;
+    ambientLighting *= ao;
+    
+    float3 emissive = t_EmissiveW.Sample(s_sampler, input.uv).rgb * p_emissive;
+    
+    return float4(directLighting + ambientLighting + emissive, alpha);
 }
