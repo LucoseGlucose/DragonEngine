@@ -17,7 +17,6 @@ public:
 
 	static DirectX::XMFLOAT3 QuatToEulerAngles(DirectX::XMFLOAT4 quat);
 
-	static bool SamplersEqual(D3D12_SAMPLER_DESC& s1, D3D12_SAMPLER_DESC& s2);
 	static D3D12_SAMPLER_DESC GetDefaultSampler();
 
 	static std::filesystem::path GetPathFromExe(std::filesystem::path path);
@@ -29,8 +28,6 @@ public:
 	static DXGI_FORMAT GetSRGBFormat(DXGI_FORMAT linear);
 	static DXGI_FORMAT GetLinearFormat(DXGI_FORMAT srgb);
 	static bool IsFormatSRGB(DXGI_FORMAT format);
-
-	static std::function<void(class RendererComponent*)> GetLitShaderParamFunc();
 
 	template<typename T>
 	static void RemoveFromVector(std::vector<T>* vec, const T& item)

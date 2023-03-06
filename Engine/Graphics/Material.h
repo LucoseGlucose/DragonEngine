@@ -25,12 +25,44 @@ public:
 	ComPtr<ID3D12DescriptorHeap> samplerDescHeap;
 
 	std::map<std::string, Texture*> cachedTextures{};
+	std::map<std::string, Sampler> cachedSamplers{};
 
 	void SetParameter(const std::string& name, void* data, size_t size);
 	void SetTexture(const std::string& name, Texture* texture);
 	void SetSampler(const std::string& name, Sampler sampler);
 
-	void UpdateTexture(const std::string& name, Texture* texture);
+	void GetParameter(const std::string& name, void* data, size_t size);
+	Texture* GetTexture(const std::string& name);
+	Sampler GetSampler(const std::string& name);
 
+	void UpdateTexture(const std::string& name, Texture* texture);
 	void Bind(CommandRecorder* recorder);
+
+	template<typename T>
+	void SetParameter(const std::string& name, T data)
+	{
+		SetParameter(name, &data, sizeof(data));
+	}
+
+	template<typename T>
+	void SetParameter(const std::string& name, T* data)
+	{
+		SetParameter(name, data, sizeof(T));
+	}
+
+	template<typename T>
+	void GetParameter(const std::string& name, T* data)
+	{
+		T value{};
+		GetParameter(name, &value, sizeof(data));
+		*data = value;
+	}
+
+	template<typename T>
+	T GetParameter(const std::string& name)
+	{
+		T value{};
+		GetParameter(name, &value, sizeof(T));
+		return value;
+	}
 };

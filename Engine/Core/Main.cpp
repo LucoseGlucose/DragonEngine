@@ -31,33 +31,18 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		Texture2D* bricks = Texture2D::Import(Utils::GetPathFromProject("Images/brickwall.jpg"), true, true);
 		Texture2D* normal = Texture2D::Import(Utils::GetPathFromProject("Images/brickwall_normal.jpg"), false, true);
 
-		Sampler sampler = Utils::GetDefaultSampler();
-		sampler.Filter = D3D12_FILTER_ANISOTROPIC;
-
-		float metallic = 0.f;
-		float roughness = .95f;
-
 		Mesh* cubeMesh = new Mesh(Utils::GetPathFromProject("Models/Cube.fbx"));
 
-		for (float x = -10; x < 10; x += 2)
-		{
-			for (float y = -10; y < 10; y += 2)
-			{
-				RendererComponent* mesh = scene->AddObject(new SceneObject("Mesh"))->AddComponent<RendererComponent>();
-				mesh->mesh = cubeMesh;
-				mesh->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitVertex.cso"), Utils::GetPathFromExe("LitPixel.cso"),
-					Rendering::sceneFB->colorTexture->samples, Rendering::sceneFB->colorTexture->format));
+		RendererComponent* mesh = scene->AddObject(new SceneObject("Mesh"))->AddComponent<RendererComponent>();
+		mesh->mesh = cubeMesh;
+		mesh->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitVertex.cso"), Utils::GetPathFromExe("LitPixel.cso"),
+			Rendering::sceneFB->colorTexture->samples, Rendering::sceneFB->colorTexture->format));
 
-				mesh->GetTransform()->SetPosition(XMFLOAT3(x, y, 0.f));
+		mesh->material->SetTexture("t_albedoW", bricks);
+		mesh->material->SetTexture("t_normalN", normal);
 
-				mesh->material->SetSampler("s_sampler", sampler);
-				mesh->material->SetTexture("t_albedoW", bricks);
-				mesh->material->SetTexture("t_normalN", normal);
-
-				mesh->material->SetParameter("p_metallic", &metallic, sizeof(float));
-				mesh->material->SetParameter("p_roughness", &roughness, sizeof(float));
-			}
-		}
+		mesh->material->SetParameter("p_metallic", 0.f);
+		mesh->material->SetParameter("p_roughness", .95f);
 
 		return scene;
 	};

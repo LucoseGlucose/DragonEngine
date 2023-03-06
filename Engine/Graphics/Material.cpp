@@ -83,6 +83,8 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 			if (bindDesc.Type == D3D_SIT_SAMPLER)
 			{
 				samplerParameters[bindDesc.Name] = numSamplers;
+				cachedSamplers[bindDesc.Name] = Utils::GetDefaultSampler();
+
 				defaultSamplers.push_back(bindDesc.Name);
 				numSamplers++;
 			}
@@ -157,6 +159,28 @@ void Material::SetSampler(const std::string& name, Sampler sampler)
 	CD3DX12_CPU_DESCRIPTOR_HANDLE samplerDescHnd = CD3DX12_CPU_DESCRIPTOR_HANDLE(samplerDescStartHnd, index, incrementSize);
 
 	Rendering::device->CreateSampler(&sampler, samplerDescHnd);
+	cachedSamplers[name] = sampler;
+}
+
+void Material::GetParameter(const std::string& name, void* data, size_t size)
+{
+	if (!cbParameters.contains(name)) return;
+
+	XMUINT2& param = cbParameters[name];
+	void* gpuPtr = cbGPUAddresses[param.x] + param.y;
+	memcpy(data, gpuPtr, size);
+}
+
+Texture* Material::GetTexture(const std::string& name)
+{
+	if (!cachedTextures.contains(name)) return nullptr;
+	return cachedTextures[name];
+}
+
+Sampler Material::GetSampler(const std::string& name)
+{
+	if (!cachedSamplers.contains(name)) return Sampler{};
+	return cachedSamplers[name];
 }
 
 void Material::UpdateTexture(const std::string& name, Texture* texture)

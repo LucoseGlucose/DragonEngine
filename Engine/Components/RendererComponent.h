@@ -14,6 +14,7 @@ public:
 	Material* material;
 
 	std::function<void(RendererComponent*)> shaderParamFunc;
+	static std::function<void(RendererComponent*)> GetLitShaderParamFunc();
 
 	virtual void Render(CommandRecorder* recorder);
 };
