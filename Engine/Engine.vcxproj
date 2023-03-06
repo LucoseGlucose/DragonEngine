@@ -314,6 +314,7 @@
     <ClInclude Include="Objects\SkyboxObject.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
     <None Include="Images\limpopo_golf_course_4k.hdr" />
     <None Include="Models\Cube.fbx" />
     <None Include="Models\Inverted Cube.fbx" />

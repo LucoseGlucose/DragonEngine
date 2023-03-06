@@ -118,7 +118,7 @@ void Texture2D::GenerateMipMaps(CommandRecorder* recorder)
 			linearFormat, DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);
 		fbs[mip - 1] = fb;
 
-		fb->Setup(recorder);
+		fb->Setup(recorder, true);
 		downsampleMat->SetParameter("p_currentMip", &mip, sizeof(uint32_t));
 
 		downsampleMat->Bind(recorder);

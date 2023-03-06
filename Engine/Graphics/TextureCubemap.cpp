@@ -111,7 +111,7 @@ void TextureCubemap::GenerateMipMaps()
 			Framebuffer* fb = new Framebuffer(mipSize, linearFormat, DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);
 			fbs[i] = fb;
 
-			fb->Setup(recorder);
+			fb->Setup(recorder, true);
 
 			downsampleMat->SetParameter("p_mvpMat", &matrices[i], sizeof(XMFLOAT4X4));
 			downsampleMat->SetParameter("p_currentMip", &mip, sizeof(float));
@@ -232,7 +232,7 @@ TextureCubemap* TextureCubemap::ImportHDR(const std::filesystem::path& file, boo
 		Framebuffer* fb = new Framebuffer(size, DXGI_FORMAT_R32G32B32A32_FLOAT, DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);
 		fbs[i] = fb;
 
-		fb->Setup(recorder);
+		fb->Setup(recorder, true);
 		material->SetParameter("p_mvpMat", &matrices[i], sizeof(XMFLOAT4X4));
 
 		material->Bind(recorder);
@@ -307,7 +307,7 @@ TextureCubemap* TextureCubemap::ComputeDiffuseIrradiance(TextureCubemap* skybox,
 		Framebuffer* fb = new Framebuffer(size, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);
 		fbs[i] = fb;
 
-		fb->Setup(recorder);
+		fb->Setup(recorder, true);
 		material->SetParameter("p_mvpMat", &matrices[i], sizeof(XMFLOAT4X4));
 
 		material->Bind(recorder);
@@ -381,7 +381,7 @@ TextureCubemap* TextureCubemap::ComputeAmbientSpecular(TextureCubemap* skybox, X
 			Framebuffer* fb = new Framebuffer(mipSize, DXGI_FORMAT_R16G16B16A16_FLOAT, DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);
 			fbs[i] = fb;
 
-			fb->Setup(recorder);
+			fb->Setup(recorder, true);
 
 			material->SetParameter("p_mvpMat", &matrices[i], sizeof(XMFLOAT4X4));
 

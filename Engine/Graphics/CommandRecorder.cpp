@@ -15,7 +15,7 @@ CommandRecorder::CommandRecorder()
 
 void CommandRecorder::StartRecording()
 {
-	if (recording) return;
+	if (recording) Utils::CrashWithMessage(L"Cannot reset a command recorder that is recording!");
 	recording = true;
 
 	Utils::ThrowIfFailed(allocator->Reset());

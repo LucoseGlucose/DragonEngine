@@ -64,7 +64,7 @@ void Framebuffer::Resize(XMUINT2 newSize)
 	Rendering::device->CreateDepthStencilView(depthStencilTexture->textureBuffer.Get(), &depthStencilTexture->descriptor.dsDesc, dsvDescHandle);
 }
 
-void Framebuffer::Setup(CommandRecorder* recorder)
+void Framebuffer::Setup(CommandRecorder* recorder, bool clearTargets)
 {
 	recorder->list->RSSetViewports(1, &Rendering::viewport);
 	recorder->list->RSSetScissorRects(1, &Rendering::scissorRect);
@@ -75,8 +75,11 @@ void Framebuffer::Setup(CommandRecorder* recorder)
 	D3D12_CPU_DESCRIPTOR_HANDLE dsCPUHandle = dsDescHeap->GetCPUDescriptorHandleForHeapStart();
 
 	recorder->list->OMSetRenderTargets(1, &rtvCPUHandle, false, &dsCPUHandle);
-	recorder->list->ClearRenderTargetView(rtvCPUHandle, &clearColor.x, 0, nullptr);
-	recorder->list->ClearDepthStencilView(dsCPUHandle, D3D12_CLEAR_FLAG_DEPTH, clearDepth, 0, 0, nullptr);
+	if (clearTargets)
+	{
+		recorder->list->ClearRenderTargetView(rtvCPUHandle, &clearColor.x, 0, nullptr);
+		recorder->list->ClearDepthStencilView(dsCPUHandle, D3D12_CLEAR_FLAG_DEPTH, clearDepth, 0, 0, nullptr);
+	}
 }
 
 void Framebuffer::Blit(CommandRecorder* recorder, Framebuffer* fb, bool color, DXGI_FORMAT colorFormat, bool depthStencil, DXGI_FORMAT dsFormat)

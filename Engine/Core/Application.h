@@ -30,5 +30,7 @@ public:
 	static bool GetFullscreen();
 	static void SetFullscreen(bool fs);
 
+	static bool Closing();
+
 	static inline GLFWwindow* window{};
 };

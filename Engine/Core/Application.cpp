@@ -130,3 +130,8 @@ void Application::SetFullscreen(bool fs)
 		fullscreen = false;
 	}
 }
+
+bool Application::Closing()
+{
+	return glfwWindowShouldClose(window);
+}

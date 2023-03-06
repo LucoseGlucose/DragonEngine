@@ -23,6 +23,9 @@
 #include <queue>
 #include <functional>
 #include <random>
+#include <thread>
+#include <utility>
+#include <future>
 
 #include "Utils.h"
 #include "Application.h"

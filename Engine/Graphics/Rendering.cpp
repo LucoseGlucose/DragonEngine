@@ -14,15 +14,19 @@ void Rendering::WaitForNextFrame()
 
 CommandRecorder* Rendering::GetRecorder()
 {
-	CommandRecorder* rec = cmdRecorders.front();
-	cmdRecorders.pop();
+	std::lock_guard<std::mutex> lock = std::lock_guard<std::mutex>(recorderMutex);
+
+	CommandRecorder* rec = cmdRecorders->front();
+	cmdRecorders->pop();
 	return rec;
 }
 
 void Rendering::RecycleRecorder(CommandRecorder* recorder)
 {
+	std::lock_guard<std::mutex> lock = std::lock_guard<std::mutex>(recorderMutex);
+
 	if (recorder->IsRecording()) recorder->Execute();
-	cmdRecorders.push(recorder);
+	cmdRecorders->push(recorder);
 }
 
 void Rendering::Init()
@@ -81,10 +85,11 @@ void Rendering::Init()
 	postFB = new Framebuffer(Application::GetUnsignedFramebufferSize(), DXGI_FORMAT_R16G16B16A16_FLOAT,
 		DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);
 
+	cmdRecorders = new std::queue<CommandRecorder*>();
 	for (size_t i = 0; i < 32; i++)
 	{
 		CommandRecorder* rec = new CommandRecorder();
-		cmdRecorders.push(rec);
+		cmdRecorders->push(rec);
 	}
 
 	Utils::ThrowIfFailed(factory->MakeWindowAssociation(Application::GetWindowHandle(), DXGI_MWA_NO_ALT_ENTER));
@@ -123,28 +128,60 @@ void Rendering::Render()
 	XMUINT2 windowSize = Application::GetUnsignedFramebufferSize();
 	if (windowSize.x == 0 || windowSize.y == 0) return;
 
+	delete renderers;
+	renderers = SceneManager::GetActiveScene()->FindComponents<RendererComponent>();
+
+	delete lights;
+	lights = SceneManager::GetActiveScene()->FindComponents<LightComponent>();
+
+	std::vector<std::future<void>> futures;
+	uint32_t numThreads = std::thread::hardware_concurrency();
+
 	CommandRecorder* recorder = GetRecorder();
 	recorder->StartRecording();
 
-	sceneFB->Setup(recorder);
+	sceneFB->Setup(recorder, true);
 
-	std::vector<RendererComponent*>* renderers = SceneManager::GetActiveScene()->FindComponents<RendererComponent>();
-	lights = SceneManager::GetActiveScene()->FindComponents<LightComponent>();
+	recorder->Execute();
+	RecycleRecorder(recorder);
 
-	for (size_t i = 0; i < renderers->size(); i++)
+	recorder = GetRecorder();
+	recorder->StartRecording();
+
+	for (size_t i = 0; i < (std::min)(numThreads, (uint32_t)renderers->size()); i++)
 	{
-		RendererComponent* renderer = renderers->at(i);
-		renderer->Render(recorder);
+		futures.push_back(std::async(std::launch::async, [numThreads](int index)
+			{
+				CommandRecorder* recorder = Rendering::GetRecorder();
+				recorder->StartRecording();
+
+				Rendering::sceneFB->Setup(recorder, false);
+
+				for (size_t i = index; i < renderers->size(); i += numThreads)
+				{
+					RendererComponent* renderer = renderers->at(i);
+					renderer->Render(recorder);
+				}
+
+				recorder->Execute();
+				Rendering::RecycleRecorder(recorder);
+			},
+			i));
 	}
-	delete renderers;
+
+	sceneFB->Setup(recorder, false);
 
 	skyboxObj->GetRenderer()->Render(recorder);
 	sceneFB->Blit(recorder, postFB, true, DXGI_FORMAT_R16G16B16A16_FLOAT, false, DXGI_FORMAT_R32_FLOAT);
 
-	recorder->StopRecording();
-	commandQueue->Execute(recorder->list.Get());
+	for (size_t i = 0; i < futures.size(); i++)
+	{
+		futures[i].wait();
+	}
 
+	recorder->Execute();
 	RecycleRecorder(recorder);
+
 	recorder = GetRecorder();
 	recorder->StartRecording();
 
@@ -160,14 +197,17 @@ void Rendering::Cleanup()
 {
 	commandQueue->WaitForAllCommands();
 
-	while (!cmdRecorders.empty())
+	while (!cmdRecorders->empty())
 	{
-		delete cmdRecorders.front();
-		cmdRecorders.pop();
+		delete cmdRecorders->front();
+		cmdRecorders->pop();
 	}
 
 	delete sceneFB;
 	delete postFB;
+
+	delete renderers;
+	delete lights;
 
 	delete presentationBuffer;
 	delete commandQueue;

@@ -13,7 +13,7 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 	uint32_t numTextures = 0;
 	uint32_t numSamplers = 0;
 
-	std::vector<std::tuple<std::string, char>> defaultTextures{};
+	std::vector<std::pair<std::string, char>> defaultTextures{};
 	std::vector<std::string> defaultSamplers{};
 
 	for (size_t i = 0; i < 2; i++)
@@ -78,7 +78,7 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 				numTextures++;
 
 				std::string varName = bindDesc.Name;
-				defaultTextures.push_back(std::tuple<std::string, char>(varName, varName.back()));
+				defaultTextures.push_back(std::pair<std::string, char>(varName, varName.back()));
 			}
 			if (bindDesc.Type == D3D_SIT_SAMPLER)
 			{
@@ -101,11 +101,11 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 
 	for (size_t i = 0; i < defaultTextures.size(); i++)
 	{
-		char code = get<1>(defaultTextures[i]);
+		char code = defaultTextures[i].second;
 
-		if (code == 'W') SetTexture(get<0>(defaultTextures[i]), Texture2D::GetWhiteTexture());
-		if (code == 'N') SetTexture(get<0>(defaultTextures[i]), Texture2D::GetNormalTexture());
-		if (code == 'L') SetTexture(get<0>(defaultTextures[i]), Texture2D::GetBRDFTexture());
+		if (code == 'W') SetTexture(defaultTextures[i].first, Texture2D::GetWhiteTexture());
+		if (code == 'N') SetTexture(defaultTextures[i].first, Texture2D::GetNormalTexture());
+		if (code == 'L') SetTexture(defaultTextures[i].first, Texture2D::GetBRDFTexture());
 	}
 
 	if (samplerParameters.size() > 0)

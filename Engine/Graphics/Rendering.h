@@ -23,7 +23,8 @@ public:
 	static inline Framebuffer* sceneFB{};
 	static inline Framebuffer* postFB{};
 
-	static inline std::queue<CommandRecorder*> cmdRecorders{};
+	static inline std::queue<CommandRecorder*>* cmdRecorders{};
+	static inline std::mutex recorderMutex{};
 
 	static inline D3D12_VIEWPORT viewport{};
 	static inline D3D12_RECT scissorRect{};
@@ -34,6 +35,7 @@ public:
 
 	static inline CameraComponent* outputCam{};
 	static inline std::vector<LightComponent*>* lights{};
+	static inline std::vector<RendererComponent*>* renderers{};
 
 	static inline UINT64 fenceValues[2]{};
 

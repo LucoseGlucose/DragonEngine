@@ -230,6 +230,7 @@
     <None Include="Models\Sphere.fbx" />
     <None Include="Models\Smooth Monkey.fbx" />
     <None Include="Models\Monkey.fbx" />
+    <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\LitPixel.hlsl" />
