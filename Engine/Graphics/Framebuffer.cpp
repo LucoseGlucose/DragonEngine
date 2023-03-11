@@ -75,11 +75,7 @@ void Framebuffer::Setup(CommandRecorder* recorder, bool clearTargets)
 	D3D12_CPU_DESCRIPTOR_HANDLE dsCPUHandle = dsDescHeap->GetCPUDescriptorHandleForHeapStart();
 
 	recorder->list->OMSetRenderTargets(1, &rtvCPUHandle, false, &dsCPUHandle);
-	if (clearTargets)
-	{
-		recorder->list->ClearRenderTargetView(rtvCPUHandle, &clearColor.x, 0, nullptr);
-		recorder->list->ClearDepthStencilView(dsCPUHandle, D3D12_CLEAR_FLAG_DEPTH, clearDepth, 0, 0, nullptr);
-	}
+	if (clearTargets) Clear(recorder, true, true);
 }
 
 void Framebuffer::Blit(CommandRecorder* recorder, Framebuffer* fb, bool color, DXGI_FORMAT colorFormat, bool depthStencil, DXGI_FORMAT dsFormat)
@@ -181,4 +177,12 @@ void Framebuffer::Blit(CommandRecorder* recorder, Framebuffer* fb, bool color, D
 			recorder->list->ResourceBarrier(2, afterBarriers);
 		}
 	}
+}
+
+void Framebuffer::Clear(CommandRecorder* recorder, bool color, bool depth)
+{
+	if (color) recorder->list->ClearRenderTargetView(rtvDescHeap->GetCPUDescriptorHandleForHeapStart(), &clearColor.x, 0, nullptr);
+
+	if (depth) recorder->list->ClearDepthStencilView(
+		dsDescHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, clearDepth, 0, 0, nullptr);
 }

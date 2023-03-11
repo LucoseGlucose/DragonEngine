@@ -22,4 +22,5 @@ public:
 	void Resize(XMUINT2 newSize);
 	void Setup(CommandRecorder* recorder, bool clearTargets);
 	void Blit(CommandRecorder* recorder, Framebuffer* fb, bool color, DXGI_FORMAT colorFormat, bool depthStencil, DXGI_FORMAT dsFormat);
+	void Clear(CommandRecorder* recorder, bool color, bool depth);
 };

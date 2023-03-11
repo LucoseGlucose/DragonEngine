@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Shader.h"
+#include "Framebuffer.h"
 
 class ShaderProgram
 {
@@ -16,4 +17,5 @@ public:
 	static ShaderProgram* Create(const std::map<SHADER_TYPE, Shader*>& shaderList, uint32_t samples, DXGI_FORMAT format);
 	static ShaderProgram* Create(const std::filesystem::path& vertexShader,
 		const std::filesystem::path& pixelShader, uint32_t samples, DXGI_FORMAT format);
+	static ShaderProgram* Create(const std::filesystem::path& vertexShader, const std::filesystem::path& pixelShader, Framebuffer* fb);
 };

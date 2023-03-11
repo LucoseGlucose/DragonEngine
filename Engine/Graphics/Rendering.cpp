@@ -140,14 +140,6 @@ void Rendering::Render()
 	CommandRecorder* recorder = GetRecorder();
 	recorder->StartRecording();
 
-	sceneFB->Setup(recorder, true);
-
-	recorder->Execute();
-	RecycleRecorder(recorder);
-
-	recorder = GetRecorder();
-	recorder->StartRecording();
-
 	for (size_t i = 0; i < (std::min)(numThreads, (uint32_t)renderers->size()); i++)
 	{
 		futures.push_back(std::async(std::launch::async, [numThreads](int index)
@@ -173,6 +165,7 @@ void Rendering::Render()
 
 	skyboxObj->GetRenderer()->Render(recorder);
 	sceneFB->Blit(recorder, postFB, true, DXGI_FORMAT_R16G16B16A16_FLOAT, false, DXGI_FORMAT_R32_FLOAT);
+	sceneFB->Clear(recorder, true, true);
 
 	for (size_t i = 0; i < futures.size(); i++)
 	{
@@ -233,7 +226,7 @@ void Rendering::Resize(XMUINT2 newSize)
 	postFB->Resize(newSize);
 	presentationBuffer->Resize(newSize);
 
-	outputObj->material->SetTexture("t_sceneTexture", postFB->colorTexture);
+	outputObj->material->UpdateTexture("t_sceneTexture", postFB->colorTexture);
 	outputCam->CalculateProjection();
 }
 

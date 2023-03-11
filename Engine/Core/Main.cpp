@@ -31,18 +31,29 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		Texture2D* bricks = Texture2D::Import(Utils::GetPathFromProject("Images/brickwall.jpg"), true, true);
 		Texture2D* normal = Texture2D::Import(Utils::GetPathFromProject("Images/brickwall_normal.jpg"), false, true);
 
-		Mesh* cubeMesh = new Mesh(Utils::GetPathFromProject("Models/Cube.fbx"));
+		Sampler sampler = Utils::GetDefaultSampler();
+		sampler.Filter = D3D12_FILTER_ANISOTROPIC;
 
-		RendererComponent* mesh = scene->AddObject(new SceneObject("Mesh"))->AddComponent<RendererComponent>();
-		mesh->mesh = cubeMesh;
-		mesh->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitVertex.cso"), Utils::GetPathFromExe("LitPixel.cso"),
-			Rendering::sceneFB->colorTexture->samples, Rendering::sceneFB->colorTexture->format));
+		Mesh* cubeMesh = new Mesh(Utils::GetPathFromProject("Models/Sphere.fbx"));
 
-		mesh->material->SetTexture("t_albedoW", bricks);
-		mesh->material->SetTexture("t_normalN", normal);
+		for (float x = -5.f; x < 5.f; x += 2.f)
+		{
+			for (float y = -5.f; y < 5.f; y += 2.f)
+			{
+				for (float z = -5.f; z < 5.f; z += 2.f)
+				{
+					RendererComponent* mesh = scene->AddObject(new SceneObject("Mesh"))->AddComponent<RendererComponent>();
+					mesh->mesh = cubeMesh;
+					mesh->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitVertex.cso"),
+						Utils::GetPathFromExe("LitPixel.cso"), Rendering::sceneFB));
+					mesh->GetTransform()->SetPosition(XMFLOAT3(x, y, z));
 
-		mesh->material->SetParameter("p_metallic", 0.f);
-		mesh->material->SetParameter("p_roughness", .95f);
+					mesh->material->SetParameter("p_albedo", XMFLOAT4(.15f, .25f, .75f, 1.f));
+					mesh->material->SetParameter("p_metallic", .8f);
+					mesh->material->SetParameter("p_roughness", .35f);
+				}
+			}
+		}
 
 		return scene;
 	};

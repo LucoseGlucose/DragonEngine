@@ -10,7 +10,7 @@ public:
 	CommandRecorder();
 
 	ComPtr<ID3D12CommandAllocator> allocator;
-	ComPtr<ID3D12GraphicsCommandList> list;
+	ComPtr<ID3D12GraphicsCommandList4> list;
 
 	void StartRecording();
 	void StopRecording();

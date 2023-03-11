@@ -228,3 +228,8 @@ ShaderProgram* ShaderProgram::Create(const std::filesystem::path& vertexShader,
     if (createdPrograms.contains(shaderList)) return createdPrograms[shaderList];
     return new ShaderProgram(shaderList, samples, format);
 }
+
+ShaderProgram* ShaderProgram::Create(const std::filesystem::path& vertexShader, const std::filesystem::path& pixelShader, Framebuffer* fb)
+{
+    return Create(vertexShader, pixelShader, fb->colorTexture->samples, fb->colorTexture->format);
+}
