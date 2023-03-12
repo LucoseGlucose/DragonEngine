@@ -22,7 +22,7 @@ public:
 	virtual void OnEnd();
 
 	template<typename T>
-	T* GetOwner()
+	T* GetOwner() requires std::is_base_of_v<SceneObject, T>
 	{
 		T* casted = dynamic_cast<T*>(owner);
 		return casted;

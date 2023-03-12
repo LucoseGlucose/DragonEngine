@@ -35,7 +35,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		sampler.Filter = D3D12_FILTER_ANISOTROPIC;
 
 		Mesh* cubeMesh = new Mesh(Utils::GetPathFromProject("Models/Sphere.fbx"));
-
+		
 		for (float x = -5.f; x < 5.f; x += 2.f)
 		{
 			for (float y = -5.f; y < 5.f; y += 2.f)

@@ -20,7 +20,7 @@ public:
 	void DestroyObject(SceneObject* object);
 
 	template<typename T>
-	T* FindObject()
+	T* FindObject() requires std::is_base_of_v<SceneObject, T>
 	{
 		for (size_t i = 0; i < objects.size(); i++)
 		{
@@ -32,14 +32,14 @@ public:
 	}
 
 	template<typename T>
-	bool TryFindObject(T** out)
+	bool TryFindObject(T** out) requires std::is_base_of_v<SceneObject, T>
 	{
 		*out = FindObject<T>();
 		return out == nullptr;
 	}
 
 	template<typename T>
-	std::vector<T*>* FindObjects()
+	std::vector<T*>* FindObjects() requires std::is_base_of_v<SceneObject, T>
 	{
 		std::vector<T*>* vec = new std::vector<T*>();
 
@@ -53,14 +53,14 @@ public:
 	}
 
 	template<typename T>
-	bool TryFindObjects(std::vector<T*>** out)
+	bool TryFindObjects(std::vector<T*>** out) requires std::is_base_of_v<SceneObject, T>
 	{
 		*out = FindObjects<T>();
 		return !(*out->empty());
 	}
 
 	template<typename T>
-	T* FindComponent()
+	T* FindComponent() requires std::is_base_of_v<Component, T>
 	{
 		for (size_t i = 0; i < objects.size(); i++)
 		{
@@ -72,14 +72,14 @@ public:
 	}
 
 	template<typename T>
-	bool TryFindComponent(T** out)
+	bool TryFindComponent(T** out) requires std::is_base_of_v<Component, T>
 	{
 		*out = FindComponent<T>();
 		return out == nullptr;
 	}
 
 	template<typename T>
-	std::vector<T*>* FindComponents()
+	std::vector<T*>* FindComponents() requires std::is_base_of_v<Component, T>
 	{
 		std::vector<T*>* vec = new std::vector<T*>();
 
@@ -97,7 +97,7 @@ public:
 	}
 
 	template<typename T>
-	bool TryFindComponents(std::vector<T*>** out)
+	bool TryFindComponents(std::vector<T*>** out) requires std::is_base_of_v<Component, T>
 	{
 		*out = FindComponents<T>();
 		return !(*out)->empty();

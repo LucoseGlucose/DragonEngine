@@ -16,7 +16,7 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 	std::vector<std::pair<std::string, char>> defaultTextures{};
 	std::vector<std::string> defaultSamplers{};
 
-	for (size_t i = 0; i < 2; i++)
+	for (size_t i = 0; i < SHADER_TYPE_MAX; i++)
 	{
 		uint32_t constantBuffersPerShader = 0;
 

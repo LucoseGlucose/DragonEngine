@@ -22,7 +22,7 @@ public:
 	void RemoveComponent(Component* comp);
 
 	template<typename T>
-	T* AddComponent()
+	T* AddComponent() requires std::is_base_of_v<Component, T>
 	{
 		T* ptr = new T(this);
 		Component* pComp = dynamic_cast<Component*>(ptr);
@@ -38,7 +38,7 @@ public:
 	}
 
 	template<typename T>
-	T* GetComponent()
+	T* GetComponent() requires std::is_base_of_v<Component, T>
 	{
 		for (size_t i = 0; i < components.size(); i++)
 		{
@@ -50,14 +50,14 @@ public:
 	}
 
 	template<typename T>
-	bool TryGetComponent(T** out)
+	bool TryGetComponent(T** out) requires std::is_base_of_v<Component, T>
 	{
 		*out = GetComponent<T>();
 		return *out == nullptr;
 	}
 
 	template<typename T>
-	std::vector<T*>* GetComponents()
+	std::vector<T*>* GetComponents() requires std::is_base_of_v<Component, T>
 	{
 		std::vector<T*>* vec = new std::vector<T*>();
 
@@ -73,7 +73,7 @@ public:
 	}
 
 	template<typename T>
-	bool TryGetComponents(std::vector<T*>** out)
+	bool TryGetComponents(std::vector<T*>** out) requires std::is_base_of_v<Component, T>
 	{
 		*out = GetComponents<T>();
 		return !(*out)->empty();

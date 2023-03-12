@@ -20,7 +20,7 @@ ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList, u
     D3D12_SHADER_DESC vertexShaderDesc;
     ComPtr<ID3D12ShaderReflection> vertexShaderReflection;
 
-    for (size_t i = 0; i < 2; i++)
+    for (size_t i = 0; i < SHADER_TYPE_MAX; i++)
     {
         SHADER_TYPE type = (SHADER_TYPE)i;
         if (!shaders.contains(type)) continue;

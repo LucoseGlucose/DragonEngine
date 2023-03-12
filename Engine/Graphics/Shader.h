@@ -4,6 +4,7 @@ typedef enum SHADER_TYPE
 {
 	SHADER_TYPE_VERTEX,
 	SHADER_TYPE_PIXEL,
+	SHADER_TYPE_MAX,
 } ShaderType;
 
 class Shader
