@@ -9,8 +9,8 @@ SkyboxObject::SkyboxObject(std::string name) : SceneObject(name)
 	if (skyboxMesh == nullptr) skyboxMesh = new Mesh(Utils::GetPathFromProject("Models/Inverted Cube.fbx"));
 
 	renderer->mesh = skyboxMesh;
-	renderer->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("SkyboxVertex.cso"),
-		Utils::GetPathFromExe("SkyboxPixel.cso"), Rendering::sceneFB->colorTexture->samples, Rendering::sceneFB->colorTexture->format));
+	renderer->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("SkyboxV.cso"),
+		Utils::GetPathFromExe("SkyboxP.cso"), Rendering::sceneFB->colorTexture->samples, Rendering::sceneFB->colorTexture->format));
 
 	renderer->shaderParamFunc = [](RendererComponent* renderer)
 	{

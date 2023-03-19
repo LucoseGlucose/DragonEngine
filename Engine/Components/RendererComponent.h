@@ -4,6 +4,8 @@
 #include "Mesh.h"
 #include "Material.h"
 
+typedef void(*ShaderParamFunc)(class RendererComponent* renderer);
+
 class RendererComponent : public Component
 {
 public:
@@ -13,8 +15,8 @@ public:
 	Mesh* mesh;
 	Material* material;
 
-	std::function<void(RendererComponent*)> shaderParamFunc;
-	static std::function<void(RendererComponent*)> GetLitShaderParamFunc();
+	ShaderParamFunc shaderParamFunc;
+	static ShaderParamFunc GetLitShaderParamFunc();
 
 	virtual void Render(CommandRecorder* recorder);
 };

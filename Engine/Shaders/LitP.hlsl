@@ -33,7 +33,7 @@ cbuffer WorldParameters : register(b2)
 {
     float3 p_cameraPosition;
     Light p_lights[5];
-    float3 ambientColor = float3(1.f, 1.f, 1.f);
+    float3 p_ambientColor = float3(1.f, 1.f, 1.f);
 }
 
 Texture2D<float4> t_albedoW : register(t0);
@@ -170,7 +170,7 @@ float4 main(PS_INPUT input) : SV_TARGET
     float3 specularIBL = (fresnelReflectance * specularBRDF.x + specularBRDF.y * (1.f - roughness)) * specularIrradiance;
 
     ambientLighting = diffuseIBL + specularIBL;
-    ambientLighting *= ambientColor;
+    ambientLighting *= p_ambientColor;
     
     float ao = t_AOW.Sample(s_sampler, input.uv).r * p_aoStrength;
     ambientLighting *= ao;

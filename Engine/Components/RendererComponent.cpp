@@ -14,7 +14,7 @@ RendererComponent::~RendererComponent()
 	delete material;
 }
 
-std::function<void(RendererComponent*)> RendererComponent::GetLitShaderParamFunc()
+ShaderParamFunc RendererComponent::GetLitShaderParamFunc()
 {
 	return [](RendererComponent* renderer)
 	{

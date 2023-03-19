@@ -126,27 +126,35 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <MultiProcFXC>true</MultiProcFXC>
+    <TargetName>DragonEngine</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugEditor|Win32'">
     <MultiProcFXC>true</MultiProcFXC>
+    <TargetName>DragonEditor</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <MultiProcFXC>true</MultiProcFXC>
+    <TargetName>DragonEngine</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseEditor|Win32'">
     <MultiProcFXC>true</MultiProcFXC>
+    <TargetName>DragonEditor</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <MultiProcFXC>true</MultiProcFXC>
+    <TargetName>DragonEngine</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugEditor|x64'">
     <MultiProcFXC>true</MultiProcFXC>
+    <TargetName>DragonEditor</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <MultiProcFXC>true</MultiProcFXC>
+    <TargetName>DragonEngine</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseEditor|x64'">
     <MultiProcFXC>true</MultiProcFXC>
+    <TargetName>DragonEditor</TargetName>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <VcpkgUseStatic>false</VcpkgUseStatic>
@@ -463,6 +471,8 @@
     <ClCompile Include="Components\LightComponent.cpp" />
     <ClCompile Include="Components\PointLightComponent.cpp" />
     <ClCompile Include="Editor\Editor.cpp" />
+    <ClCompile Include="Editor\EditorViewport.cpp" />
+    <ClCompile Include="Editor\EditorWindow.cpp" />
     <ClCompile Include="Graphics\CommandRecorder.cpp" />
     <ClCompile Include="Core\Component.cpp" />
     <ClCompile Include="Graphics\Framebuffer.cpp" />
@@ -507,6 +517,8 @@
     <ClInclude Include="Components\LightComponent.h" />
     <ClInclude Include="Components\PointLightComponent.h" />
     <ClInclude Include="Editor\Editor.h" />
+    <ClInclude Include="Editor\EditorViewport.h" />
+    <ClInclude Include="Editor\EditorWindow.h" />
     <ClInclude Include="Graphics\CommandRecorder.h" />
     <ClInclude Include="Core\Component.h" />
     <ClInclude Include="Graphics\Framebuffer.h" />

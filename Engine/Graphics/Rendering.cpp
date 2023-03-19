@@ -198,7 +198,14 @@ void Rendering::Render()
 	postFB->Setup(recorder, false);
 	tonemapObj->Render(recorder);
 
+	recorder->Execute();
+	RecycleRecorder(recorder);
+
+	recorder = GetRecorder();
+	recorder->StartRecording();
+
 #ifdef DRAGON_EDITOR
+	postFB->Setup(recorder, false);
 	outputObj->Render(recorder);
 	presentationBuffer->Setup(recorder);
 
@@ -250,6 +257,7 @@ void Rendering::Resize(XMUINT2 newSize)
 	presentationBuffer->Resize(newSize);
 
 	outputObj->material->UpdateTexture("t_sceneTexture", postFB->colorTexture);
+	tonemapObj->material->UpdateTexture("t_sceneTexture", postFB->colorTexture);
 }
 
 void Rendering::SetViewportSize(XMUINT2 size)
