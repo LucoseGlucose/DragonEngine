@@ -77,8 +77,8 @@ void TextureCubemap::GenerateMipMaps()
 	CD3DX12_CLEAR_VALUE rtClear = CD3DX12_CLEAR_VALUE(linearFormat, Colors::Black.f);
 	CD3DX12_CLEAR_VALUE dsClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_D32_FLOAT, 1.0f, 0);
 
-	Material* downsampleMat = new Material(ShaderProgram::Create(Utils::GetPathFromExe("CubemapVertex.cso"),
-		Utils::GetPathFromExe("MipmapCubePixel.cso"), 1, linearFormat));
+	Material* downsampleMat = new Material(ShaderProgram::Create(Utils::GetPathFromExe("CubemapV.cso"),
+		Utils::GetPathFromExe("MipmapCubeP.cso"), 1, linearFormat));
 
 	srvDesc.Format = linearFormat;
 
@@ -211,8 +211,8 @@ TextureCubemap* TextureCubemap::ImportHDR(const std::filesystem::path& file, boo
 	CD3DX12_CLEAR_VALUE rtClear = CD3DX12_CLEAR_VALUE(equirect->format, Colors::Black.f);
 	CD3DX12_CLEAR_VALUE dsClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_D32_FLOAT, 1.0f, 0);
 
-	Material* material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("CubemapVertex.cso"),
-		Utils::GetPathFromExe("EquirectToCubemapPixel.cso"), 1, equirect->format));
+	Material* material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("CubemapV.cso"),
+		Utils::GetPathFromExe("EquirectToCubemapP.cso"), 1, equirect->format));
 
 	XMUINT2 size = XMUINT2(equirect->size.x / 2, equirect->size.y);
 	uint32_t mipCount = generateMips ? Utils::GetMipCount(size.x, size.y) : 1;
@@ -289,8 +289,8 @@ TextureCubemap* TextureCubemap::ComputeDiffuseIrradiance(TextureCubemap* skybox,
 	CD3DX12_CLEAR_VALUE rtClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_R16G16B16A16_FLOAT, Colors::Black.f);
 	CD3DX12_CLEAR_VALUE dsClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_D32_FLOAT, 1.0f, 0);
 
-	Material* material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("CubemapVertex.cso"),
-		Utils::GetPathFromExe("IrradiancePixel.cso"), 1, DXGI_FORMAT_R16G16B16A16_FLOAT));
+	Material* material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("CubemapV.cso"),
+		Utils::GetPathFromExe("IrradianceP.cso"), 1, DXGI_FORMAT_R16G16B16A16_FLOAT));
 
 	TextureCubemap* cubemap = new TextureCubemap(std::array<void*, 6>{}, size, DXGI_FORMAT_R16G16B16A16_FLOAT, 8, 1);
 	XMFLOAT4X4* matrices = GetCubemapMatrices();
@@ -359,8 +359,8 @@ TextureCubemap* TextureCubemap::ComputeAmbientSpecular(TextureCubemap* skybox, X
 	CD3DX12_CLEAR_VALUE rtClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_R16G16B16A16_FLOAT, Colors::Black.f);
 	CD3DX12_CLEAR_VALUE dsClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_D32_FLOAT, 1.0f, 0);
 
-	Material* material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("CubemapVertex.cso"),
-		Utils::GetPathFromExe("AmbientSpecularPixel.cso"), 1, DXGI_FORMAT_R16G16B16A16_FLOAT));
+	Material* material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("CubemapV.cso"),
+		Utils::GetPathFromExe("AmbientSpecularP.cso"), 1, DXGI_FORMAT_R16G16B16A16_FLOAT));
 
 	TextureCubemap* cubemap = new TextureCubemap(std::array<void*, 6>{}, size, DXGI_FORMAT_R16G16B16A16_FLOAT, 8, mipCount);
 	XMFLOAT4X4* matrices = GetCubemapMatrices();

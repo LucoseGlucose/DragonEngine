@@ -30,8 +30,9 @@ public:
 	static inline D3D12_RECT scissorRect{};
 
 	static inline Mesh* quadMesh{};
-	static inline RendererComponent* outputObj{};
 	static inline SkyboxObject* skyboxObj{};
+	static inline RendererComponent* outputObj{};
+	static inline RendererComponent* tonemapObj{};
 
 	static inline CameraComponent* outputCam{};
 	static inline std::vector<LightComponent*>* lights{};

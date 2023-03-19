@@ -3,6 +3,10 @@
 
 #include "SceneManager.h"
 
+#ifdef DRAGON_EDITOR
+#include "Editor/Editor.h"
+#endif
+
 void Rendering::WaitForNextFrame()
 {
 	uint8_t frameIndex = presentationBuffer->swapchain->GetCurrentBackBufferIndex();
@@ -33,7 +37,7 @@ void Rendering::Init()
 {
 	UINT dxgiFactoryFlags = 0;
 
-#if _DEBUG
+#ifdef _DEBUG
 	{
 		ComPtr<ID3D12Debug> debugController;
 		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
@@ -112,10 +116,18 @@ void Rendering::Init()
 	outputObj = (new SceneObject("Render Output"))->AddComponent<RendererComponent>();
 	outputObj->mesh = quadMesh;
 
-	outputObj->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputVertex.cso"),
-		Utils::GetPathFromExe("OutputPixel.cso"), 1, DXGI_FORMAT_R8G8B8A8_UNORM));
+	outputObj->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputV.cso"),
+		Utils::GetPathFromExe("OutputP.cso"), 1, DXGI_FORMAT_R8G8B8A8_UNORM));
 
 	outputObj->material->SetTexture("t_sceneTexture", postFB->colorTexture);
+
+	tonemapObj = (new SceneObject("Tonemapping Post Process"))->AddComponent<RendererComponent>();
+	tonemapObj->mesh = quadMesh;
+
+	tonemapObj->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputV.cso"),
+		Utils::GetPathFromExe("TonemapP.cso"), 1, postFB->colorTexture->format));
+
+	tonemapObj->material->SetTexture("t_sceneTexture", postFB->colorTexture);
 
 	skyboxObj = new SkyboxObject("Skybox");
 	skyboxObj->skybox = TextureCubemap::ImportHDR(Utils::GetPathFromProject("Images/limpopo_golf_course_4k.hdr"), true);
@@ -178,6 +190,13 @@ void Rendering::Render()
 	recorder = GetRecorder();
 	recorder->StartRecording();
 
+	postFB->Setup(recorder, false);
+	tonemapObj->Render(recorder);
+
+#ifdef DRAGON_EDITOR
+	Editor::Render(recorder);
+#endif
+
 	presentationBuffer->Setup(recorder);
 	outputObj->Render(recorder);
 	presentationBuffer->Present(recorder);
@@ -195,6 +214,10 @@ void Rendering::Cleanup()
 		delete cmdRecorders->front();
 		cmdRecorders->pop();
 	}
+
+	//delete skyboxObj;
+	//delete outputObj;
+	//delete tonemapObj;
 
 	delete sceneFB;
 	delete postFB;

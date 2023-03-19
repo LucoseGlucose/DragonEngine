@@ -98,8 +98,8 @@ void Texture2D::GenerateMipMaps(CommandRecorder* recorder)
 	CD3DX12_CLEAR_VALUE rtClear = CD3DX12_CLEAR_VALUE(linearFormat, Colors::Black.f);
 	CD3DX12_CLEAR_VALUE dsClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_D32_FLOAT, 1.0f, 0);
 
-	Material* downsampleMat = new Material(ShaderProgram::Create(Utils::GetPathFromExe("MipmapVertex.cso"),
-		Utils::GetPathFromExe("MipmapPixel.cso"), 1, linearFormat));
+	Material* downsampleMat = new Material(ShaderProgram::Create(Utils::GetPathFromExe("MipmapV.cso"),
+		Utils::GetPathFromExe("MipmapP.cso"), 1, linearFormat));
 
 	srvDesc.Format = linearFormat;
 
