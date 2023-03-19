@@ -116,8 +116,13 @@ void Rendering::Init()
 	outputObj = (new SceneObject("Render Output"))->AddComponent<RendererComponent>();
 	outputObj->mesh = quadMesh;
 
+#ifdef DRAGON_EDITOR
+	outputObj->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputV.cso"),
+		Utils::GetPathFromExe("OutputP.cso"), 1, postFB->colorTexture->format));
+#else
 	outputObj->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputV.cso"),
 		Utils::GetPathFromExe("OutputP.cso"), 1, DXGI_FORMAT_R8G8B8A8_UNORM));
+#endif
 
 	outputObj->material->SetTexture("t_sceneTexture", postFB->colorTexture);
 
@@ -194,11 +199,15 @@ void Rendering::Render()
 	tonemapObj->Render(recorder);
 
 #ifdef DRAGON_EDITOR
-	Editor::Render(recorder);
-#endif
+	outputObj->Render(recorder);
+	presentationBuffer->Setup(recorder);
 
+	Editor::Render(recorder);
+#else
 	presentationBuffer->Setup(recorder);
 	outputObj->Render(recorder);
+#endif
+
 	presentationBuffer->Present(recorder);
 
 	RecycleRecorder(recorder);
@@ -233,24 +242,14 @@ void Rendering::Resize(XMUINT2 newSize)
 {
 	commandQueue->WaitForAllCommands();
 
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.Width = newSize.x;
-	viewport.Height = newSize.y;
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-
-	scissorRect.left = 0;
-	scissorRect.top = 0;
-	scissorRect.right = newSize.x;
-	scissorRect.bottom = newSize.y;
+	SetViewportSize(newSize);
+	outputCam->CalculateProjection();
 
 	sceneFB->Resize(newSize);
 	postFB->Resize(newSize);
 	presentationBuffer->Resize(newSize);
 
 	outputObj->material->UpdateTexture("t_sceneTexture", postFB->colorTexture);
-	outputCam->CalculateProjection();
 }
 
 void Rendering::SetViewportSize(XMUINT2 size)

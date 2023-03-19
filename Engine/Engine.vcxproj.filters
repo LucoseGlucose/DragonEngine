@@ -224,6 +224,7 @@
     <None Include="Models\Sphere.fbx" />
     <None Include="Models\Smooth Monkey.fbx" />
     <None Include="Models\Monkey.fbx" />
+    <None Include="imgui.ini" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\AmbientSpecularP.hlsl" />

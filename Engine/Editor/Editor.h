@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CommandRecorder.h"
+#include "Framebuffer.h"
 
 class Editor
 {

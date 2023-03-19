@@ -537,6 +537,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Images\limpopo_golf_course_4k.hdr" />
+    <None Include="imgui.ini" />
     <None Include="Models\Cube.fbx" />
     <None Include="Models\Inverted Cube.fbx" />
     <None Include="Models\Monkey.fbx" />

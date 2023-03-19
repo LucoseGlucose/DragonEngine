@@ -17,7 +17,7 @@ void Editor::Init()
 
 	Utils::ThrowIfFailed(Rendering::device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&imGuiDescHeap)));
 
-	ImGui_ImplGlfw_InitForOther(Application::window, false);
+	ImGui_ImplGlfw_InitForOther(Application::window, true);
 	ImGui_ImplDX12_Init(Rendering::device.Get(), Rendering::presentationBuffer->colorTextures.size(),
 		Rendering::presentationBuffer->colorTextures[0]->format, imGuiDescHeap.Get(),
 		imGuiDescHeap->GetCPUDescriptorHandleForHeapStart(), imGuiDescHeap->GetGPUDescriptorHandleForHeapStart());
