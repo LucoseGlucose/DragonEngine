@@ -253,6 +253,7 @@
     <FxCompile Include="Shaders\SkyboxP.hlsl" />
     <FxCompile Include="Shaders\SkyboxV.hlsl" />
     <FxCompile Include="Shaders\TonemapP.hlsl" />
+    <FxCompile Include="Shaders\GammaP.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\UV Checker.png">
