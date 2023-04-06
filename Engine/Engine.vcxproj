@@ -195,7 +195,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;user32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22000.0\um\x64</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
@@ -228,7 +228,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;user32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22000.0\um\x64</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
@@ -265,7 +265,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;user32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22000.0\um\x64</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
@@ -303,7 +303,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;user32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22000.0\um\x64</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
@@ -337,7 +337,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;user32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22000.0\um\x64</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
@@ -370,7 +370,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;user32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22000.0\um\x64</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
@@ -407,7 +407,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;user32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22000.0\um\x64</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
@@ -445,7 +445,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;dxguid.lib;user32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22000.0\um\x64</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
@@ -470,9 +470,6 @@
     <ClCompile Include="Components\DirectionalLightComponent.cpp" />
     <ClCompile Include="Components\LightComponent.cpp" />
     <ClCompile Include="Components\PointLightComponent.cpp" />
-    <ClCompile Include="Editor\Editor.cpp" />
-    <ClCompile Include="Editor\EditorViewport.cpp" />
-    <ClCompile Include="Editor\EditorWindow.cpp" />
     <ClCompile Include="Graphics\CommandRecorder.cpp" />
     <ClCompile Include="Core\Component.cpp" />
     <ClCompile Include="Graphics\Framebuffer.cpp" />
@@ -508,6 +505,10 @@
     <ClCompile Include="Graphics\RenderTexture.cpp" />
     <ClCompile Include="Graphics\PresentationBuffer.cpp" />
     <ClCompile Include="Core\Input.cpp" />
+    <ClCompile Include="NvidiaMathLib\External\sse2neon\tests\binding.cpp" />
+    <ClCompile Include="NvidiaMathLib\External\sse2neon\tests\common.cpp" />
+    <ClCompile Include="NvidiaMathLib\External\sse2neon\tests\impl.cpp" />
+    <ClCompile Include="NvidiaMathLib\External\sse2neon\tests\main.cpp" />
     <ClCompile Include="Objects\SkyboxObject.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -516,9 +517,6 @@
     <ClInclude Include="Components\DirectionalLightComponent.h" />
     <ClInclude Include="Components\LightComponent.h" />
     <ClInclude Include="Components\PointLightComponent.h" />
-    <ClInclude Include="Editor\Editor.h" />
-    <ClInclude Include="Editor\EditorViewport.h" />
-    <ClInclude Include="Editor\EditorWindow.h" />
     <ClInclude Include="Graphics\CommandRecorder.h" />
     <ClInclude Include="Core\Component.h" />
     <ClInclude Include="Graphics\Framebuffer.h" />
@@ -545,6 +543,17 @@
     <ClInclude Include="Graphics\RenderTexture.h" />
     <ClInclude Include="Graphics\PresentationBuffer.h" />
     <ClInclude Include="Core\Input.h" />
+    <ClInclude Include="NvidiaMathLib\External\sse2neon\sse2neon.h" />
+    <ClInclude Include="NvidiaMathLib\External\sse2neon\tests\binding.h" />
+    <ClInclude Include="NvidiaMathLib\External\sse2neon\tests\common.h" />
+    <ClInclude Include="NvidiaMathLib\External\sse2neon\tests\impl.h" />
+    <ClInclude Include="NvidiaMathLib\IntrinEmu.h" />
+    <ClInclude Include="NvidiaMathLib\MathLib.h" />
+    <ClInclude Include="NvidiaMathLib\MathLib_d.h" />
+    <ClInclude Include="NvidiaMathLib\MathLib_f.h" />
+    <ClInclude Include="NvidiaMathLib\NdcConfig.h" />
+    <ClInclude Include="NvidiaMathLib\Packed.h" />
+    <ClInclude Include="NvidiaMathLib\Platform.h" />
     <ClInclude Include="Objects\SkyboxObject.h" />
   </ItemGroup>
   <ItemGroup>

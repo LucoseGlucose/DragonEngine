@@ -3,10 +3,6 @@
 
 #include "SceneManager.h"
 
-#ifdef DRAGON_EDITOR
-#include "Editor/Editor.h"
-#endif
-
 void Rendering::WaitForNextFrame()
 {
 	uint8_t frameIndex = presentationBuffer->swapchain->GetCurrentBackBufferIndex();
@@ -116,13 +112,8 @@ void Rendering::Init()
 	outputObj = (new SceneObject("Render Output"))->AddComponent<RendererComponent>();
 	outputObj->mesh = quadMesh;
 
-#ifdef DRAGON_EDITOR
-	outputObj->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputV.cso"),
-		Utils::GetPathFromExe("OutputP.cso"), 1, postFB->colorTexture->format));
-#else
 	outputObj->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputV.cso"),
 		Utils::GetPathFromExe("OutputP.cso"), 1, DXGI_FORMAT_R8G8B8A8_UNORM));
-#endif
 
 	outputObj->material->SetTexture("t_sceneTexture", postFB->colorTexture);
 
@@ -160,21 +151,21 @@ void Rendering::Render()
 	for (size_t i = 0; i < (std::min)(numThreads, (uint32_t)renderers->size()); i++)
 	{
 		futures.push_back(std::async(std::launch::async, [numThreads](int index)
+		{
+			CommandRecorder* recorder = Rendering::GetRecorder();
+			recorder->StartRecording();
+
+			Rendering::sceneFB->Setup(recorder, false);
+
+			for (size_t i = index; i < renderers->size(); i += numThreads)
 			{
-				CommandRecorder* recorder = Rendering::GetRecorder();
-				recorder->StartRecording();
+				RendererComponent* renderer = renderers->at(i);
+				renderer->Render(recorder);
+			}
 
-				Rendering::sceneFB->Setup(recorder, false);
-
-				for (size_t i = index; i < renderers->size(); i += numThreads)
-				{
-					RendererComponent* renderer = renderers->at(i);
-					renderer->Render(recorder);
-				}
-
-				recorder->Execute();
-				Rendering::RecycleRecorder(recorder);
-			},
+			recorder->Execute();
+			Rendering::RecycleRecorder(recorder);
+		},
 			i));
 	}
 
@@ -204,16 +195,8 @@ void Rendering::Render()
 	recorder = GetRecorder();
 	recorder->StartRecording();
 
-#ifdef DRAGON_EDITOR
-	postFB->Setup(recorder, false);
-	outputObj->Render(recorder);
-	presentationBuffer->Setup(recorder);
-
-	Editor::Render(recorder);
-#else
 	presentationBuffer->Setup(recorder);
 	outputObj->Render(recorder);
-#endif
 
 	presentationBuffer->Present(recorder);
 

@@ -9,10 +9,6 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
-#ifdef DRAGON_EDITOR
-#include "Editor/Editor.h"
-#endif
-
 void Application::Run(const std::function<Scene*(void)>& sceneCreateFunc)
 {
 	glfwInit();
@@ -23,10 +19,6 @@ void Application::Run(const std::function<Scene*(void)>& sceneCreateFunc)
 
 	Input::Init();
 	Rendering::Init();
-	
-#ifdef DRAGON_EDITOR
-	Editor::Init();
-#endif
 
 	double lastFrameTime = 0;
 
@@ -49,10 +41,6 @@ void Application::Run(const std::function<Scene*(void)>& sceneCreateFunc)
 		if (Input::GetKeyDown(GLFW_KEY_F11)) SetFullscreen(!fullscreen);
 
 		SceneManager::GetActiveScene()->OnUpdate();
-
-#ifdef DRAGON_EDITOR
-		Editor::Update();
-#endif
 
 		Rendering::Render();
 	}

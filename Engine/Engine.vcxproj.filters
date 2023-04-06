@@ -111,13 +111,16 @@
     <ClCompile Include="Components\DirectionalLightComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Editor\Editor.cpp">
+    <ClCompile Include="NvidiaMathLib\External\sse2neon\tests\binding.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Editor\EditorWindow.cpp">
+    <ClCompile Include="NvidiaMathLib\External\sse2neon\tests\common.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Editor\EditorViewport.cpp">
+    <ClCompile Include="NvidiaMathLib\External\sse2neon\tests\impl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NvidiaMathLib\External\sse2neon\tests\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -218,13 +221,37 @@
     <ClInclude Include="Components\DirectionalLightComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Editor\Editor.h">
+    <ClInclude Include="NvidiaMathLib\External\sse2neon\tests\binding.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Editor\EditorWindow.h">
+    <ClInclude Include="NvidiaMathLib\External\sse2neon\tests\common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Editor\EditorViewport.h">
+    <ClInclude Include="NvidiaMathLib\External\sse2neon\tests\impl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NvidiaMathLib\External\sse2neon\sse2neon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NvidiaMathLib\IntrinEmu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NvidiaMathLib\MathLib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NvidiaMathLib\MathLib_d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NvidiaMathLib\MathLib_f.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NvidiaMathLib\NdcConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NvidiaMathLib\Packed.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NvidiaMathLib\Platform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
