@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Core\Engine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\Rendering.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -109,18 +106,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Components\DirectionalLightComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NvidiaMathLib\External\sse2neon\tests\binding.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NvidiaMathLib\External\sse2neon\tests\common.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NvidiaMathLib\External\sse2neon\tests\impl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NvidiaMathLib\External\sse2neon\tests\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -219,15 +204,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Components\DirectionalLightComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NvidiaMathLib\External\sse2neon\tests\binding.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NvidiaMathLib\External\sse2neon\tests\common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NvidiaMathLib\External\sse2neon\tests\impl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NvidiaMathLib\External\sse2neon\sse2neon.h">

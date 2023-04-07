@@ -43,52 +43,52 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugEditor|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseEditor|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugEditor|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseEditor|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -476,7 +476,6 @@
     <ClCompile Include="Graphics\CommandQueue.cpp" />
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Graphics\TextureCubemap.cpp" />
-    <ClCompile Include="Core\Engine.cpp" />
     <ClCompile Include="Graphics\Mesh.cpp" />
     <ClCompile Include="Graphics\Rendering.cpp" />
     <ClCompile Include="Graphics\Shader.cpp" />
@@ -505,10 +504,6 @@
     <ClCompile Include="Graphics\RenderTexture.cpp" />
     <ClCompile Include="Graphics\PresentationBuffer.cpp" />
     <ClCompile Include="Core\Input.cpp" />
-    <ClCompile Include="NvidiaMathLib\External\sse2neon\tests\binding.cpp" />
-    <ClCompile Include="NvidiaMathLib\External\sse2neon\tests\common.cpp" />
-    <ClCompile Include="NvidiaMathLib\External\sse2neon\tests\impl.cpp" />
-    <ClCompile Include="NvidiaMathLib\External\sse2neon\tests\main.cpp" />
     <ClCompile Include="Objects\SkyboxObject.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -544,9 +539,6 @@
     <ClInclude Include="Graphics\PresentationBuffer.h" />
     <ClInclude Include="Core\Input.h" />
     <ClInclude Include="NvidiaMathLib\External\sse2neon\sse2neon.h" />
-    <ClInclude Include="NvidiaMathLib\External\sse2neon\tests\binding.h" />
-    <ClInclude Include="NvidiaMathLib\External\sse2neon\tests\common.h" />
-    <ClInclude Include="NvidiaMathLib\External\sse2neon\tests\impl.h" />
     <ClInclude Include="NvidiaMathLib\IntrinEmu.h" />
     <ClInclude Include="NvidiaMathLib\MathLib.h" />
     <ClInclude Include="NvidiaMathLib\MathLib_d.h" />
