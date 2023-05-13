@@ -4,7 +4,7 @@ struct PS_INPUT
     float2 uv : TEXCOORD;
 };
 
-Texture2D<float4> t_sceneTexture : register(t0);
+Texture2D<float4> t_inputTexture : register(t0);
 SamplerState s_sampler : register(s0);
 
 cbuffer PostProcessSettings : register(b0)
@@ -222,7 +222,7 @@ float3 calcTonemapping(in float3 col)
 
 float4 main(PS_INPUT input) : SV_TARGET
 {
-    float4 texCol = t_sceneTexture.Sample(s_sampler, input.uv);
+    float4 texCol = t_inputTexture.Sample(s_sampler, input.uv);
     float3 tonemapping = calcTonemapping(texCol.rgb);
 
     return float4(tonemapping, texCol.a);

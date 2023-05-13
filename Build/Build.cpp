@@ -45,7 +45,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 					RendererComponent* mesh = scene->AddObject(new SceneObject("Mesh"))->AddComponent<RendererComponent>();
 					mesh->mesh = cubeMesh;
 					mesh->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitV.cso"),
-						Utils::GetPathFromExe("LitP.cso"), Rendering::sceneFB));
+						Utils::GetPathFromExe("LitP.cso"), Rendering::scenePass->outputFB));
 					mesh->GetTransform()->SetPosition(XMFLOAT3(x, y, z));
 
 					mesh->material->SetParameter("p_albedo", XMFLOAT4(.15f, .25f, .75f, 1.f));

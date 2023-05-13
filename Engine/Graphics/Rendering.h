@@ -10,6 +10,10 @@
 #include "RendererComponent.h"
 #include "LightComponent.h"
 #include "SkyboxObject.h"
+#include "RenderPass.h"
+#include "SceneRenderPass.h"
+#include "ResolveRenderPass.h"
+#include "ProcessRenderPass.h"
 
 class Rendering
 {
@@ -20,8 +24,6 @@ public:
 
 	static inline CommandQueue* commandQueue{};
 	static inline PresentationBuffer* presentationBuffer{};
-	static inline Framebuffer* sceneFB{};
-	static inline Framebuffer* postFB{};
 
 	static inline std::queue<CommandRecorder*>* cmdRecorders{};
 	static inline std::mutex recorderMutex{};
@@ -29,14 +31,16 @@ public:
 	static inline D3D12_VIEWPORT viewport{};
 	static inline D3D12_RECT scissorRect{};
 
-	static inline Mesh* quadMesh{};
-	static inline SkyboxObject* skyboxObj{};
-	static inline RendererComponent* outputObj{};
-	static inline RendererComponent* tonemapObj{};
+	static inline std::vector<RenderPass*> renderPasses{};
 
+	static inline Mesh* quadMesh{};
+	static inline RendererComponent* outputObj{};
 	static inline CameraComponent* outputCam{};
-	static inline std::vector<LightComponent*>* lights{};
-	static inline std::vector<RendererComponent*>* renderers{};
+
+	static inline SceneRenderPass* scenePass{};
+	static inline ResolveRenderPass* resolvePass{};
+	static inline ProcessRenderPass* tonemapPass{};
+	static inline ProcessRenderPass* gammaPass{};
 
 	static inline UINT64 fenceValues[2]{};
 

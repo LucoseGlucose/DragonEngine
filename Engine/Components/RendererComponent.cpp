@@ -38,7 +38,7 @@ ShaderParamFunc RendererComponent::GetLitShaderParamFunc()
 		XMFLOAT3 cameraPosition = Rendering::outputCam->GetTransform()->GetPosition();
 		renderer->material->SetParameter("p_cameraPosition", &cameraPosition);
 
-		std::vector<LightComponent*> lights = *Rendering::lights;
+		std::vector<LightComponent*> lights = *Rendering::scenePass->lights;
 		std::map<LightComponent*, float> distances{};
 
 		for (size_t i = 0; i < lights.size(); i++)
@@ -70,8 +70,8 @@ ShaderParamFunc RendererComponent::GetLitShaderParamFunc()
 
 		renderer->material->SetParameter<LightData*>("p_lights", lightData);
 
-		renderer->material->SetTexture("t_irradiance", Rendering::skyboxObj->irradiance);
-		renderer->material->SetTexture("t_specularReflections", Rendering::skyboxObj->specular);
+		renderer->material->SetTexture("t_irradiance", Rendering::scenePass->skyboxObj->irradiance);
+		renderer->material->SetTexture("t_specularReflections", Rendering::scenePass->skyboxObj->specular);
 	};
 }
 

@@ -76,15 +76,6 @@ void Rendering::Init()
 	commandQueue = new CommandQueue();
 	presentationBuffer = new PresentationBuffer();
 
-	CD3DX12_CLEAR_VALUE rtClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_R16G16B16A16_FLOAT, Colors::Black.f);
-	CD3DX12_CLEAR_VALUE dsClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_D32_FLOAT, 1.0f, 0);
-
-	sceneFB = new Framebuffer(Application::GetUnsignedFramebufferSize(), DXGI_FORMAT_R16G16B16A16_FLOAT,
-		DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 4);
-
-	postFB = new Framebuffer(Application::GetUnsignedFramebufferSize(), DXGI_FORMAT_R16G16B16A16_FLOAT,
-		DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);
-
 	cmdRecorders = new std::queue<CommandRecorder*>();
 	for (size_t i = 0; i < 32; i++)
 	{
@@ -95,17 +86,8 @@ void Rendering::Init()
 	Utils::ThrowIfFailed(factory->MakeWindowAssociation(Application::GetWindowHandle(), DXGI_MWA_NO_ALT_ENTER));
 	XMUINT2 windowSize = Application::GetUnsignedFramebufferSize();
 
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.Width = windowSize.x;
-	viewport.Height = windowSize.y;
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-
-	scissorRect.left = 0;
-	scissorRect.top = 0;
-	scissorRect.right = windowSize.x;
-	scissorRect.bottom = windowSize.y;
+	viewport.MaxDepth = 1.f;
+	ResetViewportSize();
 
 	quadMesh = new Mesh(Utils::GetPathFromProject("Models/Quad.fbx"));
 
@@ -115,20 +97,15 @@ void Rendering::Init()
 	outputObj->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputV.cso"),
 		Utils::GetPathFromExe("OutputP.cso"), 1, DXGI_FORMAT_R8G8B8A8_UNORM));
 
-	outputObj->material->SetTexture("t_sceneTexture", postFB->colorTexture);
+	scenePass = new SceneRenderPass();
+	resolvePass = new ResolveRenderPass();
+	tonemapPass = new ProcessRenderPass(new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputV.cso"),
+		Utils::GetPathFromExe("TonemapP.cso"), 1, DXGI_FORMAT_R16G16B16A16_FLOAT)));
+	gammaPass = new ProcessRenderPass(new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputV.cso"),
+		Utils::GetPathFromExe("GammaP.cso"), 1, DXGI_FORMAT_R16G16B16A16_FLOAT)));
 
-	tonemapObj = (new SceneObject("Tonemapping Post Process"))->AddComponent<RendererComponent>();
-	tonemapObj->mesh = quadMesh;
-
-	tonemapObj->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputV.cso"),
-		Utils::GetPathFromExe("TonemapP.cso"), 1, postFB->colorTexture->format));
-
-	tonemapObj->material->SetTexture("t_sceneTexture", postFB->colorTexture);
-
-	skyboxObj = new SkyboxObject("Skybox");
-	skyboxObj->skybox = TextureCubemap::ImportHDR(Utils::GetPathFromProject("Images/limpopo_golf_course_4k.hdr"), true);
-	skyboxObj->irradiance = TextureCubemap::ComputeDiffuseIrradiance(skyboxObj->skybox, XMUINT2(32, 32));
-	skyboxObj->specular = TextureCubemap::ComputeAmbientSpecular(skyboxObj->skybox, XMUINT2(256, 256), 5);
+	renderPasses = std::vector<RenderPass*>{ scenePass, resolvePass, tonemapPass, gammaPass };
+	outputObj->material->SetTexture("t_inputTexture", renderPasses[renderPasses.size() - 1]->outputFB->colorTexture);
 }
 
 void Rendering::Render()
@@ -136,66 +113,17 @@ void Rendering::Render()
 	XMUINT2 windowSize = Application::GetUnsignedFramebufferSize();
 	if (windowSize.x == 0 || windowSize.y == 0) return;
 
-	delete renderers;
-	renderers = SceneManager::GetActiveScene()->FindComponents<RendererComponent>();
-
-	delete lights;
-	lights = SceneManager::GetActiveScene()->FindComponents<LightComponent>();
-
-	std::vector<std::future<void>> futures;
-	uint32_t numThreads = std::thread::hardware_concurrency();
+	for (size_t i = 0; i < renderPasses.size(); i++)
+	{
+		renderPasses[i]->Render(i != 0 ? renderPasses[i - 1]->outputFB : nullptr);
+	}
 
 	CommandRecorder* recorder = GetRecorder();
 	recorder->StartRecording();
 
-	for (size_t i = 0; i < (std::min)(numThreads, (uint32_t)renderers->size()); i++)
-	{
-		futures.push_back(std::async(std::launch::async, [numThreads](int index)
-		{
-			CommandRecorder* recorder = Rendering::GetRecorder();
-			recorder->StartRecording();
-
-			Rendering::sceneFB->Setup(recorder, false);
-
-			for (size_t i = index; i < renderers->size(); i += numThreads)
-			{
-				RendererComponent* renderer = renderers->at(i);
-				renderer->Render(recorder);
-			}
-
-			recorder->Execute();
-			Rendering::RecycleRecorder(recorder);
-		},
-			i));
-	}
-
-	sceneFB->Setup(recorder, false);
-
-	skyboxObj->GetRenderer()->Render(recorder);
-	sceneFB->Blit(recorder, postFB, true, DXGI_FORMAT_R16G16B16A16_FLOAT, false, DXGI_FORMAT_R32_FLOAT);
-	sceneFB->Clear(recorder, true, true);
-
-	for (size_t i = 0; i < futures.size(); i++)
-	{
-		futures[i].wait();
-	}
-
-	recorder->Execute();
-	RecycleRecorder(recorder);
-
-	recorder = GetRecorder();
-	recorder->StartRecording();
-
-	postFB->Setup(recorder, false);
-	tonemapObj->Render(recorder);
-
-	recorder->Execute();
-	RecycleRecorder(recorder);
-
-	recorder = GetRecorder();
-	recorder->StartRecording();
-
 	presentationBuffer->Setup(recorder);
+
+	outputObj->material->UpdateTexture("t_inputTexture", renderPasses[renderPasses.size() - 1]->outputFB->colorTexture);
 	outputObj->Render(recorder);
 
 	presentationBuffer->Present(recorder);
@@ -214,16 +142,6 @@ void Rendering::Cleanup()
 		cmdRecorders->pop();
 	}
 
-	//delete skyboxObj;
-	//delete outputObj;
-	//delete tonemapObj;
-
-	delete sceneFB;
-	delete postFB;
-
-	delete renderers;
-	delete lights;
-
 	delete presentationBuffer;
 	delete commandQueue;
 }
@@ -235,12 +153,12 @@ void Rendering::Resize(XMUINT2 newSize)
 	SetViewportSize(newSize);
 	outputCam->CalculateProjection();
 
-	sceneFB->Resize(newSize);
-	postFB->Resize(newSize);
-	presentationBuffer->Resize(newSize);
+	for (size_t i = 0; i < renderPasses.size(); i++)
+	{
+		renderPasses[i]->Resize(i != 0 ? renderPasses[i - 1]->outputFB : nullptr, newSize);
+	}
 
-	outputObj->material->UpdateTexture("t_sceneTexture", postFB->colorTexture);
-	tonemapObj->material->UpdateTexture("t_sceneTexture", postFB->colorTexture);
+	presentationBuffer->Resize(newSize);
 }
 
 void Rendering::SetViewportSize(XMUINT2 size)

@@ -126,35 +126,35 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <MultiProcFXC>true</MultiProcFXC>
-    <TargetName>DragonEngine</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugEditor|Win32'">
     <MultiProcFXC>true</MultiProcFXC>
-    <TargetName>DragonEditor</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <MultiProcFXC>true</MultiProcFXC>
-    <TargetName>DragonEngine</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseEditor|Win32'">
     <MultiProcFXC>true</MultiProcFXC>
-    <TargetName>DragonEditor</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <MultiProcFXC>true</MultiProcFXC>
-    <TargetName>DragonEngine</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugEditor|x64'">
     <MultiProcFXC>true</MultiProcFXC>
-    <TargetName>DragonEditor</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <MultiProcFXC>true</MultiProcFXC>
-    <TargetName>DragonEngine</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseEditor|x64'">
     <MultiProcFXC>true</MultiProcFXC>
-    <TargetName>DragonEditor</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <VcpkgUseStatic>false</VcpkgUseStatic>
@@ -475,6 +475,10 @@
     <ClCompile Include="Graphics\Framebuffer.cpp" />
     <ClCompile Include="Graphics\CommandQueue.cpp" />
     <ClCompile Include="Core\Application.cpp" />
+    <ClCompile Include="Graphics\ProcessRenderPass.cpp" />
+    <ClCompile Include="Graphics\RenderPass.cpp" />
+    <ClCompile Include="Graphics\ResolveRenderPass.cpp" />
+    <ClCompile Include="Graphics\SceneRenderPass.cpp" />
     <ClCompile Include="Graphics\TextureCubemap.cpp" />
     <ClCompile Include="Graphics\Mesh.cpp" />
     <ClCompile Include="Graphics\Rendering.cpp" />
@@ -517,9 +521,12 @@
     <ClInclude Include="Graphics\Framebuffer.h" />
     <ClInclude Include="Graphics\CommandQueue.h" />
     <ClInclude Include="Core\Application.h" />
-    <ClInclude Include="Graphics\d3dx12.h" />
     <ClInclude Include="Graphics\Mesh.h" />
+    <ClInclude Include="Graphics\ProcessRenderPass.h" />
     <ClInclude Include="Graphics\Rendering.h" />
+    <ClInclude Include="Graphics\RenderPass.h" />
+    <ClInclude Include="Graphics\ResolveRenderPass.h" />
+    <ClInclude Include="Graphics\SceneRenderPass.h" />
     <ClInclude Include="Graphics\Shader.h" />
     <ClInclude Include="Graphics\ShaderProgram.h" />
     <ClInclude Include="Graphics\Material.h" />

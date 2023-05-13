@@ -70,7 +70,6 @@ void Framebuffer::Setup(CommandRecorder* recorder, bool clearTargets)
 	recorder->list->RSSetScissorRects(1, &Rendering::scissorRect);
 	recorder->list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	UINT handleSize = Rendering::device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvCPUHandle = rtvDescHeap->GetCPUDescriptorHandleForHeapStart();
 	D3D12_CPU_DESCRIPTOR_HANDLE dsCPUHandle = dsDescHeap->GetCPUDescriptorHandleForHeapStart();
 
@@ -78,7 +77,7 @@ void Framebuffer::Setup(CommandRecorder* recorder, bool clearTargets)
 	if (clearTargets) Clear(recorder, true, true);
 }
 
-void Framebuffer::Blit(CommandRecorder* recorder, Framebuffer* fb, bool color, DXGI_FORMAT colorFormat, bool depthStencil, DXGI_FORMAT dsFormat)
+void Framebuffer::Blit(CommandRecorder* recorder, Framebuffer* dest, bool color, DXGI_FORMAT colorFormat, bool depthStencil, DXGI_FORMAT dsFormat)
 {
 	if (colorTexture->samples < 2)
 	{
@@ -87,18 +86,18 @@ void Framebuffer::Blit(CommandRecorder* recorder, Framebuffer* fb, bool color, D
 			CD3DX12_RESOURCE_BARRIER toCopySrc = CD3DX12_RESOURCE_BARRIER::Transition(colorTexture->textureBuffer.Get(),
 				D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
-			CD3DX12_RESOURCE_BARRIER toCopyDest = CD3DX12_RESOURCE_BARRIER::Transition(fb->colorTexture->textureBuffer.Get(),
+			CD3DX12_RESOURCE_BARRIER toCopyDest = CD3DX12_RESOURCE_BARRIER::Transition(dest->colorTexture->textureBuffer.Get(),
 				D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
 
 			CD3DX12_RESOURCE_BARRIER initialBarriers[2] = { toCopySrc, toCopyDest };
 			recorder->list->ResourceBarrier(2, initialBarriers);
 
-			recorder->list->CopyResource(fb->colorTexture->textureBuffer.Get(), colorTexture->textureBuffer.Get());
+			recorder->list->CopyResource(dest->colorTexture->textureBuffer.Get(), colorTexture->textureBuffer.Get());
 
 			CD3DX12_RESOURCE_BARRIER fromSrcToRT = CD3DX12_RESOURCE_BARRIER::Transition(colorTexture->textureBuffer.Get(),
 				D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-			CD3DX12_RESOURCE_BARRIER fromDestToRT = CD3DX12_RESOURCE_BARRIER::Transition(fb->colorTexture->textureBuffer.Get(),
+			CD3DX12_RESOURCE_BARRIER fromDestToRT = CD3DX12_RESOURCE_BARRIER::Transition(dest->colorTexture->textureBuffer.Get(),
 				D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 			CD3DX12_RESOURCE_BARRIER afterBarriers[2] = { fromSrcToRT, fromDestToRT };
@@ -109,19 +108,19 @@ void Framebuffer::Blit(CommandRecorder* recorder, Framebuffer* fb, bool color, D
 			CD3DX12_RESOURCE_BARRIER toCopySrc = CD3DX12_RESOURCE_BARRIER::Transition(depthStencilTexture->textureBuffer.Get(),
 				D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
-			CD3DX12_RESOURCE_BARRIER toCopyDest = CD3DX12_RESOURCE_BARRIER::Transition(fb->depthStencilTexture->textureBuffer.Get(),
+			CD3DX12_RESOURCE_BARRIER toCopyDest = CD3DX12_RESOURCE_BARRIER::Transition(dest->depthStencilTexture->textureBuffer.Get(),
 				D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_COPY_DEST);
 
 			CD3DX12_RESOURCE_BARRIER initialBarriers[2] = { toCopySrc, toCopyDest };
 			recorder->list->ResourceBarrier(2, initialBarriers);
 
-			recorder->list->CopyResource(fb->depthStencilTexture->textureBuffer.Get(),
+			recorder->list->CopyResource(dest->depthStencilTexture->textureBuffer.Get(),
 				depthStencilTexture->textureBuffer.Get());
 
 			CD3DX12_RESOURCE_BARRIER fromSrcToDW = CD3DX12_RESOURCE_BARRIER::Transition(depthStencilTexture->textureBuffer.Get(),
 				D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
-			CD3DX12_RESOURCE_BARRIER fromDestToDW = CD3DX12_RESOURCE_BARRIER::Transition(fb->depthStencilTexture->textureBuffer.Get(),
+			CD3DX12_RESOURCE_BARRIER fromDestToDW = CD3DX12_RESOURCE_BARRIER::Transition(dest->depthStencilTexture->textureBuffer.Get(),
 				D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
 			CD3DX12_RESOURCE_BARRIER afterBarriers[2] = { fromSrcToDW, fromDestToDW };
@@ -135,19 +134,19 @@ void Framebuffer::Blit(CommandRecorder* recorder, Framebuffer* fb, bool color, D
 			CD3DX12_RESOURCE_BARRIER toResolveSrc = CD3DX12_RESOURCE_BARRIER::Transition(colorTexture->textureBuffer.Get(),
 				D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_RESOLVE_SOURCE);
 
-			CD3DX12_RESOURCE_BARRIER toResolveDest = CD3DX12_RESOURCE_BARRIER::Transition(fb->colorTexture->textureBuffer.Get(),
+			CD3DX12_RESOURCE_BARRIER toResolveDest = CD3DX12_RESOURCE_BARRIER::Transition(dest->colorTexture->textureBuffer.Get(),
 				D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_RESOLVE_DEST);
 
 			CD3DX12_RESOURCE_BARRIER initialBarriers[2] = { toResolveSrc, toResolveDest };
 			recorder->list->ResourceBarrier(2, initialBarriers);
 
-			recorder->list->ResolveSubresource(fb->colorTexture->textureBuffer.Get(),
+			recorder->list->ResolveSubresource(dest->colorTexture->textureBuffer.Get(),
 				0, colorTexture->textureBuffer.Get(), 0, colorFormat);
 
 			CD3DX12_RESOURCE_BARRIER fromSrcToRT = CD3DX12_RESOURCE_BARRIER::Transition(colorTexture->textureBuffer.Get(),
 				D3D12_RESOURCE_STATE_RESOLVE_SOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-			CD3DX12_RESOURCE_BARRIER fromDestToRT = CD3DX12_RESOURCE_BARRIER::Transition(fb->colorTexture->textureBuffer.Get(),
+			CD3DX12_RESOURCE_BARRIER fromDestToRT = CD3DX12_RESOURCE_BARRIER::Transition(dest->colorTexture->textureBuffer.Get(),
 				D3D12_RESOURCE_STATE_RESOLVE_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 			CD3DX12_RESOURCE_BARRIER afterBarriers[2] = { fromSrcToRT, fromDestToRT };
@@ -158,19 +157,19 @@ void Framebuffer::Blit(CommandRecorder* recorder, Framebuffer* fb, bool color, D
 			CD3DX12_RESOURCE_BARRIER toResolveSrc = CD3DX12_RESOURCE_BARRIER::Transition(depthStencilTexture->textureBuffer.Get(),
 				D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_RESOLVE_SOURCE);
 
-			CD3DX12_RESOURCE_BARRIER toResolveDest = CD3DX12_RESOURCE_BARRIER::Transition(fb->depthStencilTexture->textureBuffer.Get(),
+			CD3DX12_RESOURCE_BARRIER toResolveDest = CD3DX12_RESOURCE_BARRIER::Transition(dest->depthStencilTexture->textureBuffer.Get(),
 				D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_RESOLVE_DEST);
 
 			CD3DX12_RESOURCE_BARRIER initialBarriers[2] = { toResolveSrc, toResolveDest };
 			recorder->list->ResourceBarrier(2, initialBarriers);
 
-			recorder->list->ResolveSubresource(fb->depthStencilTexture->textureBuffer.Get(),
+			recorder->list->ResolveSubresource(dest->depthStencilTexture->textureBuffer.Get(),
 				0, depthStencilTexture->textureBuffer.Get(), 0, dsFormat);
 
 			CD3DX12_RESOURCE_BARRIER fromSrcToDW = CD3DX12_RESOURCE_BARRIER::Transition(depthStencilTexture->textureBuffer.Get(),
 				D3D12_RESOURCE_STATE_RESOLVE_SOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
-			CD3DX12_RESOURCE_BARRIER fromDestToDW = CD3DX12_RESOURCE_BARRIER::Transition(fb->depthStencilTexture->textureBuffer.Get(),
+			CD3DX12_RESOURCE_BARRIER fromDestToDW = CD3DX12_RESOURCE_BARRIER::Transition(dest->depthStencilTexture->textureBuffer.Get(),
 				D3D12_RESOURCE_STATE_RESOLVE_DEST, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
 			CD3DX12_RESOURCE_BARRIER afterBarriers[2] = { fromSrcToDW, fromDestToDW };
