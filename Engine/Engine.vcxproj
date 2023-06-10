@@ -470,6 +470,8 @@
     <ClCompile Include="Components\DirectionalLightComponent.cpp" />
     <ClCompile Include="Components\LightComponent.cpp" />
     <ClCompile Include="Components\PointLightComponent.cpp" />
+    <ClCompile Include="Core\SceneLayer.cpp" />
+    <ClCompile Include="Core\Layer.cpp" />
     <ClCompile Include="Graphics\CommandRecorder.cpp" />
     <ClCompile Include="Core\Component.cpp" />
     <ClCompile Include="Graphics\Framebuffer.cpp" />
@@ -516,6 +518,8 @@
     <ClInclude Include="Components\DirectionalLightComponent.h" />
     <ClInclude Include="Components\LightComponent.h" />
     <ClInclude Include="Components\PointLightComponent.h" />
+    <ClInclude Include="Core\SceneLayer.h" />
+    <ClInclude Include="Core\Layer.h" />
     <ClInclude Include="Graphics\CommandRecorder.h" />
     <ClInclude Include="Core\Component.h" />
     <ClInclude Include="Graphics\Framebuffer.h" />

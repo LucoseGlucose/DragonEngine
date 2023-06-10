@@ -5,8 +5,6 @@
 
 void Input::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	//glfwSetWindowTitle(Application::window, std::to_string(yoffset).c_str());
-
 	scrolled = true;
 	scrollValue = yoffset;
 }
@@ -40,6 +38,11 @@ void Input::Update()
 	double x, y;
 	glfwGetCursorPos(Application::window, &x, &y);
 	mousePos = XMFLOAT2(x, y);
+}
+
+void Input::CleanUp()
+{
+	glfwSetScrollCallback(Application::window, nullptr);
 }
 
 bool Input::GetKey(int key)

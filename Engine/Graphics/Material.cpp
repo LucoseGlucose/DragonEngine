@@ -14,7 +14,7 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 	uint32_t numSamplers = 0;
 
 	std::vector<std::pair<std::string, char>> defaultTextures{};
-	std::vector<std::string> defaultSamplers{};
+	std::vector<std::pair<std::string, char>> defaultSamplers{};
 
 	for (size_t i = 0; i < SHADER_TYPE_MAX; i++)
 	{
@@ -85,7 +85,8 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 				samplerParameters[bindDesc.Name] = numSamplers;
 				cachedSamplers[bindDesc.Name] = Utils::GetDefaultSampler();
 
-				defaultSamplers.push_back(bindDesc.Name);
+				std::string varName = bindDesc.Name;
+				defaultSamplers.push_back(std::pair<std::string, char>(varName, varName.back()));
 				numSamplers++;
 			}
 		}
@@ -122,7 +123,10 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 
 	for (size_t i = 0; i < defaultSamplers.size(); i++)
 	{
-		SetSampler(defaultSamplers[i], Utils::GetDefaultSampler());
+		char code = defaultSamplers[i].second;
+
+		if (code == 'L') SetSampler(defaultSamplers[i].first, Utils::GetBRDFSampler());
+		else SetSampler(defaultSamplers[i].first, Utils::GetDefaultSampler());
 	}
 }
 

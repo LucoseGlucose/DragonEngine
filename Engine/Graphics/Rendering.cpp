@@ -123,7 +123,6 @@ void Rendering::Render()
 
 	presentationBuffer->Setup(recorder);
 
-	outputObj->material->UpdateTexture("t_inputTexture", renderPasses[renderPasses.size() - 1]->outputFB->colorTexture);
 	outputObj->Render(recorder);
 
 	presentationBuffer->Present(recorder);
@@ -158,6 +157,7 @@ void Rendering::Resize(XMUINT2 newSize)
 		renderPasses[i]->Resize(i != 0 ? renderPasses[i - 1]->outputFB : nullptr, newSize);
 	}
 
+	outputObj->material->UpdateTexture("t_inputTexture", renderPasses[renderPasses.size() - 1]->outputFB->colorTexture);
 	presentationBuffer->Resize(newSize);
 }
 

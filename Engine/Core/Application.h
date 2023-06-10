@@ -5,6 +5,9 @@
 #include <GLFW/glfw3.h>
 #include <DirectXMath.h>
 #include <functional>
+#include <list>
+
+#include "Layer.h"
 #include "Scene.h"
 
 using namespace DirectX;
@@ -14,9 +17,11 @@ class Application
 	static inline bool fullscreen{};
 	static inline XMINT2 lastWindowedSize{};
 	static inline XMINT2 lastWindowedPos{};
+	static inline std::list<Layer*> layers{};
 
 public:
-	static void Run(const std::function<Scene* (void)>& sceneCreateFunc);
+	static void Init();
+	static void Run();
 
 	static XMINT2 GetFramebufferSize();
 	static XMUINT2 GetUnsignedFramebufferSize();
@@ -29,6 +34,9 @@ public:
 
 	static bool GetFullscreen();
 	static void SetFullscreen(bool fs);
+
+	static void PushLayer(Layer* layer);
+	static void PopLayer();
 
 	static bool Closing();
 

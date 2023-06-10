@@ -11,7 +11,7 @@ void CameraComponent::CalculateProjection()
 {
 	XMINT2 windowSize = Application::GetFramebufferSize();
 
-	DirectX::XMStoreFloat4x4(&projectionMat, XMMatrixPerspectiveFovLH(
+	DirectX::XMStoreFloat4x4(&projectionMat, DirectX::XMMatrixPerspectiveFovLH(
 		DirectX::XMConvertToRadians(fieldOfView), (float)windowSize.x / windowSize.y, nearClip, farClip));
 }
 
@@ -21,7 +21,8 @@ void CameraComponent::CalculateView()
 	XMFLOAT3 fwd = GetTransform()->GetForward();
 	XMFLOAT3 up = GetTransform()->GetUp();
 
-	DirectX::XMStoreFloat4x4(&viewMat, XMMatrixLookToLH(DirectX::XMLoadFloat3(&pos), DirectX::XMLoadFloat3(&fwd), DirectX::XMLoadFloat3(&up)));
+	DirectX::XMStoreFloat4x4(&viewMat, DirectX::XMMatrixLookToLH(DirectX::XMLoadFloat3(&pos),
+		DirectX::XMLoadFloat3(&fwd), DirectX::XMLoadFloat3(&up)));
 }
 
 float CameraComponent::GetFOV()

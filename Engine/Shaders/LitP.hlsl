@@ -48,6 +48,7 @@ TextureCube<float4> t_specularReflections : register(t7);
 Texture2D<float4> t_brdfLUTL : register(t8);
 
 SamplerState s_sampler : register(s0);
+SamplerState s_brdfLUTL : register(s1);
 
 static const float PI = 3.141592;
 static const float Epsilon = 0.00001;
@@ -165,9 +166,9 @@ float4 main(PS_INPUT input) : SV_TARGET
     float3 specularIrradiance = t_specularReflections.SampleLevel(s_sampler, specularReflectionVector,
         roughness * specularTextureLevels).rgb;
     
-    float2 specularBRDF = t_brdfLUTL.SampleLevel(s_sampler, float2(surfaceViewAngle, roughness), 0.f).rg;
+    float2 specularBRDF = t_brdfLUTL.SampleLevel(s_brdfLUTL, float2(surfaceViewAngle, 1.f - roughness), 0.f).rg;
     
-    float3 specularIBL = (fresnelReflectance * specularBRDF.x + specularBRDF.y * (1.f - roughness)) * specularIrradiance;
+    float3 specularIBL = (fresnelReflectance * specularBRDF.x + specularBRDF.y) * specularIrradiance;
 
     ambientLighting = diffuseIBL + specularIBL;
     ambientLighting *= p_ambientColor;

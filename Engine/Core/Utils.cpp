@@ -55,6 +55,21 @@ D3D12_SAMPLER_DESC Utils::GetDefaultSampler()
 	return sampler;
 }
 
+D3D12_SAMPLER_DESC Utils::GetBRDFSampler()
+{
+	D3D12_SAMPLER_DESC sampler{};
+	sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	sampler.MaxAnisotropy = 0;
+	sampler.MinLOD = 0;
+	sampler.MaxLOD = 0;
+
+	return sampler;
+}
+
 std::filesystem::path Utils::GetPathFromExe(std::filesystem::path path)
 {
 	std::filesystem::path exePath = Application::GetApplicationPath();

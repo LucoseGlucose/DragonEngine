@@ -11,52 +11,39 @@
 #include "TextureCubemap.h"
 #include "PointLightComponent.h"
 #include "DirectionalLightComponent.h"
+#include "BuildLayer.h"
+#include "SceneLayer.h"
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
-	std::function<Scene* (void)> func = [&]()
-	{
-		Scene* scene = new Scene("MainScene");
+	Application::Init();
+	Application::PushLayer(new BuildLayer());
 
-		CameraComponent* cam = scene->AddObject(new SceneObject("Camera"))->AddComponent<CameraComponent>();
-		Rendering::outputCam = cam;
-		cam->GetOwner()->AddComponent<CameraControllerComponent>();
+	Scene* scene = new Scene("MainScene");
 
-		cam->GetTransform()->SetPosition(XMFLOAT3(0.f, 0.f, -4.f));
+	CameraComponent* cam = scene->AddObject(new SceneObject("Camera"))->AddComponent<CameraComponent>();
+	Rendering::outputCam = cam;
+	cam->GetOwner()->AddComponent<CameraControllerComponent>();
 
-		LightComponent* light = scene->AddObject(new SceneObject("Light"))->AddComponent<DirectionalLightComponent>();
-		light->GetTransform()->SetPosition(XMFLOAT3(2.f, 2.5f, -1.5f));
-		light->GetTransform()->SetEulerAngles(XMFLOAT3(28.f, 53.f, 0.f));
+	cam->GetTransform()->SetPosition(XMFLOAT3(0.f, 0.f, -4.f));
 
-		Texture2D* bricks = Texture2D::Import(Utils::GetPathFromProject("Images/brickwall.jpg"), true, true);
-		Texture2D* normal = Texture2D::Import(Utils::GetPathFromProject("Images/brickwall_normal.jpg"), false, true);
+	LightComponent* light = scene->AddObject(new SceneObject("Light"))->AddComponent<DirectionalLightComponent>();
+	light->GetTransform()->SetPosition(XMFLOAT3(2.f, 2.5f, -1.5f));
+	light->GetTransform()->SetEulerAngles(XMFLOAT3(28.f, 53.f, 0.f));
 
-		Sampler sampler = Utils::GetDefaultSampler();
-		sampler.Filter = D3D12_FILTER_ANISOTROPIC;
+	Mesh* cubeMesh = new Mesh(Utils::GetPathFromProject("Models/Cube.fbx"));
 
-		Mesh* cubeMesh = new Mesh(Utils::GetPathFromProject("Models/Sphere.fbx"));
+	RendererComponent* mesh = scene->AddObject(new SceneObject("Mesh"))->AddComponent<RendererComponent>();
+	mesh->mesh = cubeMesh;
+	mesh->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitV.cso"),
+		Utils::GetPathFromExe("LitP.cso"), Rendering::scenePass->outputFB));
 
-		for (float x = -5.f; x < 5.f; x += 2.f)
-		{
-			for (float y = -5.f; y < 5.f; y += 2.f)
-			{
-				for (float z = -5.f; z < 5.f; z += 2.f)
-				{
-					RendererComponent* mesh = scene->AddObject(new SceneObject("Mesh"))->AddComponent<RendererComponent>();
-					mesh->mesh = cubeMesh;
-					mesh->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitV.cso"),
-						Utils::GetPathFromExe("LitP.cso"), Rendering::scenePass->outputFB));
-					mesh->GetTransform()->SetPosition(XMFLOAT3(x, y, z));
+	mesh->material->SetParameter("p_albedo", (void*)&DirectX::Colors::Firebrick.f[0], sizeof(float) * 4);
+	mesh->material->SetParameter("p_metallic", .25f);
+	mesh->material->SetParameter("p_roughness", .75f);
 
-					mesh->material->SetParameter("p_albedo", XMFLOAT4(.15f, .25f, .75f, 1.f));
-					mesh->material->SetParameter("p_metallic", .8f);
-					mesh->material->SetParameter("p_roughness", .35f);
-				}
-			}
-		}
+	SceneManager::AddScene(scene);
 
-		return scene;
-	};
-
-	Application::Run(func);
+	Application::PushLayer(new SceneLayer());
+	Application::Run();
 }

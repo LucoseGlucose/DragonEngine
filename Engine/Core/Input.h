@@ -20,6 +20,7 @@ class Input
 public:
 	static void Init();
 	static void Update();
+	static void CleanUp();
 
 	static bool GetKey(int key);
 	static bool GetKeyDown(int key);

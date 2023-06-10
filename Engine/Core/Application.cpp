@@ -9,7 +9,7 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
-void Application::Run(const std::function<Scene*(void)>& sceneCreateFunc)
+void Application::Init()
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -17,37 +17,34 @@ void Application::Run(const std::function<Scene*(void)>& sceneCreateFunc)
 	window = glfwCreateWindow(1280, 720, "DragonEngine", nullptr, nullptr);
 	glfwSetWindowPos(window, 320, 180);
 
-	Input::Init();
 	Rendering::Init();
+}
 
-	double lastFrameTime = 0;
-
-	SceneManager::AddScene(sceneCreateFunc());
-	SceneManager::GetActiveScene()->OnStart();
-
+void Application::Run()
+{
 	while (!glfwWindowShouldClose(window))
 	{
-		TimeManager::Update(glfwGetTime() - lastFrameTime);
-		lastFrameTime = glfwGetTime();
-
 		XMUINT2 preWindowSize = GetUnsignedFramebufferSize();
 
 		glfwPollEvents();
-		Input::Update();
 
 		XMUINT2 postWindowSize = GetUnsignedFramebufferSize();
-		if (postWindowSize.x != preWindowSize.x || postWindowSize.y != preWindowSize.y) Rendering::Resize(postWindowSize);
+		if (postWindowSize.x != preWindowSize.x || postWindowSize.y != preWindowSize.y)
+		{
+			for (Layer*& l : layers)
+			{
+				l->Resize(postWindowSize);
+			}
+		}
 
-		if (Input::GetKeyDown(GLFW_KEY_F11)) SetFullscreen(!fullscreen);
-
-		SceneManager::GetActiveScene()->OnUpdate();
+		for (Layer*& l : layers)
+		{
+			l->Update();
+		}
 
 		Rendering::Render();
 	}
 
-	SetFullscreen(false);
-
-	SceneManager::GetActiveScene()->OnEnd();
 	Rendering::Cleanup();
 
 	glfwDestroyWindow(window);
@@ -130,6 +127,18 @@ void Application::SetFullscreen(bool fs)
 		Rendering::Resize(GetUnsignedFramebufferSize());
 		fullscreen = false;
 	}
+}
+
+void Application::PushLayer(Layer* layer)
+{
+	layers.push_back(layer);
+	layer->OnPush();
+}
+
+void Application::PopLayer()
+{
+	layers.back()->OnPop();
+	layers.erase(layers.end());
 }
 
 bool Application::Closing()

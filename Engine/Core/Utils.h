@@ -18,6 +18,7 @@ public:
 	static DirectX::XMFLOAT3 QuatToEulerAngles(DirectX::XMFLOAT4 quat);
 
 	static D3D12_SAMPLER_DESC GetDefaultSampler();
+	static D3D12_SAMPLER_DESC GetBRDFSampler();
 
 	static std::filesystem::path GetPathFromExe(std::filesystem::path path);
 	static std::filesystem::path GetPathFromProject(std::filesystem::path path);
