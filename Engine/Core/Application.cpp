@@ -45,6 +45,13 @@ void Application::Run()
 		Rendering::Render();
 	}
 
+	for (Layer*& l : layers)
+	{
+		l->OnPop();
+		delete l;
+	}
+	layers.clear();
+
 	Rendering::Cleanup();
 
 	glfwDestroyWindow(window);

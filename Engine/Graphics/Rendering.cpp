@@ -14,7 +14,7 @@ void Rendering::WaitForNextFrame()
 
 CommandRecorder* Rendering::GetRecorder()
 {
-	std::lock_guard<std::mutex> lock = std::lock_guard<std::mutex>(recorderMutex);
+	//std::lock_guard<std::mutex> lock = std::lock_guard<std::mutex>(recorderMutex);
 
 	CommandRecorder* rec = cmdRecorders->front();
 	cmdRecorders->pop();
@@ -23,7 +23,7 @@ CommandRecorder* Rendering::GetRecorder()
 
 void Rendering::RecycleRecorder(CommandRecorder* recorder)
 {
-	std::lock_guard<std::mutex> lock = std::lock_guard<std::mutex>(recorderMutex);
+	//std::lock_guard<std::mutex> lock = std::lock_guard<std::mutex>(recorderMutex);
 
 	if (recorder->IsRecording()) recorder->Execute();
 	cmdRecorders->push(recorder);

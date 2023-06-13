@@ -1,7 +1,9 @@
 #pragma once
 
+#include "Scene.h"
+
 class Game
 {
 public:
-	void Init();
+	static Scene* Init();
 };
