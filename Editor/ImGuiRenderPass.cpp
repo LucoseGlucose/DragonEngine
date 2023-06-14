@@ -3,6 +3,7 @@
 
 #include "imgui_impl_dx12.h"
 #include "EditorLayer.h"
+#include "Rendering.h"
 
 ImGuiRenderPass::ImGuiRenderPass()
 {
@@ -17,8 +18,13 @@ void ImGuiRenderPass::Execute(Framebuffer* inputFB, CommandRecorder* recorder)
 {
 	outputFB->Setup(recorder, true);
 
+	D3D12_CPU_DESCRIPTOR_HANDLE texDescStartHnd = EditorLayer::descHeap->GetCPUDescriptorHandleForHeapStart();
+	UINT incrementSize = Rendering::device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE texDescHnd = CD3DX12_CPU_DESCRIPTOR_HANDLE(texDescStartHnd, 1, incrementSize);
+
+	Rendering::device->CreateShaderResourceView(inputFB->colorTexture->textureBuffer.Get(), &inputFB->colorTexture->srvDesc, texDescHnd);
+
 	ImGui::Render();
-	ImGui::RenderPlatformWindowsDefault();
 
 	ID3D12DescriptorHeap* descHeaps[] = { EditorLayer::descHeap.Get() };
 
@@ -28,5 +34,11 @@ void ImGuiRenderPass::Execute(Framebuffer* inputFB, CommandRecorder* recorder)
 
 void ImGuiRenderPass::Resize(Framebuffer* inputFB, XMUINT2 newSize)
 {
+	outputFB->Resize(newSize);
 
+	D3D12_CPU_DESCRIPTOR_HANDLE texDescStartHnd = EditorLayer::descHeap->GetCPUDescriptorHandleForHeapStart();
+	UINT incrementSize = Rendering::device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE texDescHnd = CD3DX12_CPU_DESCRIPTOR_HANDLE(texDescStartHnd, 1, incrementSize);
+
+	Rendering::device->CreateShaderResourceView(inputFB->colorTexture->textureBuffer.Get(), &inputFB->colorTexture->srvDesc, texDescHnd);
 }

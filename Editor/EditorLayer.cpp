@@ -1,10 +1,22 @@
 #include "stdafx.h"
 #include "EditorLayer.h"
 
-#include "Rendering.h"
 #include "imgui_impl_dx12.h"
 #include "imgui_impl_glfw.h"
+
+#include "Rendering.h"
 #include "ImGuiRenderPass.h"
+#include "ViewportWindow.h"
+#include "IconsMaterialDesign.h"
+
+ImTextureID EditorLayer::GetViewportTextureID()
+{
+	D3D12_GPU_DESCRIPTOR_HANDLE texDescStartHnd = EditorLayer::descHeap->GetGPUDescriptorHandleForHeapStart();
+	UINT incrementSize = Rendering::device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHnd = CD3DX12_GPU_DESCRIPTOR_HANDLE(texDescStartHnd, 1, incrementSize);
+
+	return (ImTextureID)texDescHnd.ptr;
+}
 
 void EditorLayer::OnPush()
 {
@@ -13,6 +25,17 @@ void EditorLayer::OnPush()
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_::ImGuiConfigFlags_DockingEnable;
+
+	ImFontConfig fontConfig{};
+	io.Fonts->AddFontFromFileTTF(Utils::GetPathFromSolution("Editor/Fonts/Rubik-Regular.ttf").string().c_str(), 14.f);
+
+	static const ImWchar iconRanges[] = { ICON_MIN_MD, ICON_MAX_MD, 0 };
+	fontConfig.MergeMode = true;
+	fontConfig.GlyphOffset.y = 4.f;
+	io.Fonts->AddFontFromFileTTF(Utils::GetPathFromSolution("Editor/Fonts/MaterialIcons-Regular.ttf")
+		.string().c_str(), 16.f, &fontConfig, iconRanges);
+
+	ImGuiStyle& style = ImGui::GetStyle();
 
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
@@ -26,9 +49,10 @@ void EditorLayer::OnPush()
 		descHeap->GetCPUDescriptorHandleForHeapStart(), descHeap->GetGPUDescriptorHandleForHeapStart());
 
 	ImGuiRenderPass* imRenderPass = new ImGuiRenderPass();
-
 	Rendering::renderPasses.push_back(imRenderPass);
 	Rendering::outputObj->material->SetTexture("t_inputTexture", imRenderPass->outputFB->colorTexture);
+
+	windows.push_back(new ViewportWindow());
 }
 
 void EditorLayer::Update()
@@ -39,8 +63,24 @@ void EditorLayer::Update()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
+	ImGui::BeginMainMenuBar();
+	if (ImGui::BeginMenu("Windows"))
+	{
+		for (size_t i = 0; i < windows.size(); i++)
+		{
+			ImGui::MenuItem(windows[i]->title.c_str(), nullptr, &windows[i]->open);
+		}
+		ImGui::EndMenu();
+	}
+	ImGui::EndMainMenuBar();
+
 	ImGui::DockSpaceOverViewport();
 	ImGui::ShowDemoWindow();
+
+	for (size_t i = 0; i < windows.size(); i++)
+	{
+		windows[i]->Show();
+	}
 }
 
 void EditorLayer::Resize(XMUINT2 newSize)

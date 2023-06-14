@@ -24,6 +24,12 @@
     <ClCompile Include="ImGuiRenderPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="EditorWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewportWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EditorLayer.h">
@@ -32,8 +38,24 @@
     <ClInclude Include="ImGuiRenderPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EditorWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewportWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IconsMaterialDesign.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="imgui.ini" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Fonts\MaterialIcons-Regular.ttf" />
+    <Font Include="Fonts\Rubik-Bold.ttf" />
+    <Font Include="Fonts\Rubik-BoldItalic.ttf" />
+    <Font Include="Fonts\Rubik-Italic.ttf" />
+    <Font Include="Fonts\Rubik-Regular.ttf" />
   </ItemGroup>
 </Project>
