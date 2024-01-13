@@ -159,6 +159,7 @@
     <ClCompile Include="EditorLayer.cpp" />
     <ClCompile Include="EditorWindow.cpp" />
     <ClCompile Include="ImGuiRenderPass.cpp" />
+    <ClCompile Include="SceneWindow.cpp" />
     <ClCompile Include="ViewportWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -174,10 +175,8 @@
     <ClInclude Include="EditorWindow.h" />
     <ClInclude Include="IconsMaterialDesign.h" />
     <ClInclude Include="ImGuiRenderPass.h" />
+    <ClInclude Include="SceneWindow.h" />
     <ClInclude Include="ViewportWindow.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="imgui.ini" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Fonts\MaterialIcons-Regular.ttf" />
@@ -185,6 +184,9 @@
     <Font Include="Fonts\Rubik-BoldItalic.ttf" />
     <Font Include="Fonts\Rubik-Italic.ttf" />
     <Font Include="Fonts\Rubik-Regular.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="imgui.ini" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

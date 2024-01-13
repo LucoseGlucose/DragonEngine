@@ -30,6 +30,9 @@
     <ClCompile Include="ViewportWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SceneWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EditorLayer.h">
@@ -47,9 +50,9 @@
     <ClInclude Include="IconsMaterialDesign.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="imgui.ini" />
+    <ClInclude Include="SceneWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Font Include="Fonts\MaterialIcons-Regular.ttf" />
@@ -57,5 +60,8 @@
     <Font Include="Fonts\Rubik-BoldItalic.ttf" />
     <Font Include="Fonts\Rubik-Italic.ttf" />
     <Font Include="Fonts\Rubik-Regular.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="imgui.ini" />
   </ItemGroup>
 </Project>

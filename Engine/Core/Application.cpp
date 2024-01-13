@@ -72,6 +72,11 @@ XMUINT2 Application::GetUnsignedFramebufferSize()
 	return XMUINT2(width, height);
 }
 
+XMUINT2 Application::GetViewportSize()
+{
+	return layers.front()->GetViewportSize();
+}
+
 XMINT2 Application::GetWindowSize()
 {
 	int width, height;

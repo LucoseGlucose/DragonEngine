@@ -11,4 +11,5 @@ public:
 	virtual void Update();
 	virtual void Resize(XMUINT2 newSize);
 	virtual void OnPop();
+	virtual XMUINT2 GetViewportSize();
 };

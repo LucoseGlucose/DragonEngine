@@ -25,6 +25,7 @@ public:
 
 	static XMINT2 GetFramebufferSize();
 	static XMUINT2 GetUnsignedFramebufferSize();
+	static XMUINT2 GetViewportSize();
 
 	static XMINT2 GetWindowSize();
 	static XMINT2 GetWindowPosition();

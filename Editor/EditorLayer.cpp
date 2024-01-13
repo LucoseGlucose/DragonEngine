@@ -6,8 +6,10 @@
 
 #include "Rendering.h"
 #include "ImGuiRenderPass.h"
-#include "ViewportWindow.h"
 #include "IconsMaterialDesign.h"
+
+#include "ViewportWindow.h"
+#include "SceneWindow.h"
 
 ImTextureID EditorLayer::GetViewportTextureID()
 {
@@ -52,7 +54,9 @@ void EditorLayer::OnPush()
 	Rendering::renderPasses.push_back(imRenderPass);
 	Rendering::outputObj->material->SetTexture("t_inputTexture", imRenderPass->outputFB->colorTexture);
 
-	windows.push_back(new ViewportWindow());
+	viewport = new ViewportWindow();
+	windows.push_back(viewport);
+	windows.push_back(new SceneWindow());
 }
 
 void EditorLayer::Update()
@@ -75,7 +79,6 @@ void EditorLayer::Update()
 	ImGui::EndMainMenuBar();
 
 	ImGui::DockSpaceOverViewport();
-	ImGui::ShowDemoWindow();
 
 	for (size_t i = 0; i < windows.size(); i++)
 	{
@@ -94,4 +97,9 @@ void EditorLayer::OnPop()
 
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
+}
+
+XMUINT2 EditorLayer::GetViewportSize()
+{
+	return XMUINT2(viewport->lastWindowSize.x, viewport->lastWindowSize.y);
 }

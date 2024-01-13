@@ -22,3 +22,8 @@ void BuildLayer::OnPop()
 {
 
 }
+
+XMUINT2 BuildLayer::GetViewportSize()
+{
+	return Application::GetUnsignedFramebufferSize();
+}

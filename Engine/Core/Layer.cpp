@@ -20,3 +20,8 @@ void Layer::OnPop()
 {
 
 }
+
+XMUINT2 Layer::GetViewportSize()
+{
+	return XMUINT2();
+}

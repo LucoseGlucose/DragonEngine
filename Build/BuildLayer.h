@@ -9,4 +9,5 @@ public:
 	virtual void Update() override;
 	virtual void Resize(XMUINT2 newSize) override;
 	virtual void OnPop() override;
+	virtual XMUINT2 GetViewportSize() override;
 };

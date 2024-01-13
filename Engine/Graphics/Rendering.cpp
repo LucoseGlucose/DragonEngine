@@ -105,7 +105,7 @@ void Rendering::Init()
 		Utils::GetPathFromExe("GammaP.cso"), 1, DXGI_FORMAT_R16G16B16A16_FLOAT)));
 
 	renderPasses = std::vector<RenderPass*>{ scenePass, resolvePass, tonemapPass, gammaPass };
-	outputObj->material->SetTexture("t_inputTexture", renderPasses[renderPasses.size() - 1]->outputFB->colorTexture);
+	outputObj->material->SetTexture("t_inputTexture", renderPasses.back()->outputFB->colorTexture);
 }
 
 void Rendering::Render()
@@ -157,7 +157,7 @@ void Rendering::Resize(XMUINT2 newSize)
 		renderPasses[i]->Resize(i != 0 ? renderPasses[i - 1]->outputFB : nullptr, newSize);
 	}
 
-	outputObj->material->UpdateTexture("t_inputTexture", renderPasses[renderPasses.size() - 1]->outputFB->colorTexture);
+	outputObj->material->UpdateTexture("t_inputTexture", renderPasses.back()->outputFB->colorTexture);
 	presentationBuffer->Resize(newSize);
 }
 
