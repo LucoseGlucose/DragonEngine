@@ -11,8 +11,8 @@ public:
 	SceneRenderPass();
 	~SceneRenderPass();
 
-	std::vector<LightComponent*>* lights;
-	std::vector<RendererComponent*>* renderers;
+	std::vector<LightComponent*> lights;
+	std::vector<RendererComponent*> renderers;
 	SkyboxObject* skyboxObj;
 
 	virtual void Execute(Framebuffer* inputFB, CommandRecorder* recorder) override;

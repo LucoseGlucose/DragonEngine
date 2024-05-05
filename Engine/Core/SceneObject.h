@@ -57,23 +57,23 @@ public:
 	}
 
 	template<typename T>
-	std::vector<T*>* GetComponents() requires std::is_base_of_v<Component, T>
+	std::vector<T*> GetComponents() requires std::is_base_of_v<Component, T>
 	{
-		std::vector<T*>* vec = new std::vector<T*>();
+		std::vector<T*> vec = std::vector<T*>();
 
 		for (size_t i = 0; i < components.size(); i++)
 		{
 			Component* pComp = components[i];
 			T* casted = dynamic_cast<T*>(pComp);
 
-			if (casted != nullptr) vec->push_back(casted);
+			if (casted != nullptr) vec.push_back(casted);
 		}
 
 		return vec;
 	}
 
 	template<typename T>
-	bool TryGetComponents(std::vector<T*>** out) requires std::is_base_of_v<Component, T>
+	bool TryGetComponents(std::vector<T*>* out) requires std::is_base_of_v<Component, T>
 	{
 		*out = GetComponents<T>();
 		return !(*out)->empty();

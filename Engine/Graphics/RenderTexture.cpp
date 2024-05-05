@@ -49,6 +49,8 @@ void RenderTexture::Resize(XMUINT2 size, D3D12_RESOURCE_STATES startingState)
 	Utils::ThrowIfFailed(Rendering::device->CreateCommittedResource(&heapProps, D3D12_HEAP_FLAG_NONE, &textureDesc,
 		startingState, &clearValue, IID_PPV_ARGS(&textureBuffer)));
 	NAME_D3D_OBJECT(textureBuffer);
+
+	this->size = size;
 }
 
 void RenderTexture::Resize(XMUINT2 size, ID3D12Resource** existingResource)
@@ -57,4 +59,6 @@ void RenderTexture::Resize(XMUINT2 size, ID3D12Resource** existingResource)
 
 	textureBuffer = *existingResource;
 	NAME_D3D_OBJECT(textureBuffer);
+
+	this->size = size;
 }

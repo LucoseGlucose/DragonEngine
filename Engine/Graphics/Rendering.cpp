@@ -14,8 +14,6 @@ void Rendering::WaitForNextFrame()
 
 CommandRecorder* Rendering::GetRecorder()
 {
-	//std::lock_guard<std::mutex> lock = std::lock_guard<std::mutex>(recorderMutex);
-
 	CommandRecorder* rec = cmdRecorders->front();
 	cmdRecorders->pop();
 	return rec;
@@ -23,8 +21,6 @@ CommandRecorder* Rendering::GetRecorder()
 
 void Rendering::RecycleRecorder(CommandRecorder* recorder)
 {
-	//std::lock_guard<std::mutex> lock = std::lock_guard<std::mutex>(recorderMutex);
-
 	if (recorder->IsRecording()) recorder->Execute();
 	cmdRecorders->push(recorder);
 }
@@ -47,12 +43,13 @@ void Rendering::Init()
 	Utils::ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory)));
 
 	int adapterIndex = 0;
-	bool adapterFound = false;
+	ComPtr<IDXGIAdapter1> tempAdapter;
+	SIZE_T mostVideoMem = 0;
 
-	while (factory->EnumAdapters1(adapterIndex, &adapter) != DXGI_ERROR_NOT_FOUND)
+	while (factory->EnumAdapters1(adapterIndex, &tempAdapter) != DXGI_ERROR_NOT_FOUND)
 	{
 		DXGI_ADAPTER_DESC1 adapterDesc{};
-		adapter->GetDesc1(&adapterDesc);
+		tempAdapter->GetDesc1(&adapterDesc);
 
 		if (adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
 		{
@@ -60,17 +57,20 @@ void Rendering::Init()
 			continue;
 		}
 
-		HRESULT result = D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), nullptr);
+		HRESULT result = D3D12CreateDevice(tempAdapter.Get(), D3D_FEATURE_LEVEL_11_1, _uuidof(ID3D12Device), nullptr);
 		if (SUCCEEDED(result))
 		{
-			adapterFound = true;
-			break;
+			if (adapterDesc.DedicatedVideoMemory > mostVideoMem)
+			{
+				mostVideoMem = adapterDesc.DedicatedVideoMemory;
+				adapter = tempAdapter;
+			}
 		}
 
 		adapterIndex++;
 	}
 
-	Utils::ThrowIfFailed(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device)));
+	Utils::ThrowIfFailed(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_1, IID_PPV_ARGS(&device)));
 	NAME_D3D_OBJECT(device);
 
 	commandQueue = new CommandQueue();
@@ -121,10 +121,10 @@ void Rendering::Render()
 	CommandRecorder* recorder = GetRecorder();
 	recorder->StartRecording();
 
+	ResetViewportSize();
 	presentationBuffer->Setup(recorder);
 
 	outputObj->Render(recorder);
-
 	presentationBuffer->Present(recorder);
 
 	RecycleRecorder(recorder);
@@ -172,11 +172,5 @@ void Rendering::SetViewportSize(XMUINT2 size)
 
 void Rendering::ResetViewportSize()
 {
-	XMUINT2 size = Application::GetUnsignedFramebufferSize();
-
-	viewport.Width = size.x;
-	viewport.Height = size.y;
-
-	scissorRect.right = size.x;
-	scissorRect.bottom = size.y;
+	SetViewportSize(Application::GetUnsignedFramebufferSize());
 }

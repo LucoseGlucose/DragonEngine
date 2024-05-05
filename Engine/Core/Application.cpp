@@ -24,8 +24,10 @@ void Application::Run()
 {
 	while (!glfwWindowShouldClose(window))
 	{
-		XMUINT2 preWindowSize = GetUnsignedFramebufferSize();
+		deltaTime = std::lerp(deltaTime, glfwGetTime() - lastFrameTime, .25);
+		lastFrameTime = glfwGetTime();
 
+		XMUINT2 preWindowSize = GetUnsignedFramebufferSize();
 		glfwPollEvents();
 
 		XMUINT2 postWindowSize = GetUnsignedFramebufferSize();
@@ -89,6 +91,11 @@ XMINT2 Application::GetWindowPosition()
 	int x, y;
 	glfwGetWindowPos(window, &x, &y);
 	return XMINT2(x, y);
+}
+
+double Application::GetDeltaTime()
+{
+	return deltaTime;
 }
 
 HWND Application::GetWindowHandle()

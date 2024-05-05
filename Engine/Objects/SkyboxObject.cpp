@@ -29,7 +29,7 @@ SkyboxObject::SkyboxObject(std::string name) : SceneObject(name)
 	};
 }
 
-RendererComponent* SkyboxObject::GetRenderer()
+RendererComponent* SkyboxObject::GetRendererComponent()
 {
 	return renderer;
 }

@@ -17,7 +17,11 @@ class Application
 	static inline bool fullscreen{};
 	static inline XMINT2 lastWindowedSize{};
 	static inline XMINT2 lastWindowedPos{};
+
 	static inline std::list<Layer*> layers{};
+
+	static inline double lastFrameTime{};
+	static inline double deltaTime{};
 
 public:
 	static void Init();
@@ -29,6 +33,8 @@ public:
 
 	static XMINT2 GetWindowSize();
 	static XMINT2 GetWindowPosition();
+
+	static double GetDeltaTime();
 
 	static HWND GetWindowHandle();
 	static std::filesystem::path GetApplicationPath();

@@ -5,11 +5,12 @@
 void TimeManager::Update(double delta)
 {
 	deltaTime = delta;
+	totalTime += delta;
 }
 
 double TimeManager::GetTotalTime()
 {
-	return glfwGetTime();
+	return totalTime;
 }
 
 double TimeManager::GetDeltaTime()

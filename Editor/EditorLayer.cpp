@@ -10,6 +10,7 @@
 
 #include "ViewportWindow.h"
 #include "SceneWindow.h"
+#include "StatsWindow.h"
 
 ImTextureID EditorLayer::GetViewportTextureID()
 {
@@ -56,7 +57,9 @@ void EditorLayer::OnPush()
 
 	viewport = new ViewportWindow();
 	windows.push_back(viewport);
+
 	windows.push_back(new SceneWindow());
+	windows.push_back(new StatsWindow());
 }
 
 void EditorLayer::Update()

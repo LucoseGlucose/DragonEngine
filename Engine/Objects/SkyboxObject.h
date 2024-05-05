@@ -18,5 +18,5 @@ public:
 	TextureCubemap* irradiance = nullptr;
 	TextureCubemap* specular = nullptr;
 
-	RendererComponent* GetRenderer();
+	RendererComponent* GetRendererComponent();
 };

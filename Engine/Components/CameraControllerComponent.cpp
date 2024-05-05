@@ -45,6 +45,8 @@ void CameraControllerComponent::OnUpdate()
 
 	if (Input::GetMouseButton(GLFW_MOUSE_BUTTON_RIGHT))
 	{
+		glfwSetInputMode(Application::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 		float yaw = posDelta.x * (float)TimeManager::GetDeltaTime() * rotateSpeed;
 		yaw = DirectX::XMConvertToRadians(yaw);
 
@@ -135,6 +137,6 @@ void CameraControllerComponent::OnUpdate()
 			DirectX::XMStoreFloat3(&newPos, vec);
 			GetTransform()->SetPosition(newPos);
 		}
-
 	}
+	else glfwSetInputMode(Application::window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }

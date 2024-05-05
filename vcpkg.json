@@ -1,0 +1,16 @@
+{
+  "dependencies": [
+    "assimp",
+    "d3dx12",
+    "glfw3",
+    {
+      "name": "imgui",
+      "features": [
+        "docking-experimental",
+        "dx12-binding",
+        "glfw-binding"
+      ]
+    },
+    "stb"
+  ]
+}

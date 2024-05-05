@@ -9,7 +9,7 @@ CameraComponent::CameraComponent(SceneObject* owner) : Component(owner)
 
 void CameraComponent::CalculateProjection()
 {
-	XMINT2 windowSize = Application::GetFramebufferSize();
+	XMUINT2 windowSize = Application::GetViewportSize();
 
 	DirectX::XMStoreFloat4x4(&projectionMat, DirectX::XMMatrixPerspectiveFovLH(
 		DirectX::XMConvertToRadians(fieldOfView), (float)windowSize.x / windowSize.y, nearClip, farClip));

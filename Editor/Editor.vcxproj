@@ -82,6 +82,17 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>DragonEditor</TargetName>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <VcpkgUseStatic>false</VcpkgUseStatic>
+    <VcpkgTriplet>x64-windows</VcpkgTriplet>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <VcpkgUseStatic>false</VcpkgUseStatic>
+    <VcpkgTriplet>x64-windows</VcpkgTriplet>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -160,6 +171,7 @@
     <ClCompile Include="EditorWindow.cpp" />
     <ClCompile Include="ImGuiRenderPass.cpp" />
     <ClCompile Include="SceneWindow.cpp" />
+    <ClCompile Include="StatsWindow.cpp" />
     <ClCompile Include="ViewportWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -176,6 +188,7 @@
     <ClInclude Include="IconsMaterialDesign.h" />
     <ClInclude Include="ImGuiRenderPass.h" />
     <ClInclude Include="SceneWindow.h" />
+    <ClInclude Include="StatsWindow.h" />
     <ClInclude Include="ViewportWindow.h" />
   </ItemGroup>
   <ItemGroup>

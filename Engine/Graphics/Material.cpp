@@ -159,7 +159,7 @@ void Material::SetSampler(const std::string& name, Sampler sampler)
 	uint32_t index = samplerParameters[name];
 
 	D3D12_CPU_DESCRIPTOR_HANDLE samplerDescStartHnd = samplerDescHeap->GetCPUDescriptorHandleForHeapStart();
-	UINT incrementSize = Rendering::device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	UINT incrementSize = Rendering::device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 	CD3DX12_CPU_DESCRIPTOR_HANDLE samplerDescHnd = CD3DX12_CPU_DESCRIPTOR_HANDLE(samplerDescStartHnd, index, incrementSize);
 
 	Rendering::device->CreateSampler(&sampler, samplerDescHnd);

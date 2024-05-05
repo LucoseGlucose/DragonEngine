@@ -10,4 +10,5 @@ public:
 	virtual void BeforeShow() override;
 	virtual void OnGui() override;
 	virtual void AfterShow() override;
+	virtual void OnResizeWindow(ImVec2 newSize);
 };

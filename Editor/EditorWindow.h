@@ -4,6 +4,11 @@
 
 class EditorWindow
 {
+protected:
+	int sameWindowSizeFrames = 0;
+	bool resizingWindow = false;
+	const int sameWindowSizeFrameMax = 4;
+
 public:
 	EditorWindow(const std::string& title, const ImVec2& minSize);
 
@@ -17,4 +22,5 @@ public:
 	virtual void BeforeShow();
 	virtual void OnGui();
 	virtual void AfterShow();
+	virtual void OnResizeWindow(ImVec2 newSize);
 };

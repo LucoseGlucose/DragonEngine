@@ -17,32 +17,28 @@ SceneRenderPass::SceneRenderPass()
 	skyboxObj->irradiance = TextureCubemap::ComputeDiffuseIrradiance(skyboxObj->skybox, XMUINT2(32, 32));
 	skyboxObj->specular = TextureCubemap::ComputeAmbientSpecular(skyboxObj->skybox, XMUINT2(256, 256), 5);
 
-	skyboxObj->GetRenderer()->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("SkyboxV.cso"),
+	skyboxObj->GetRendererComponent()->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("SkyboxV.cso"),
 		Utils::GetPathFromExe("SkyboxP.cso"), outputFB));
 }
 
 SceneRenderPass::~SceneRenderPass()
 {
-	delete renderers;
-	delete lights;
 	delete skyboxObj;
 }
 
 void SceneRenderPass::Execute(Framebuffer* inputFB, CommandRecorder* recorder)
 {
-	delete renderers;
 	renderers = SceneManager::GetActiveScene()->FindComponents<RendererComponent>();
-
-	delete lights;
 	lights = SceneManager::GetActiveScene()->FindComponents<LightComponent>();
 
+	Rendering::SetViewportSize(outputFB->colorTexture->size);
 	outputFB->Setup(recorder, true);
 
-	for (size_t i = 0; i < renderers->size(); i++)
+	for (size_t i = 0; i < renderers.size(); i++)
 	{
-		RendererComponent* renderer = renderers->at(i);
+		RendererComponent* renderer = renderers.at(i);
 		renderer->Render(recorder);
 	}
 
-	skyboxObj->GetRenderer()->Render(recorder);
+	skyboxObj->GetRendererComponent()->Render(recorder);
 }

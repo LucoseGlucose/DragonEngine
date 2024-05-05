@@ -38,7 +38,7 @@ ShaderParamFunc RendererComponent::GetLitShaderParamFunc()
 		XMFLOAT3 cameraPosition = Rendering::outputCam->GetTransform()->GetPosition();
 		renderer->material->SetParameter("p_cameraPosition", &cameraPosition);
 
-		std::vector<LightComponent*> lights = *Rendering::scenePass->lights;
+		std::vector<LightComponent*> lights = Rendering::scenePass->lights;
 		std::map<LightComponent*, float> distances{};
 
 		for (size_t i = 0; i < lights.size(); i++)
