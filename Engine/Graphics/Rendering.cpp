@@ -57,7 +57,7 @@ void Rendering::Init()
 			continue;
 		}
 
-		HRESULT result = D3D12CreateDevice(tempAdapter.Get(), D3D_FEATURE_LEVEL_11_1, _uuidof(ID3D12Device), nullptr);
+		HRESULT result = D3D12CreateDevice(tempAdapter.Get(), D3D_FEATURE_LEVEL_12_2, _uuidof(ID3D12Device), nullptr);
 		if (SUCCEEDED(result))
 		{
 			if (adapterDesc.DedicatedVideoMemory > mostVideoMem)
@@ -70,7 +70,7 @@ void Rendering::Init()
 		adapterIndex++;
 	}
 
-	Utils::ThrowIfFailed(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_1, IID_PPV_ARGS(&device)));
+	Utils::ThrowIfFailed(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_12_2, IID_PPV_ARGS(&device)));
 	NAME_D3D_OBJECT(device);
 
 	commandQueue = new CommandQueue();
@@ -92,20 +92,23 @@ void Rendering::Init()
 	quadMesh = new Mesh(Utils::GetPathFromProject("Models/Quad.fbx"));
 
 	outputObj = (new SceneObject("Render Output"))->AddComponent<RendererComponent>();
-	outputObj->mesh = quadMesh;
+	outputObj->SetMesh(quadMesh);
 
-	outputObj->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputV.cso"),
-		Utils::GetPathFromExe("OutputP.cso"), 1, DXGI_FORMAT_R8G8B8A8_UNORM));
+	outputObj->SetMaterial(new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputV.cso"),
+		Utils::GetPathFromExe("OutputP.cso"), 1, DXGI_FORMAT_R8G8B8A8_UNORM)));
 
 	scenePass = new SceneRenderPass();
 	resolvePass = new ResolveRenderPass();
+
 	tonemapPass = new ProcessRenderPass(new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputV.cso"),
 		Utils::GetPathFromExe("TonemapP.cso"), 1, DXGI_FORMAT_R16G16B16A16_FLOAT)));
+	tonemapPass->material->SetParameter("p_tonemappingMode", 1);
+
 	gammaPass = new ProcessRenderPass(new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputV.cso"),
 		Utils::GetPathFromExe("GammaP.cso"), 1, DXGI_FORMAT_R16G16B16A16_FLOAT)));
 
 	renderPasses = std::vector<RenderPass*>{ scenePass, resolvePass, tonemapPass, gammaPass };
-	outputObj->material->SetTexture("t_inputTexture", renderPasses.back()->outputFB->colorTexture);
+	outputObj->GetMaterial()->SetTexture("t_inputTexture", renderPasses.back()->outputFB->colorTexture);
 }
 
 void Rendering::Render()
@@ -157,7 +160,7 @@ void Rendering::Resize(XMUINT2 newSize)
 		renderPasses[i]->Resize(i != 0 ? renderPasses[i - 1]->outputFB : nullptr, newSize);
 	}
 
-	outputObj->material->UpdateTexture("t_inputTexture", renderPasses.back()->outputFB->colorTexture);
+	outputObj->GetMaterial()->UpdateTexture("t_inputTexture", renderPasses.back()->outputFB->colorTexture);
 	presentationBuffer->Resize(newSize);
 }
 

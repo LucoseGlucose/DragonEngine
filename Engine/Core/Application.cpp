@@ -24,7 +24,7 @@ void Application::Run()
 {
 	while (!glfwWindowShouldClose(window))
 	{
-		deltaTime = std::lerp(deltaTime, glfwGetTime() - lastFrameTime, .25);
+		deltaTime = glfwGetTime() - lastFrameTime;
 		lastFrameTime = glfwGetTime();
 
 		XMUINT2 preWindowSize = GetUnsignedFramebufferSize();

@@ -5,7 +5,8 @@
 class StatsWindow : public EditorWindow
 {
 	int framesSinceUpdate = 0;
-	const int maxFramesSinceUpdate = 15;
+	const double maxUpdateTime = .1;
+	double totalDeltaTime = 0;
 	double lastDeltaTime = 0;
 	double startupTime = 0;
 

@@ -354,7 +354,7 @@ TextureCubemap* TextureCubemap::ComputeDiffuseIrradiance(TextureCubemap* skybox,
 	return cubemap;
 }
 
-TextureCubemap* TextureCubemap::ComputeAmbientSpecular(TextureCubemap* skybox, XMUINT2 size, uint32_t mipCount)
+TextureCubemap* TextureCubemap::ComputeAmbientSpecular(TextureCubemap* skybox, XMUINT2 size, uint32_t mipCount, float sampleCount)
 {
 	CD3DX12_CLEAR_VALUE rtClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_R16G16B16A16_FLOAT, Colors::Black.f);
 	CD3DX12_CLEAR_VALUE dsClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_D32_FLOAT, 1.0f, 0);
@@ -383,6 +383,7 @@ TextureCubemap* TextureCubemap::ComputeAmbientSpecular(TextureCubemap* skybox, X
 
 			fb->Setup(recorder, true);
 
+			material->SetParameter("p_sampleCount", sampleCount);
 			material->SetParameter("p_mvpMat", &matrices[i], sizeof(XMFLOAT4X4));
 
 			float resolution = skybox->size.x;

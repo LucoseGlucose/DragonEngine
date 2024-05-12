@@ -275,23 +275,6 @@
     <None Include="imgui.ini" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders\AmbientSpecularP.hlsl" />
-    <FxCompile Include="Shaders\CubemapV.hlsl" />
-    <FxCompile Include="Shaders\EquirectToCubemapP.hlsl" />
-    <FxCompile Include="Shaders\IrradianceP.hlsl" />
-    <FxCompile Include="Shaders\LitP.hlsl" />
-    <FxCompile Include="Shaders\LitV.hlsl" />
-    <FxCompile Include="Shaders\MipmapCubeP.hlsl" />
-    <FxCompile Include="Shaders\MipmapP.hlsl" />
-    <FxCompile Include="Shaders\MipmapV.hlsl" />
-    <FxCompile Include="Shaders\OutputP.hlsl" />
-    <FxCompile Include="Shaders\OutputV.hlsl" />
-    <FxCompile Include="Shaders\SkyboxP.hlsl" />
-    <FxCompile Include="Shaders\SkyboxV.hlsl" />
-    <FxCompile Include="Shaders\TonemapP.hlsl" />
-    <FxCompile Include="Shaders\GammaP.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="Images\UV Checker.png">
       <Filter>Resource Files</Filter>
     </Image>
@@ -325,5 +308,22 @@
     <Image Include="Images\BRDF LUT.png">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders\TonemapP.hlsl" />
+    <FxCompile Include="Shaders\AmbientSpecularP.hlsl" />
+    <FxCompile Include="Shaders\CubemapV.hlsl" />
+    <FxCompile Include="Shaders\EquirectToCubemapP.hlsl" />
+    <FxCompile Include="Shaders\GammaP.hlsl" />
+    <FxCompile Include="Shaders\IrradianceP.hlsl" />
+    <FxCompile Include="Shaders\LitP.hlsl" />
+    <FxCompile Include="Shaders\LitV.hlsl" />
+    <FxCompile Include="Shaders\MipmapCubeP.hlsl" />
+    <FxCompile Include="Shaders\MipmapP.hlsl" />
+    <FxCompile Include="Shaders\MipmapV.hlsl" />
+    <FxCompile Include="Shaders\OutputP.hlsl" />
+    <FxCompile Include="Shaders\OutputV.hlsl" />
+    <FxCompile Include="Shaders\SkyboxP.hlsl" />
+    <FxCompile Include="Shaders\SkyboxV.hlsl" />
   </ItemGroup>
 </Project>

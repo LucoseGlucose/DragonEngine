@@ -12,6 +12,8 @@ ImGuiRenderPass::ImGuiRenderPass()
 
 	outputFB = new Framebuffer(Application::GetUnsignedFramebufferSize(), DXGI_FORMAT_R16G16B16A16_FLOAT,
 		DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);
+
+	Rendering::outputObj->GetMaterial()->SetTexture("t_inputTexture", outputFB->colorTexture);
 }
 
 void ImGuiRenderPass::Execute(Framebuffer* inputFB, CommandRecorder* recorder)

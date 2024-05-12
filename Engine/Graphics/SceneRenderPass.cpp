@@ -15,10 +15,10 @@ SceneRenderPass::SceneRenderPass()
 	skyboxObj = new SkyboxObject("Skybox");
 	skyboxObj->skybox = TextureCubemap::ImportHDR(Utils::GetPathFromProject("Images/limpopo_golf_course_4k.hdr"), true);
 	skyboxObj->irradiance = TextureCubemap::ComputeDiffuseIrradiance(skyboxObj->skybox, XMUINT2(32, 32));
-	skyboxObj->specular = TextureCubemap::ComputeAmbientSpecular(skyboxObj->skybox, XMUINT2(256, 256), 5);
+	skyboxObj->specular = TextureCubemap::ComputeAmbientSpecular(skyboxObj->skybox, XMUINT2(1024, 1024), 5, 4096);
 
-	skyboxObj->GetRendererComponent()->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("SkyboxV.cso"),
-		Utils::GetPathFromExe("SkyboxP.cso"), outputFB));
+	skyboxObj->GetRendererComponent()->SetMaterial(new Material(ShaderProgram::Create(Utils::GetPathFromExe("SkyboxV.cso"),
+		Utils::GetPathFromExe("SkyboxP.cso"), outputFB)));
 }
 
 SceneRenderPass::~SceneRenderPass()

@@ -5,7 +5,7 @@
 #include "Texture2D.h"
 
 #include <d3d12shader.h>
-#include <d3dcompiler.h>
+#include <dxcapi.h>
 
 Material::Material(ShaderProgram* shader) : shader(shader)
 {
@@ -24,9 +24,16 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 		if (!shader->shaders.contains(type)) continue;
 		Shader* currentShader = shader->shaders[type];
 
+		ComPtr<IDxcUtils> utils;
+		Utils::ThrowIfFailed(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&utils)));
+
+		DxcBuffer shaderBuffer{};
+		shaderBuffer.Ptr = currentShader->bytecode.pShaderBytecode;
+		shaderBuffer.Size = currentShader->bytecode.BytecodeLength;
+		shaderBuffer.Encoding = 0u;
+
 		ComPtr<ID3D12ShaderReflection> shaderReflection;
-		Utils::ThrowIfFailed(D3DReflect(currentShader->bytecode.pShaderBytecode,
-			currentShader->bytecode.BytecodeLength, IID_PPV_ARGS(&shaderReflection)));
+		Utils::ThrowIfFailed(utils->CreateReflection(&shaderBuffer, IID_PPV_ARGS(&shaderReflection)));
 
 		D3D12_SHADER_DESC shaderDesc{};
 		Utils::ThrowIfFailed(shaderReflection->GetDesc(&shaderDesc));

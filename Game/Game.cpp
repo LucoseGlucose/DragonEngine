@@ -22,19 +22,21 @@ Scene* Game::Init()
 	cam->GetTransform()->SetPosition(XMFLOAT3(0.f, 0.f, -4.f));
 
 	LightComponent* light = scene->AddObject(new SceneObject("Light"))->AddComponent<DirectionalLightComponent>();
+	light->strength = .5f;
+	light->color = XMFLOAT3(1.f, .99f, .97f);
 	light->GetTransform()->SetPosition(XMFLOAT3(2.f, 2.5f, -1.5f));
 	light->GetTransform()->SetEulerAngles(XMFLOAT3(28.f, 53.f, 0.f));
 
-	Mesh* cubeMesh = new Mesh(Utils::GetPathFromProject("Models/Cube.fbx"));
+	Mesh* mesh = new Mesh(Utils::GetPathFromProject("Models/Cube.fbx"));
 
-	RendererComponent* mesh = scene->AddObject(new SceneObject("Mesh"))->AddComponent<RendererComponent>();
-	mesh->mesh = cubeMesh;
-	mesh->material = new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitV.cso"),
-		Utils::GetPathFromExe("LitP.cso"), Rendering::scenePass->outputFB));
+	RendererComponent* object = scene->AddObject(new SceneObject("Mesh"))->AddComponent<RendererComponent>();
+	object->SetMesh(mesh);
+	object->SetMaterial(new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitV.cso"),
+		Utils::GetPathFromExe("LitP.cso"), Rendering::scenePass->outputFB)));
 
-	mesh->material->SetParameter("p_albedo", (void*)&DirectX::Colors::Firebrick.f[0], sizeof(float) * 4);
-	mesh->material->SetParameter("p_metallic", .25f);
-	mesh->material->SetParameter("p_roughness", .75f);
+	object->GetMaterial()->SetParameter("p_albedo", (void*)&DirectX::Colors::DodgerBlue.f[0], sizeof(float) * 4);
+	object->GetMaterial()->SetParameter("p_metallic", .7f);
+	object->GetMaterial()->SetParameter("p_roughness", .1f);
 
 	return scene;
 }

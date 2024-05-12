@@ -9,7 +9,7 @@ SamplerState s_sampler : register(s0);
 
 cbuffer PostProcessSettings : register(b0)
 {
-    uint p_tonemappingMode = 1;
+    uint p_tonemappingMode;
 }
 
 float3 aces(float3 x)

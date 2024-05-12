@@ -5,6 +5,7 @@
 
 RendererComponent::RendererComponent(SceneObject* owner) : Component(owner)
 {
+	shaderDefaultFunc = GetLitShaderDefaultFunc();
 	shaderParamFunc = GetLitShaderParamFunc();
 }
 
@@ -12,6 +13,20 @@ RendererComponent::~RendererComponent()
 {
 	delete mesh;
 	delete material;
+}
+
+ShaderParamFunc RendererComponent::GetLitShaderDefaultFunc()
+{
+	return [](RendererComponent* renderer)
+	{
+		renderer->material->SetParameter("p_albedo", XMFLOAT4(1.f, 1.f, 1.f, 1.f));
+		renderer->material->SetParameter("p_roughness", .5f);
+		renderer->material->SetParameter("p_metallic", .5f);
+		renderer->material->SetParameter("p_normalStrength", 1.f);
+		renderer->material->SetParameter("p_aoStrength", 1.f);
+		renderer->material->SetParameter("p_emissive", XMFLOAT3(0.f, 0.f, 0.f));
+		renderer->material->SetParameter("p_ambientColor", XMFLOAT3(.25f, .25f, .25f));
+	};
 }
 
 ShaderParamFunc RendererComponent::GetLitShaderParamFunc()
@@ -68,11 +83,33 @@ ShaderParamFunc RendererComponent::GetLitShaderParamFunc()
 			lightData[i] = data;
 		}
 
-		renderer->material->SetParameter<LightData*>("p_lights", lightData);
+		renderer->material->SetParameter<LightData>("p_lights", lightData);
+		renderer->material->SetParameter("p_ambientColor", Rendering::scenePass->skyboxObj->ambientColor);
 
 		renderer->material->SetTexture("t_irradiance", Rendering::scenePass->skyboxObj->irradiance);
 		renderer->material->SetTexture("t_specularReflections", Rendering::scenePass->skyboxObj->specular);
 	};
+}
+
+void RendererComponent::SetMaterial(Material* material)
+{
+	this->material = material;
+	if (shaderDefaultFunc != nullptr) shaderDefaultFunc(this);
+}
+
+Material* RendererComponent::GetMaterial()
+{
+	return material;
+}
+
+void RendererComponent::SetMesh(Mesh* mesh)
+{
+	this->mesh = mesh;
+}
+
+Mesh* RendererComponent::GetMesh()
+{
+	return mesh;
 }
 
 void RendererComponent::Render(CommandRecorder* recorder)

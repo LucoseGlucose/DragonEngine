@@ -3,7 +3,7 @@
 
 #include "Rendering.h"
 #include <d3d12shader.h>
-#include <d3dcompiler.h>
+#include <dxcapi.h>
 
 ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList, uint32_t samples, DXGI_FORMAT format) : shaders(shaderList)
 {
@@ -26,9 +26,17 @@ ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList, u
         if (!shaders.contains(type)) continue;
         Shader* shader = shaders[type];
 
+        ComPtr<IDxcUtils> utils;
+        Utils::ThrowIfFailed(DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&utils)));
+
+        DxcBuffer shaderBuffer{};
+        shaderBuffer.Ptr = shader->bytecode.pShaderBytecode;
+        shaderBuffer.Size = shader->bytecode.BytecodeLength;
+        shaderBuffer.Encoding = 0u;
+
         ComPtr<ID3D12ShaderReflection> shaderReflection;
-        Utils::ThrowIfFailed(D3DReflect(shader->bytecode.pShaderBytecode,
-            shader->bytecode.BytecodeLength, IID_PPV_ARGS(&shaderReflection)));
+        Utils::ThrowIfFailed(utils->CreateReflection(&shaderBuffer, IID_PPV_ARGS(&shaderReflection)));
+
         if (type == SHADER_TYPE_VERTEX) vertexShaderReflection = shaderReflection;
 
         D3D12_SHADER_DESC shaderDesc{};

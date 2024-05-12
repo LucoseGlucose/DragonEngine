@@ -9,12 +9,12 @@ struct PS_INPUT
 
 cbuffer SurfaceParameters : register(b1)
 {
-    float4 p_albedo = float4(1.f, 1.f, 1.f, 1.f);
-    float p_roughness = .5f;
-    float p_metallic = .5f;
-    float p_normalStrength = 1.f;
-    float p_aoStrength = 1.f;
-    float3 p_emissive = float3(0.f, 0.f, 0.f);
+    float4 p_albedo;
+    float p_roughness;
+    float p_metallic;
+    float p_normalStrength;
+    float p_aoStrength;
+    float3 p_emissive;
 }
 
 struct Light
@@ -33,7 +33,7 @@ cbuffer WorldParameters : register(b2)
 {
     float3 p_cameraPosition;
     Light p_lights[5];
-    float3 p_ambientColor = float3(1.f, 1.f, 1.f);
+    float3 p_ambientColor;
 }
 
 Texture2D<float4> t_albedoW : register(t0);

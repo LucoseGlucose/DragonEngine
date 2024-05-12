@@ -8,11 +8,12 @@ SkyboxObject::SkyboxObject(std::string name) : SceneObject(name)
 	renderer = AddComponent<RendererComponent>();
 	if (skyboxMesh == nullptr) skyboxMesh = new Mesh(Utils::GetPathFromProject("Models/Inverted Cube.fbx"));
 
-	renderer->mesh = skyboxMesh;
+	renderer->SetMesh(skyboxMesh);
+	renderer->shaderDefaultFunc = nullptr;
 
 	renderer->shaderParamFunc = [](RendererComponent* renderer)
 	{
-		renderer->material->SetTexture("t_texture", renderer->GetOwner<SkyboxObject>()->skybox);
+		renderer->GetMaterial()->SetTexture("t_texture", renderer->GetOwner<SkyboxObject>()->skybox);
 
 		XMFLOAT4X4 projMat = Rendering::outputCam->GetProjectionMat();
 		XMFLOAT4X4 viewMat = Rendering::outputCam->GetViewMat();
@@ -25,7 +26,7 @@ SkyboxObject::SkyboxObject(std::string name) : SceneObject(name)
 		XMFLOAT4X4 mvpMat;
 		DirectX::XMStoreFloat4x4(&mvpMat, DirectX::XMMatrixTranspose(multiplied));
 
-		renderer->material->SetParameter("p_mvpMat", &mvpMat, sizeof(mvpMat));
+		renderer->GetMaterial()->SetParameter("p_mvpMat", &mvpMat, sizeof(mvpMat));
 	};
 }
 

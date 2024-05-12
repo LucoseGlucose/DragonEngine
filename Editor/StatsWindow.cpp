@@ -11,13 +11,15 @@ StatsWindow::StatsWindow() : EditorWindow(ICON_MD_FORMAT_LIST_NUMBERED" Stats", 
 void StatsWindow::OnGui()
 {
 	framesSinceUpdate++;
+	totalDeltaTime += Application::GetDeltaTime();
 
-	if (framesSinceUpdate >= maxFramesSinceUpdate)
+	if (totalDeltaTime >= maxUpdateTime)
 	{
+		lastDeltaTime = totalDeltaTime / static_cast<double>(framesSinceUpdate);
 		framesSinceUpdate = 0;
-		lastDeltaTime = Application::GetDeltaTime() * 1000;
+		totalDeltaTime = 0;
 	}
 
 	ImGui::Text("Startup time: %s s", std::to_string(startupTime).c_str());
-	ImGui::Text("Last frame time: %s ms", std::to_string(lastDeltaTime).c_str());
+	ImGui::Text("Last frame time: %s ms", std::to_string(lastDeltaTime * 1000).c_str());
 }

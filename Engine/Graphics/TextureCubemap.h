@@ -19,5 +19,5 @@ public:
 	static TextureCubemap* Import(const std::array<std::filesystem::path, 6>& files, bool sRGB, bool generateMips);
 	static TextureCubemap* ImportHDR(const std::filesystem::path& file, bool generateMips);
 	static TextureCubemap* ComputeDiffuseIrradiance(TextureCubemap* skybox, XMUINT2 size);
-	static TextureCubemap* ComputeAmbientSpecular(TextureCubemap* skybox, XMUINT2 size, uint32_t mipCount);
+	static TextureCubemap* ComputeAmbientSpecular(TextureCubemap* skybox, XMUINT2 size, uint32_t mipCount, float sampleCount);
 };

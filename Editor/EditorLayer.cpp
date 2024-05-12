@@ -53,7 +53,6 @@ void EditorLayer::OnPush()
 
 	ImGuiRenderPass* imRenderPass = new ImGuiRenderPass();
 	Rendering::renderPasses.push_back(imRenderPass);
-	Rendering::outputObj->material->SetTexture("t_inputTexture", imRenderPass->outputFB->colorTexture);
 
 	viewport = new ViewportWindow();
 	windows.push_back(viewport);

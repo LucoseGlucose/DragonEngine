@@ -3,6 +3,8 @@
     "assimp",
     "d3dx12",
     "glfw3",
+    "stb",
+    "directx-dxc",
     {
       "name": "imgui",
       "features": [
@@ -10,7 +12,6 @@
         "dx12-binding",
         "glfw-binding"
       ]
-    },
-    "stb"
+    }
   ]
 }
