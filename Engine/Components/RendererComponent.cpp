@@ -58,7 +58,7 @@ ShaderParamFunc RendererComponent::GetLitShaderParamFunc()
 
 		for (size_t i = 0; i < lights.size(); i++)
 		{
-			distances[lights[i]] = lights[i]->GetTransform()->GetDistance(renderer->GetTransform(), true);
+			distances[lights[i]] = lights[i]->GetTransform()->GetDistance(renderer->GetTransform());
 		}
 
 		std::sort(lights.begin(), lights.end(), [distances](LightComponent* l1, LightComponent* l2)
@@ -116,8 +116,17 @@ void RendererComponent::Render(CommandRecorder* recorder)
 {
 	if (mesh == nullptr || material == nullptr) return;
 
+	XMFLOAT4X4 currentMat = GetOwner()->GetTransform()->GetMatrix();
+
+	CalculateBoundingBoxes();
 	shaderParamFunc(this);
 
 	material->Bind(recorder);
 	mesh->Draw(recorder);
+}
+
+void RendererComponent::CalculateBoundingBoxes()
+{
+	XMFLOAT3 pos = GetTransform()->GetPosition();
+
 }

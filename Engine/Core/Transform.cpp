@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "Transform.h"
 
-Transform::Transform(SceneObject* owner) : position(), rotation(DirectX::g_XMIdentityR3), scale(DirectX::g_XMOne3),
-	matrix(), localPosition(), localRotation(DirectX::g_XMIdentityR3), localScale(DirectX::g_XMOne3), localMatrix()
+Transform::Transform(SceneObject* owner) : position(), rotation(Quaternion::Identity), scale(Vector3::One),
+	matrix(Matrix::Identity), localPosition(), localRotation(Quaternion::Identity), localScale(Vector3::One), localMatrix()
 {
 	this->owner = owner;
 	this->parent = nullptr;
@@ -25,370 +25,204 @@ void Transform::SetParent(Transform* newParent, bool keepWorldTransform)
 	parent = newParent;
 }
 
-XMFLOAT3 Transform::GetPosition()
+Vector3 Transform::GetPosition()
 {
 	return position;
 }
 
-XMFLOAT4 Transform::GetRotation()
+Quaternion Transform::GetRotation()
 {
 	return rotation;
 }
 
-XMFLOAT3 Transform::GetScale()
+Vector3 Transform::GetScale()
 {
 	return scale;
 }
 
-XMFLOAT4X4 Transform::GetMatrix()
+Matrix Transform::GetMatrix()
 {
 	return matrix;
 }
 
-XMFLOAT3 Transform::GetEulerAngles()
+Vector3 Transform::GetEulerAngles()
 {
-	return Utils::QuatToEulerAngles(rotation);
+	return rotation.ToEuler();
 }
 
-XMFLOAT3 Transform::GetForward()
+Vector3 Transform::GetForward()
 {
-	XMVECTOR rotVec = DirectX::XMLoadFloat4(&rotation);
-	XMVECTOR fwdVec = XMVector3Rotate(DirectX::g_XMIdentityR2, rotVec);
-
-	XMFLOAT3 fwd;
-	DirectX::XMStoreFloat3(&fwd, fwdVec);
-
-	return fwd;
+	return Vector3::Transform(Vector3::UnitZ, rotation);
 }
 
-XMFLOAT3 Transform::GetUp()
+Vector3 Transform::GetUp()
 {
-	XMVECTOR rotVec = DirectX::XMLoadFloat4(&rotation);
-	XMVECTOR upVec = XMVector3Rotate(DirectX::g_XMIdentityR1, rotVec);
-
-	XMFLOAT3 up;
-	DirectX::XMStoreFloat3(&up, upVec);
-
-	return up;
+	return Vector3::Transform(Vector3::UnitY, rotation);
 }
 
-XMFLOAT3 Transform::GetRight()
+Vector3 Transform::GetRight()
 {
-	XMVECTOR rotVec = DirectX::XMLoadFloat4(&rotation);
-	XMVECTOR rightVec = XMVector3Rotate(DirectX::g_XMIdentityR0, rotVec);
-
-	XMFLOAT3 right;
-	DirectX::XMStoreFloat3(&right, rightVec);
-
-	return right;
+	return Vector3::Transform(Vector3::UnitX, rotation);
 }
 
 void Transform::CalculateMatrices()
 {
-	XMVECTOR posVec = DirectX::XMLoadFloat3(&position);
-	XMVECTOR rotVec = DirectX::XMLoadFloat4(&rotation);
-	XMVECTOR sclVec = DirectX::XMLoadFloat3(&scale);
-
-	XMMATRIX mat = DirectX::XMMatrixScalingFromVector(sclVec) *
-		DirectX::XMMatrixRotationQuaternion(rotVec) * DirectX::XMMatrixTranslationFromVector(posVec);
-	DirectX::XMStoreFloat4x4(&matrix, mat);
-
-	XMVECTOR lposVec = DirectX::XMLoadFloat3(&localPosition);
-	XMVECTOR lrotVec = DirectX::XMLoadFloat4(&localRotation);
-	XMVECTOR lsclVec = DirectX::XMLoadFloat3(&localScale);
-
-	XMMATRIX lmat = DirectX::XMMatrixScalingFromVector(lsclVec) *
-		DirectX::XMMatrixRotationQuaternion(lrotVec) * DirectX::XMMatrixTranslationFromVector(lposVec);
-	DirectX::XMStoreFloat4x4(&localMatrix, lmat);
+	matrix = Matrix::CreateScale(scale) * Matrix::CreateFromQuaternion(rotation) * Matrix::CreateTranslation(position);
+	localMatrix = Matrix::CreateScale(localScale) * Matrix::CreateFromQuaternion(localRotation) * Matrix::CreateTranslation(localPosition);
 }
 
-void Transform::SetPosition(XMFLOAT3 pos)
+void Transform::SetPosition(Vector3 pos)
 {
-	uint32_t comparison;
-	DirectX::XMVectorEqualR(&comparison, DirectX::XMLoadFloat3(&position), DirectX::XMLoadFloat3(&pos));
-
-	if (DirectX::XMComparisonAllTrue(comparison)) return;
+	if (pos == position) return;
 	position = pos;
 
 	if (parent == nullptr) localPosition = position;
-	else
-	{
-		XMVECTOR posVec = DirectX::XMLoadFloat3(&position);
-
-		XMFLOAT4X4 parent4x4Mat = parent->GetMatrix();
-		XMMATRIX parentMat = DirectX::XMLoadFloat4x4(&parent4x4Mat);
-
-		XMVECTOR parentMatDet = DirectX::XMMatrixDeterminant(parentMat);
-		XMMATRIX invPMat = DirectX::XMMatrixInverse(&parentMatDet, parentMat);
-
-		XMVECTOR newLPos = DirectX::XMVector3Transform(posVec, invPMat);
-		DirectX::XMStoreFloat3(&localPosition, newLPos);
-	}
+	else localPosition = Vector3::Transform(position, parent->GetMatrix().Invert());
 
 	CalculateMatrices();
 }
 
-void Transform::SetRotation(XMFLOAT4 rot)
+void Transform::SetRotation(Quaternion rot)
 {
-	uint32_t comparison;
-	DirectX::XMVectorEqualR(&comparison, DirectX::XMLoadFloat4(&rotation), DirectX::XMLoadFloat4(&rot));
-
-	if (DirectX::XMComparisonAllTrue(comparison)) return;
+	if (rot == rotation) return;
 	rotation = rot;
 
 	if (parent == nullptr) localRotation = rotation;
-	else
-	{
-		XMVECTOR rotVec = DirectX::XMLoadFloat4(&rotation);
-
-		XMFLOAT4 parentRot = parent->GetRotation();
-		XMVECTOR parentRotVec = DirectX::XMLoadFloat4(&parentRot);
-		XMVECTOR invParentRotVec = DirectX::XMQuaternionInverse(parentRotVec);
-
-		XMVECTOR newLRot = DirectX::XMQuaternionMultiply(invParentRotVec, rotVec);
-		DirectX::XMStoreFloat4(&localRotation, newLRot);
-	}
+	else localRotation = parent->GetRotation() * rotation;
 
 	CalculateMatrices();
 }
 
-void Transform::SetScale(XMFLOAT3 scl)
+void Transform::SetScale(Vector3 scl)
 {
-	uint32_t comparison;
-	DirectX::XMVectorEqualR(&comparison, DirectX::XMLoadFloat3(&scale), DirectX::XMLoadFloat3(&scl));
-
-	if (DirectX::XMComparisonAllTrue(comparison)) return;
+	if (scl == scale) return;
 	scale = scl;
 
 	if (parent == nullptr) localScale = scale;
-	else
-	{
-		XMVECTOR sclVec = DirectX::XMLoadFloat3(&scale);
-
-		XMFLOAT3 parentScale = parent->GetScale();
-		XMVECTOR parentSclVec = DirectX::XMLoadFloat3(&parentScale);
-
-		XMVECTOR newLScl = sclVec / parentSclVec;
-		DirectX::XMStoreFloat3(&localScale, newLScl);
-	}
+	else localScale = scale / parent->GetScale();
 
 	CalculateMatrices();
 }
 
-void Transform::SetMatrix(XMFLOAT4X4 mat)
+void Transform::SetMatrix(Matrix mat)
 {
-	XMVECTOR posVec;
-	XMVECTOR rotVec;
-	XMVECTOR sclVec;
-	XMMATRIX matMat = DirectX::XMLoadFloat4x4(&mat);
+	Vector3 pos;
+	Quaternion rot;
+	Vector3 scl;
 
-	DirectX::XMMatrixDecompose(&sclVec, &rotVec, &posVec, matMat);
-
-	XMFLOAT3 pos;
-	XMFLOAT4 rot;
-	XMFLOAT3 scl;
-
-	DirectX::XMStoreFloat3(&pos, posVec);
-	DirectX::XMStoreFloat4(&rot, rotVec);
-	DirectX::XMStoreFloat3(&scl, sclVec);
+	mat.Decompose(scl, rot, pos);
 
 	SetPosition(pos);
 	SetRotation(rot);
 	SetScale(scl);
 }
 
-void Transform::SetEulerAngles(XMFLOAT3 angles)
+void Transform::SetEulerAngles(Vector3 angles)
 {
-	XMVECTOR rotVec = DirectX::XMQuaternionRotationRollPitchYaw(DirectX::XMConvertToRadians(angles.x),
+	Quaternion rot = Quaternion::CreateFromYawPitchRoll(DirectX::XMConvertToRadians(angles.x),
 		DirectX::XMConvertToRadians(angles.y), DirectX::XMConvertToRadians(angles.z));
 
-	XMFLOAT4 rot;
-	DirectX::XMStoreFloat4(&rot, rotVec);
-
 	SetRotation(rot);
 }
 
-void Transform::SetForward(XMFLOAT3 fwd)
+void Transform::SetForward(Vector3 fwd)
 {
-	XMVECTOR fwdVec = DirectX::XMLoadFloat3(&fwd);
-	XMVECTOR rotVec = DirectX::XMQuaternionRotationAxis(fwdVec, 0.0f);
-
-	XMFLOAT4 rot;
-	DirectX::XMStoreFloat4(&rot, rotVec);
-
+	Quaternion rot = Quaternion::CreateFromAxisAngle(fwd, 0.f);\
 	SetRotation(rot);
 }
 
-void Transform::SetUp(XMFLOAT3 up)
+void Transform::SetUp(Vector3 up)
 {
-	XMVECTOR upVec = DirectX::XMLoadFloat3(&up);
-
-	XMFLOAT3 right = GetRight();
-	XMVECTOR rightVec = DirectX::XMLoadFloat3(&right);
-
-	XMVECTOR rotVec = DirectX::XMQuaternionRotationAxis(DirectX::XMVector3Cross(upVec, rightVec), 0.0f);
-
-	XMFLOAT4 rot;
-	DirectX::XMStoreFloat4(&rot, rotVec);
-
+	Quaternion rot = Quaternion::CreateFromAxisAngle(up.Cross(GetRight()), 0.f);
 	SetRotation(rot);
 }
 
-void Transform::SetRight(XMFLOAT3 right)
+void Transform::SetRight(Vector3 right)
 {
-	XMVECTOR rightVec = DirectX::XMLoadFloat3(&right);
-
-	XMFLOAT3 up = GetUp();
-	XMVECTOR upVec = DirectX::XMLoadFloat3(&right);
-
-	XMVECTOR rotVec = DirectX::XMQuaternionRotationAxis(DirectX::XMVector3Cross(rightVec, upVec), 0.0f);
-
-	XMFLOAT4 rot;
-	DirectX::XMStoreFloat4(&rot, rotVec);
-
+	Quaternion rot = Quaternion::CreateFromAxisAngle(right.Cross(GetUp()), 0.f);
 	SetRotation(rot);
 }
 
-XMFLOAT3 Transform::GetLocalPosition()
+Vector3 Transform::GetLocalPosition()
 {
 	return localPosition;
 }
 
-XMFLOAT4 Transform::GetLocalRotation()
+Quaternion Transform::GetLocalRotation()
 {
 	return localRotation;
 }
 
-XMFLOAT3 Transform::GetLocalScale()
+Vector3 Transform::GetLocalScale()
 {
 	return localScale;
 }
 
-XMFLOAT4X4 Transform::GetLocalMatrix()
+Matrix Transform::GetLocalMatrix()
 {
 	return localMatrix;
 }
 
-void Transform::SetLocalPosition(XMFLOAT3 pos)
+void Transform::SetLocalPosition(Vector3 pos)
 {
-	uint32_t comparison;
-	DirectX::XMVectorEqualR(&comparison, DirectX::XMLoadFloat3(&localPosition), DirectX::XMLoadFloat3(&pos));
-
-	if (DirectX::XMComparisonAllTrue(comparison)) return;
+	if (pos == localPosition) return;
 	localPosition = pos;
 
 	if (parent == nullptr) position = localPosition;
-	else
-	{
-		XMVECTOR posVec = DirectX::XMLoadFloat3(&localPosition);
-
-		XMFLOAT4X4 parent4x4Mat = parent->GetMatrix();
-		XMMATRIX parentMat = DirectX::XMLoadFloat4x4(&parent4x4Mat);
-
-		XMVECTOR newWPos = DirectX::XMVector3Transform(posVec, parentMat);
-		DirectX::XMStoreFloat3(&position, newWPos);
-	}
+	else position = Vector3::Transform(localPosition, parent->GetMatrix());
 
 	CalculateMatrices();
 }
 
-void Transform::SetLocalRotation(XMFLOAT4 rot)
+void Transform::SetLocalRotation(Quaternion rot)
 {
-	uint32_t comparison;
-	DirectX::XMVectorEqualR(&comparison, DirectX::XMLoadFloat4(&localRotation), DirectX::XMLoadFloat4(&rot));
-
-	if (DirectX::XMComparisonAllTrue(comparison)) return;
+	if (rot == localRotation) return;
 	localRotation = rot;
 
 	if (parent == nullptr) rotation = localRotation;
-	else
-	{
-		XMVECTOR rotVec = DirectX::XMLoadFloat4(&localRotation);
-
-		XMFLOAT4 parentRot = parent->GetRotation();
-		XMVECTOR parentRotVec = DirectX::XMLoadFloat4(&parentRot);
-
-		XMVECTOR newWRot = DirectX::XMQuaternionMultiply(parentRotVec, rotVec);
-		DirectX::XMStoreFloat4(&rotation, newWRot);
-	}
+	else rotation = parent->GetRotation() * localRotation;
 
 	CalculateMatrices();
 }
 
-void Transform::SetLocalScale(XMFLOAT3 scl)
+void Transform::SetLocalScale(Vector3 scl)
 {
-	uint32_t comparison;
-	DirectX::XMVectorEqualR(&comparison, DirectX::XMLoadFloat3(&localScale), DirectX::XMLoadFloat3(&scl));
-
-	if (DirectX::XMComparisonAllTrue(comparison)) return;
+	if (scl == localScale) return;
 	localScale = scl;
 
 	if (parent == nullptr) scale = localScale;
-	else
-	{
-		XMVECTOR sclVec = DirectX::XMLoadFloat3(&localScale);
-
-		XMFLOAT3 parentScale = parent->GetScale();
-		XMVECTOR parentSclVec = DirectX::XMLoadFloat3(&parentScale);
-
-		XMVECTOR newWScl = sclVec * parentSclVec;
-		DirectX::XMStoreFloat3(&scale, newWScl);
-	}
+	else scale = localScale * parent->GetScale();
 
 	CalculateMatrices();
 }
 
-void Transform::SetLocalMatrix(XMFLOAT4X4 mat)
+void Transform::SetLocalMatrix(Matrix mat)
 {
-	XMVECTOR posVec;
-	XMVECTOR rotVec;
-	XMVECTOR sclVec;
-	XMMATRIX matMat = DirectX::XMLoadFloat4x4(&mat);
+	Vector3 pos;
+	Quaternion rot;
+	Vector3 scl;
 
-	DirectX::XMMatrixDecompose(&sclVec, &rotVec, &posVec, matMat);
-
-	XMFLOAT3 pos;
-	XMFLOAT4 rot;
-	XMFLOAT3 scl;
-
-	DirectX::XMStoreFloat3(&pos, posVec);
-	DirectX::XMStoreFloat4(&rot, rotVec);
-	DirectX::XMStoreFloat3(&scl, sclVec);
+	mat.Decompose(scl, rot, pos);
 
 	SetLocalPosition(pos);
 	SetLocalRotation(rot);
 	SetLocalScale(scl);
 }
 
-XMFLOAT3 Transform::GetLocalEulerAngles()
+Vector3 Transform::GetLocalEulerAngles()
 {
-	return Utils::QuatToEulerAngles(localRotation);
+	return localRotation.ToEuler();
 }
 
-void Transform::SetLocalEulerAngles(XMFLOAT3 angles)
+void Transform::SetLocalEulerAngles(Vector3 angles)
 {
-	XMVECTOR rotVec = DirectX::XMQuaternionRotationRollPitchYaw(DirectX::XMConvertToRadians(angles.x),
+	Quaternion rot = Quaternion::CreateFromYawPitchRoll(DirectX::XMConvertToRadians(angles.x),
 		DirectX::XMConvertToRadians(angles.y), DirectX::XMConvertToRadians(angles.z));
-
-	XMFLOAT4 rot;
-	DirectX::XMStoreFloat4(&rot, rotVec);
 
 	SetLocalRotation(rot);
 }
 
-float Transform::GetDistance(Transform* other, bool estimation)
+float Transform::GetDistance(Transform* other)
 {
-	XMFLOAT3 otherPos = other->GetPosition();
-	XMFLOAT3 pos = GetPosition();
-
-	XMVECTOR otherPosVec = DirectX::XMLoadFloat3(&otherPos);
-	XMVECTOR posVec = DirectX::XMLoadFloat3(&pos);
-
-	XMVECTOR subtractedVec = posVec - otherPosVec;
-	XMVECTOR distanceVec = estimation ? XMVector3LengthEst(subtractedVec) : XMVector3Length(subtractedVec);
-
-	float distance;
-	DirectX::XMStoreFloat(&distance, distanceVec);
-
-	return distance;
+	return (position - other->GetPosition()).Length();
 }

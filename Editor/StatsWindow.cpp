@@ -22,4 +22,5 @@ void StatsWindow::OnGui()
 
 	ImGui::Text("Startup time: %s s", std::to_string(startupTime).c_str());
 	ImGui::Text("Last frame time: %s ms", std::to_string(lastDeltaTime * 1000).c_str());
+	ImGui::Text("Frames per second: %s", std::to_string(1.0 / lastDeltaTime).c_str());
 }

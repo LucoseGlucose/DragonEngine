@@ -19,13 +19,13 @@ Scene* Game::Init()
 	Rendering::outputCam = cam;
 	cam->GetOwner()->AddComponent<CameraControllerComponent>();
 
-	cam->GetTransform()->SetPosition(XMFLOAT3(0.f, 0.f, -4.f));
+	cam->GetTransform()->SetPosition(Vector3(0.f, 0.f, -4.f));
 
 	LightComponent* light = scene->AddObject(new SceneObject("Light"))->AddComponent<DirectionalLightComponent>();
 	light->strength = .5f;
-	light->color = XMFLOAT3(1.f, .99f, .97f);
-	light->GetTransform()->SetPosition(XMFLOAT3(2.f, 2.5f, -1.5f));
-	light->GetTransform()->SetEulerAngles(XMFLOAT3(28.f, 53.f, 0.f));
+	light->color = Vector3(1.f, .99f, .97f);
+	light->GetTransform()->SetPosition(Vector3(2.f, 2.5f, -1.5f));
+	light->GetTransform()->SetEulerAngles(Vector3(28.f, 53.f, 0.f));
 
 	Mesh* mesh = new Mesh(Utils::GetPathFromProject("Models/Cube.fbx"));
 
@@ -33,10 +33,10 @@ Scene* Game::Init()
 	object->SetMesh(mesh);
 	object->SetMaterial(new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitV.cso"),
 		Utils::GetPathFromExe("LitP.cso"), Rendering::scenePass->outputFB)));
-
-	object->GetMaterial()->SetParameter("p_albedo", (void*)&DirectX::Colors::DodgerBlue.f[0], sizeof(float) * 4);
-	object->GetMaterial()->SetParameter("p_metallic", .7f);
-	object->GetMaterial()->SetParameter("p_roughness", .1f);
+	
+	object->GetMaterial()->SetParameter("p_albedo", Color(DirectX::ColorsLinear::DodgerBlue));
+	object->GetMaterial()->SetParameter("p_metallic", .1f);
+	object->GetMaterial()->SetParameter("p_roughness", .9f);
 
 	return scene;
 }

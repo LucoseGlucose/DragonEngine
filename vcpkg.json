@@ -5,6 +5,8 @@
     "glfw3",
     "stb",
     "directx-dxc",
+    "meshoptimizer",
+    "tracy",
     {
       "name": "imgui",
       "features": [

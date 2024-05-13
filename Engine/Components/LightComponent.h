@@ -4,14 +4,14 @@
 
 struct LightData
 {
-	XMFLOAT3 color;
+	Vector3 color;
 	float type;
-	XMFLOAT3 position;
+	Vector3 position;
 	float pad0;
-	XMFLOAT3 direction;
+	Vector3 direction;
 	float pad1;
-	XMFLOAT2 falloff;
-	XMFLOAT2 radius;
+	Vector2 falloff;
+	Vector2 radius;
 };
 
 class LightComponent : public Component
@@ -19,10 +19,10 @@ class LightComponent : public Component
 public:
 	LightComponent(SceneObject* owner);
 
-	XMFLOAT3 color = XMFLOAT3(1.f, 1.f, 1.f);
+	Vector3 color = Vector3(1.f, 1.f, 1.f);
 	float strength = 1.f;
 
 	virtual float GetLightType();
-	virtual XMFLOAT3 GetOutput();
+	virtual Vector3 GetOutput();
 	virtual void GetLightData(LightData* data);
 };

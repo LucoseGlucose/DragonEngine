@@ -37,7 +37,7 @@ void Input::Update()
 
 	double x, y;
 	glfwGetCursorPos(Application::window, &x, &y);
-	mousePos = XMFLOAT2(x, y);
+	mousePos = Vector2(x, y);
 }
 
 void Input::CleanUp()
@@ -60,7 +60,7 @@ bool Input::GetKeyUp(int key)
 	return !keyMap[key] && prevKeyMap[key];
 }
 
-XMFLOAT2 Input::GetMousePosition()
+Vector2 Input::GetMousePosition()
 {
 	return mousePos;
 }
@@ -85,7 +85,7 @@ float Input::GetMouseScrollDelta()
 	return scrollValue;
 }
 
-XMFLOAT2 Input::GetMousePosDelta()
+Vector2 Input::GetMousePosDelta()
 {
-	return XMFLOAT2(mousePos.x - lastMousePos.x, mousePos.y - lastMousePos.y);
+	return mousePos - lastMousePos;
 }

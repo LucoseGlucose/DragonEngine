@@ -28,9 +28,11 @@ public:
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 	D3D12_INDEX_BUFFER_VIEW indexBufferView;
 
+	DirectX::BoundingBox aabb;
+
 	void UploadMeshData();
 	void Draw(CommandRecorder* recorder);
 
 	static const int importFlags = aiProcess_ConvertToLeftHanded | aiProcess_JoinIdenticalVertices
-		| aiProcess_OptimizeMeshes | aiProcess_Triangulate | aiProcess_CalcTangentSpace;
+		| aiProcess_OptimizeMeshes | aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_GenBoundingBoxes;
 };

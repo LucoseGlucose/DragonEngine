@@ -24,11 +24,11 @@ void Application::Run()
 {
 	while (!glfwWindowShouldClose(window))
 	{
-		deltaTime = glfwGetTime() - lastFrameTime;
-		lastFrameTime = glfwGetTime();
-
 		XMUINT2 preWindowSize = GetUnsignedFramebufferSize();
 		glfwPollEvents();
+
+		deltaTime = glfwGetTime() - lastFrameTime;
+		lastFrameTime = glfwGetTime();
 
 		XMUINT2 postWindowSize = GetUnsignedFramebufferSize();
 		if (postWindowSize.x != preWindowSize.x || postWindowSize.y != preWindowSize.y)
@@ -44,7 +44,7 @@ void Application::Run()
 			l->Update();
 		}
 
-		Rendering::Render();
+		if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) == GLFW_FALSE) Rendering::Render();
 	}
 
 	for (Layer*& l : layers)

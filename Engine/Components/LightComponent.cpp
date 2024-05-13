@@ -6,9 +6,9 @@ LightComponent::LightComponent(SceneObject* owner) : Component(owner)
 
 }
 
-XMFLOAT3 LightComponent::GetOutput()
+Vector3 LightComponent::GetOutput()
 {
-	XMFLOAT3 output;
+	Vector3 output;
 	DirectX::XMStoreFloat3(&output, DirectX::XMLoadFloat3(&color) * strength);
 
 	return output;

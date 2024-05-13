@@ -14,8 +14,8 @@ class Input
 	static inline bool scrolled{};
 	static inline float scrollValue{};
 
-	static inline XMFLOAT2 lastMousePos{};
-	static inline XMFLOAT2 mousePos{};
+	static inline Vector2 lastMousePos{};
+	static inline Vector2 mousePos{};
 
 public:
 	static void Init();
@@ -26,12 +26,12 @@ public:
 	static bool GetKeyDown(int key);
 	static bool GetKeyUp(int key);
 
-	static XMFLOAT2 GetMousePosition();
+	static Vector2 GetMousePosition();
 
 	static bool GetMouseButton(int button);
 	static bool GetMouseButtonDown(int button);
 	static bool GetMouseButtonUp(int button);
 
 	static float GetMouseScrollDelta();
-	static XMFLOAT2 GetMousePosDelta();
+	static Vector2 GetMousePosDelta();
 };

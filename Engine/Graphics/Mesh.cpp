@@ -5,13 +5,18 @@
 #include <assimp/scene.h>
 #include "Rendering.h"
 
-Mesh::Mesh(std::filesystem::path path) : vertices(), indices()
+Mesh::Mesh(std::filesystem::path path) : vertices(), indices(), aabb()
 {
 	Assimp::Importer importer{};
 	const aiScene* scene = importer.ReadFile(path.string(), importFlags);
 
 	if (scene->mNumMeshes < 1) Utils::CrashWithMessage(L"There must be exactly one mesh in file!");
 	aiMesh* mesh = scene->mMeshes[0];
+
+	aiVector3D center = mesh->mAABB.mMax + mesh->mAABB.mMin;
+	aiVector3D extents = mesh->mAABB.mMax - mesh->mAABB.mMin;
+
+	aabb = BoundingBox(XMFLOAT3(center.x, center.y, center.z), XMFLOAT3(extents.x, extents.y, extents.z));
 
 	vertices.resize(mesh->mNumVertices);
 

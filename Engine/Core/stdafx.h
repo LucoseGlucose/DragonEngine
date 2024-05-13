@@ -8,6 +8,9 @@
 
 #include <DirectXMath.h>
 #include <DirectXColors.h>
+#include <DirectXCollision.h>
+#include "SimpleMath.h"
+
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include "d3dx12.h"
@@ -27,9 +30,13 @@
 #include <utility>
 #include <future>
 
+#define TRACY_ENABLE
+#include "tracy/Tracy.hpp"
+
 #include "Utils.h"
 #include "Application.h"
 #include "TimeManager.h"
 
 using namespace Microsoft::WRL;
 using namespace DirectX;
+using namespace DirectX::SimpleMath;

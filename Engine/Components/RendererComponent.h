@@ -18,6 +18,9 @@ public:
 	ShaderParamFunc shaderParamFunc;
 	ShaderParamFunc shaderDefaultFunc;
 
+	BoundingBox aabb;
+	BoundingOrientedBox obb;
+
 	static ShaderParamFunc GetLitShaderDefaultFunc();
 	static ShaderParamFunc GetLitShaderParamFunc();
 
@@ -28,4 +31,5 @@ public:
 	virtual Mesh* GetMesh();
 
 	virtual void Render(CommandRecorder* recorder);
+	virtual void CalculateBoundingBoxes();
 };

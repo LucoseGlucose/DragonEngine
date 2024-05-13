@@ -1,8 +1,8 @@
 #pragma once
 
-#include <DirectXMath.h>
+#include "SimpleMath.h"
 
-using namespace DirectX;
+using namespace DirectX::SimpleMath;
 
 class SceneObject;
 
@@ -11,15 +11,15 @@ class Transform
 	SceneObject* owner;
 	Transform* parent;
 
-	XMFLOAT3 position;
-	XMFLOAT4 rotation;
-	XMFLOAT3 scale;
-	XMFLOAT4X4 matrix;
+	Vector3 position;
+	Quaternion rotation;
+	Vector3 scale;
+	Matrix matrix;
 
-	XMFLOAT3 localPosition;
-	XMFLOAT4 localRotation;
-	XMFLOAT3 localScale;
-	XMFLOAT4X4 localMatrix;
+	Vector3 localPosition;
+	Quaternion localRotation;
+	Vector3 localScale;
+	Matrix localMatrix;
 
 	void CalculateMatrices();
 
@@ -30,38 +30,38 @@ public:
 	Transform* GetParent();
 	void SetParent(Transform* newParent, bool keepWorldTransform = true);
 
-	XMFLOAT3 GetPosition();
-	XMFLOAT4 GetRotation();
-	XMFLOAT3 GetScale();
-	XMFLOAT4X4 GetMatrix();
+	Vector3 GetPosition();
+	Quaternion GetRotation();
+	Vector3 GetScale();
+	Matrix GetMatrix();
 
-	XMFLOAT3 GetEulerAngles();
-	XMFLOAT3 GetForward();
-	XMFLOAT3 GetUp();
-	XMFLOAT3 GetRight();
+	Vector3 GetEulerAngles();
+	Vector3 GetForward();
+	Vector3 GetUp();
+	Vector3 GetRight();
 
-	void SetPosition(XMFLOAT3 pos);
-	void SetRotation(XMFLOAT4 rot);
-	void SetScale(XMFLOAT3 scl);
-	void SetMatrix(XMFLOAT4X4 mat);
+	void SetPosition(Vector3 pos);
+	void SetRotation(Quaternion rot);
+	void SetScale(Vector3 scl);
+	void SetMatrix(Matrix mat);
 
-	void SetEulerAngles(XMFLOAT3 angles);
-	void SetForward(XMFLOAT3 fwd);
-	void SetUp(XMFLOAT3 up);
-	void SetRight(XMFLOAT3 right);
+	void SetEulerAngles(Vector3 angles);
+	void SetForward(Vector3 fwd);
+	void SetUp(Vector3 up);
+	void SetRight(Vector3 right);
 
-	XMFLOAT3 GetLocalPosition();
-	XMFLOAT4 GetLocalRotation();
-	XMFLOAT3 GetLocalScale();
-	XMFLOAT4X4 GetLocalMatrix();
+	Vector3 GetLocalPosition();
+	Quaternion GetLocalRotation();
+	Vector3 GetLocalScale();
+	Matrix GetLocalMatrix();
 
-	void SetLocalPosition(XMFLOAT3 pos);
-	void SetLocalRotation(XMFLOAT4 rot);
-	void SetLocalScale(XMFLOAT3 scl);
-	void SetLocalMatrix(XMFLOAT4X4 mat);
+	void SetLocalPosition(Vector3 pos);
+	void SetLocalRotation(Quaternion rot);
+	void SetLocalScale(Vector3 scl);
+	void SetLocalMatrix(Matrix mat);
 
-	XMFLOAT3 GetLocalEulerAngles();
-	void SetLocalEulerAngles(XMFLOAT3 angles);
+	Vector3 GetLocalEulerAngles();
+	void SetLocalEulerAngles(Vector3 angles);
 
-	float GetDistance(Transform* other, bool estimation);
+	float GetDistance(Transform* other);
 };
