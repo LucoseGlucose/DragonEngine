@@ -38,6 +38,7 @@ public:
 
 	static HWND GetWindowHandle();
 	static std::filesystem::path GetApplicationPath();
+	static void SetWindowIcon(const std::filesystem::path& path);
 
 	static bool GetFullscreen();
 	static void SetFullscreen(bool fs);

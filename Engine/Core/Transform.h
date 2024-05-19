@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SimpleMath.h"
+#include "Event.h"
 
 using namespace DirectX::SimpleMath;
 

@@ -5,6 +5,7 @@
 #include "TimeManager.h"
 #include "SceneManager.h"
 #include "Input.h"
+#include "stb_image.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
@@ -117,6 +118,21 @@ std::filesystem::path Application::GetApplicationPath()
 	delete[] path;
 
 	return str;
+}
+
+void Application::SetWindowIcon(const std::filesystem::path& path)
+{
+	int width;
+	int height;
+	int channels;
+	unsigned char* pixels = stbi_load(path.string().c_str(), &width, &height, &channels, 4);
+
+	GLFWimage icon;
+	icon.pixels = pixels;
+	icon.width = width;
+	icon.height = height;
+
+	glfwSetWindowIcon(window, 1, &icon);
 }
 
 bool Application::GetFullscreen()

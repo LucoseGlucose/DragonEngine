@@ -26,5 +26,8 @@
     <ClInclude Include="BuildLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BuildSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

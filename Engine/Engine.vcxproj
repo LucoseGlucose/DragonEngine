@@ -296,6 +296,8 @@
     <ClInclude Include="Components\DirectionalLightComponent.h" />
     <ClInclude Include="Components\LightComponent.h" />
     <ClInclude Include="Components\PointLightComponent.h" />
+    <ClInclude Include="Core\EngineSettings.h" />
+    <ClInclude Include="Core\Event.h" />
     <ClInclude Include="Core\SceneLayer.h" />
     <ClInclude Include="Core\Layer.h" />
     <ClInclude Include="Core\SimpleMath.h" />
@@ -340,7 +342,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Images\limpopo_golf_course_4k.hdr" />
-    <None Include="imgui.ini" />
     <None Include="Models\Cube.fbx" />
     <None Include="Models\Inverted Cube.fbx" />
     <None Include="Models\Monkey.fbx" />
@@ -352,6 +353,7 @@
     <Image Include="Images\BRDF LUT.png" />
     <Image Include="Images\brickwall.jpg" />
     <Image Include="Images\brickwall_normal.jpg" />
+    <Image Include="Images\DragonEngine Logo.png" />
     <Image Include="Images\Six sided skybox\back.jpg" />
     <Image Include="Images\Six sided skybox\bottom.jpg" />
     <Image Include="Images\Six sided skybox\front.jpg" />

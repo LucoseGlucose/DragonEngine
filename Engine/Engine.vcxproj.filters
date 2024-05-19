@@ -269,6 +269,12 @@
     <ClInclude Include="Core\SimpleMath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Event.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\EngineSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\Quad.fbx" />
@@ -278,7 +284,6 @@
     <None Include="Models\Sphere.fbx" />
     <None Include="Models\Smooth Monkey.fbx" />
     <None Include="Models\Monkey.fbx" />
-    <None Include="imgui.ini" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\UV Checker.png">
@@ -312,6 +317,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="Images\BRDF LUT.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\DragonEngine Logo.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
