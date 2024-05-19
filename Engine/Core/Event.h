@@ -8,6 +8,10 @@ struct Event
 {
 	using FuncType = std::function<void(T)>;
 
+	void operator()(T param);
+	void operator+=(FuncType func);
+	void operator-=(FuncType func);
+
 	void Invoke(T param);
 	void Subscribe(FuncType func);
 	void Unsubscribe(FuncType func);
@@ -15,6 +19,24 @@ struct Event
 private:
 	std::list<FuncType> subscribers;
 };
+
+template<typename T>
+void Event<T>::operator()(T param)
+{
+	Invoke(param);
+}
+
+template<typename T>
+inline void Event<T>::operator+=(FuncType func)
+{
+	Subscribe(func);
+}
+
+template<typename T>
+inline void Event<T>::operator-=(FuncType func)
+{
+	Unsubscribe(func);
+}
 
 template<typename T>
 inline void Event<T>::Invoke(T param)

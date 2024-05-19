@@ -259,6 +259,7 @@
     <ClCompile Include="Graphics\Framebuffer.cpp" />
     <ClCompile Include="Graphics\CommandQueue.cpp" />
     <ClCompile Include="Core\Application.cpp" />
+    <ClCompile Include="Graphics\GraphicsResource.cpp" />
     <ClCompile Include="Graphics\ProcessRenderPass.cpp" />
     <ClCompile Include="Graphics\RenderPass.cpp" />
     <ClCompile Include="Graphics\ResolveRenderPass.cpp" />
@@ -306,6 +307,7 @@
     <ClInclude Include="Graphics\Framebuffer.h" />
     <ClInclude Include="Graphics\CommandQueue.h" />
     <ClInclude Include="Core\Application.h" />
+    <ClInclude Include="Graphics\GraphicsResource.h" />
     <ClInclude Include="Graphics\Mesh.h" />
     <ClInclude Include="Graphics\ProcessRenderPass.h" />
     <ClInclude Include="Graphics\Rendering.h" />

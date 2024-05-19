@@ -7,6 +7,8 @@ RendererComponent::RendererComponent(SceneObject* owner) : Component(owner)
 {
 	shaderDefaultFunc = GetLitShaderDefaultFunc();
 	shaderParamFunc = GetLitShaderParamFunc();
+
+	GetTransform()->onMatrixChanged += [this](Matrix m) { CalculateBoundingBoxes(); };
 }
 
 RendererComponent::~RendererComponent()

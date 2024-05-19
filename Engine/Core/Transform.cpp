@@ -1,13 +1,11 @@
 #include "stdafx.h"
 #include "Transform.h"
 
-Transform::Transform(SceneObject* owner) : position(), rotation(Quaternion::Identity), scale(Vector3::One),
-	matrix(Matrix::Identity), localPosition(), localRotation(Quaternion::Identity), localScale(Vector3::One), localMatrix()
+Transform::Transform(SceneObject* owner) : Object(owner->name + " - Transform"), position(), rotation(Quaternion::Identity),
+	scale(Vector3::One), matrix(Matrix::Identity), localPosition(), localRotation(Quaternion::Identity), localScale(Vector3::One), localMatrix()
 {
 	this->owner = owner;
 	this->parent = nullptr;
-
-	CalculateMatrices();
 }
 
 SceneObject* Transform::GetOwner()
@@ -20,9 +18,11 @@ Transform* Transform::GetParent()
 	return parent;
 }
 
-void Transform::SetParent(Transform* newParent, bool keepWorldTransform)
+void Transform::SetParent(Transform* newParent)
 {
 	parent = newParent;
+
+	onParentChanged(newParent);
 }
 
 Vector3 Transform::GetPosition()
@@ -69,6 +69,8 @@ void Transform::CalculateMatrices()
 {
 	matrix = Matrix::CreateScale(scale) * Matrix::CreateFromQuaternion(rotation) * Matrix::CreateTranslation(position);
 	localMatrix = Matrix::CreateScale(localScale) * Matrix::CreateFromQuaternion(localRotation) * Matrix::CreateTranslation(localPosition);
+
+	onMatrixChanged(matrix);
 }
 
 void Transform::SetPosition(Vector3 pos)
@@ -80,6 +82,7 @@ void Transform::SetPosition(Vector3 pos)
 	else localPosition = Vector3::Transform(position, parent->GetMatrix().Invert());
 
 	CalculateMatrices();
+	onPositionChanged(pos);
 }
 
 void Transform::SetRotation(Quaternion rot)
@@ -91,6 +94,7 @@ void Transform::SetRotation(Quaternion rot)
 	else localRotation = parent->GetRotation() * rotation;
 
 	CalculateMatrices();
+	onRotationChanged(rot);
 }
 
 void Transform::SetScale(Vector3 scl)
@@ -102,6 +106,7 @@ void Transform::SetScale(Vector3 scl)
 	else localScale = scale / parent->GetScale();
 
 	CalculateMatrices();
+	onScaleChanged(scl);
 }
 
 void Transform::SetMatrix(Matrix mat)

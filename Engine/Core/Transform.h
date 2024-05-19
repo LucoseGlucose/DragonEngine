@@ -7,7 +7,7 @@ using namespace DirectX::SimpleMath;
 
 class SceneObject;
 
-class Transform
+class Transform : public Object
 {
 	SceneObject* owner;
 	Transform* parent;
@@ -29,7 +29,7 @@ public:
 
 	SceneObject* GetOwner();
 	Transform* GetParent();
-	void SetParent(Transform* newParent, bool keepWorldTransform = true);
+	void SetParent(Transform* newParent);
 
 	Vector3 GetPosition();
 	Quaternion GetRotation();
@@ -65,4 +65,10 @@ public:
 	void SetLocalEulerAngles(Vector3 angles);
 
 	float GetDistance(Transform* other);
+
+	Event<Vector3> onPositionChanged;
+	Event<Quaternion> onRotationChanged;
+	Event<Vector3> onScaleChanged;
+	Event<Matrix> onMatrixChanged;
+	Event<Transform*> onParentChanged;
 };
