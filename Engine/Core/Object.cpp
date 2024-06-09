@@ -3,10 +3,8 @@
 
 #include <random>
 
-Object::Object(std::string name)
+Object::Object(std::string name) : name(name)
 {
-	this->name = name;
-
 	int first = std::rand();
 	int second = std::rand();
 	id = second;

@@ -32,9 +32,30 @@ public:
 	}
 
 	template<typename T>
+	T* FindObjectByName(const std::string& name) requires std::is_base_of_v<SceneObject, T>
+	{
+		for (size_t i = 0; i < objects.size(); i++)
+		{
+			if (objects[i]->name != name) continue;
+
+			T* casted = dynamic_cast<T*>(objects[i]);
+			if (casted != nullptr) return casted;
+		}
+
+		return nullptr;
+	}
+
+	template<typename T>
 	bool TryFindObject(T** out) requires std::is_base_of_v<SceneObject, T>
 	{
 		*out = FindObject<T>();
+		return out == nullptr;
+	}
+
+	template<typename T>
+	bool TryFindObjectByName(const std::string& name, T** out) requires std::is_base_of_v<SceneObject, T>
+	{
+		*out = FindObjectByName<T>(name);
 		return out == nullptr;
 	}
 
@@ -53,9 +74,32 @@ public:
 	}
 
 	template<typename T>
+	std::vector<T*> FindObjectsByName(const std::string& name) requires std::is_base_of_v<SceneObject, T>
+	{
+		std::vector<T*> vec = std::vector<T*>();
+
+		for (size_t i = 0; i < objects.size(); i++)
+		{
+			if (objects[i]->name != name) continue;
+
+			T* casted = dynamic_cast<T*>(objects[i]);
+			if (casted != nullptr) vec.push_back(casted);
+		}
+
+		return vec;
+	}
+
+	template<typename T>
 	bool TryFindObjects(std::vector<T*>* out) requires std::is_base_of_v<SceneObject, T>
 	{
 		*out = FindObjects<T>();
+		return !(*out->empty());
+	}
+
+	template<typename T>
+	bool TryFindObjectsByName(const std::string& name, std::vector<T*>* out) requires std::is_base_of_v<SceneObject, T>
+	{
+		*out = FindObjectsByName<T>(name);
 		return !(*out->empty());
 	}
 

@@ -2,6 +2,8 @@
 
 #include "EditorWindow.h"
 
+#include "IconsMaterialDesign.h"
+
 class StatsWindow : public EditorWindow
 {
 	int framesSinceUpdate = 0;
@@ -11,7 +13,9 @@ class StatsWindow : public EditorWindow
 	double startupTime = 0;
 
 public:
-	StatsWindow();
+	StatsWindow(EditorLayer* el, EditorWindowIndex windowIndex);
+
+	static inline std::string GetTitle() { return ICON_MD_FORMAT_LIST_NUMBERED" Stats"; };
 
 	virtual void OnGui() override;
 };

@@ -11,7 +11,7 @@ void GameLayer::Update()
 
 }
 
-void GameLayer::Resize(XMUINT2 newSize)
+void GameLayer::Resize(Vector2 newSize)
 {
 
 }

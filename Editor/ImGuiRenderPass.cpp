@@ -10,21 +10,22 @@ ImGuiRenderPass::ImGuiRenderPass()
 	CD3DX12_CLEAR_VALUE rtClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_R16G16B16A16_FLOAT, Colors::Black.f);
 	CD3DX12_CLEAR_VALUE dsClear = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_D32_FLOAT, 1.0f, 0);
 
-	outputFB = new Framebuffer(Application::GetUnsignedFramebufferSize(), DXGI_FORMAT_R16G16B16A16_FLOAT,
-		DXGI_FORMAT_D32_FLOAT, rtClear, dsClear, 1);
+	outputFB = new Framebuffer(RenderTextureProfile(Application::GetFramebufferSize(), DXGI_FORMAT_D32_FLOAT, dsClear, 1),
+		{ RenderTextureProfile(Application::GetFramebufferSize(), DXGI_FORMAT_R16G16B16A16_FLOAT, rtClear, 1) });
 
-	Rendering::outputObj->GetMaterial()->SetTexture("t_inputTexture", outputFB->colorTexture);
+	Rendering::outputObj->GetMaterial()->SetTexture("t_inputTexture", outputFB->colorTextures.front());
 }
 
 void ImGuiRenderPass::Execute(Framebuffer* inputFB, CommandRecorder* recorder)
 {
-	outputFB->Setup(recorder, true);
+	outputFB->Setup(recorder);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE texDescStartHnd = EditorLayer::descHeap->GetCPUDescriptorHandleForHeapStart();
 	UINT incrementSize = Rendering::device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	CD3DX12_CPU_DESCRIPTOR_HANDLE texDescHnd = CD3DX12_CPU_DESCRIPTOR_HANDLE(texDescStartHnd, 1, incrementSize);
 
-	Rendering::device->CreateShaderResourceView(inputFB->colorTexture->textureBuffer.Get(), &inputFB->colorTexture->srvDesc, texDescHnd);
+	Rendering::device->CreateShaderResourceView(inputFB->colorTextures.front()->resourceBuffer.Get(),
+		&inputFB->colorTextures.front()->srvDesc, texDescHnd);
 
 	ImGui::Render();
 

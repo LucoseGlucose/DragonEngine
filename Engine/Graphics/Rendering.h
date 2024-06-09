@@ -9,40 +9,43 @@
 #include "CameraComponent.h"
 #include "RendererComponent.h"
 #include "LightComponent.h"
-#include "SkyboxObject.h"
 #include "RenderPass.h"
 #include "SceneRenderPass.h"
 #include "ResolveRenderPass.h"
 #include "ProcessRenderPass.h"
+#include "Utils.h"
 
 class Rendering
 {
 public:
-	static inline ComPtr<IDXGIFactory4> factory{};
-	static inline ComPtr<IDXGIAdapter1> adapter{};
-	static inline ComPtr<ID3D12Device4> device{};
 
-	static inline CommandQueue* commandQueue{};
-	static inline PresentationBuffer* presentationBuffer{};
+	STATIC(ComPtr<IDXGIFactory4> factory);
+	STATIC(ComPtr<IDXGIAdapter1> adapter);
+	STATIC(ComPtr<ID3D12Device4> device);
 
-	static inline std::queue<CommandRecorder*>* cmdRecorders{};
-	static inline std::mutex recorderMutex{};
+	STATIC(CommandQueue* commandQueue);
+	STATIC(PresentationBuffer* presentationBuffer);
 
-	static inline D3D12_VIEWPORT viewport{};
-	static inline D3D12_RECT scissorRect{};
+	STATIC(std::queue<CommandRecorder*>* cmdRecorders);
+	STATIC(std::mutex recorderMutex);
 
-	static inline std::vector<RenderPass*> renderPasses{};
+	STATIC(D3D12_VIEWPORT viewport);
+	STATIC(D3D12_RECT scissorRect);
 
-	static inline Mesh* quadMesh{};
-	static inline RendererComponent* outputObj{};
-	static inline CameraComponent* outputCam{};
+	STATIC(std::vector<RenderPass*> renderPasses);
 
-	static inline SceneRenderPass* scenePass{};
-	static inline ResolveRenderPass* resolvePass{};
-	static inline ProcessRenderPass* tonemapPass{};
-	static inline ProcessRenderPass* gammaPass{};
+	STATIC(Mesh* quadMesh);
+	STATIC(Material* missingMaterial);
 
-	static inline UINT64 fenceValues[2]{};
+	STATIC(RendererComponent* outputObj);
+	STATIC(CameraComponent* outputCam);
+
+	STATIC(SceneRenderPass* scenePass);
+	STATIC(ResolveRenderPass* resolvePass);
+	STATIC(ProcessRenderPass* tonemapPass);
+	STATIC(ProcessRenderPass* gammaPass);
+
+	static inline std::array<UINT64, Settings::numPresentationFrames> fenceValues{};
 
 	static void WaitForNextFrame();
 
@@ -53,8 +56,26 @@ public:
 	static void Render();
 	static void Cleanup();
 
-	static void Resize(XMUINT2 newSize);
+	static void Resize(Vector2 newSize);
 
-	static void SetViewportSize(XMUINT2 size);
+	static void SetViewportSize(Vector2 size);
 	static void ResetViewportSize();
+
+	static D3D12_SAMPLER_DESC GetDefaultSampler();
+	static D3D12_SAMPLER_DESC GetBRDFSampler();
+
+	static UINT32 GetMipCount(UINT32 width, UINT32 height);
+
+	static DXGI_FORMAT GetSRGBFormat(DXGI_FORMAT linear);
+	static DXGI_FORMAT GetLinearFormat(DXGI_FORMAT srgb);
+	static bool IsFormatSRGB(DXGI_FORMAT format);
+
+	static UINT8 GetColorMaskForIndex(UINT8 index);
+	static DXGI_FORMAT GetResolveFormatForDepth(DXGI_FORMAT format);
+	static void RecordBarriers(CommandRecorder* recorder, std::initializer_list<CD3DX12_RESOURCE_BARRIER> barriers);
+
+	static CD3DX12_BLEND_DESC GetDefaultBlendState();
+	static CD3DX12_RASTERIZER_DESC GetDefaultRasterizerState();
+	static CD3DX12_DEPTH_STENCIL_DESC GetDefaultDepthStencilState();
+	static DXGI_SAMPLE_DESC GetDefaultSampleDesc();
 };

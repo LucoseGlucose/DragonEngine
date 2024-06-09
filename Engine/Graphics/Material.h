@@ -3,14 +3,16 @@
 #include "ShaderProgram.h"
 #include "Texture.h"
 #include "CommandRecorder.h"
+#include "DescriptorHeap.h"
 
 typedef D3D12_SAMPLER_DESC Sampler;
 
 class Material
 {
 public:
+
 	Material(ShaderProgram* shader);
-	Material(const Material& mat) = default;
+	~Material();
 
 	ShaderProgram* shader;
 
@@ -18,11 +20,11 @@ public:
 	std::vector<ComPtr<ID3D12Resource>> parameterBuffers{};
 	std::vector<UINT8*> cbGPUAddresses{};
 
-	std::map<std::string, uint32_t> textureParameters{};
-	ComPtr<ID3D12DescriptorHeap> textureDescHeap;
+	std::map<std::string, UINT32> textureParameters{};
+	DescriptorHeap textureDescHeap;
 
-	std::map<std::string, uint32_t> samplerParameters{};
-	ComPtr<ID3D12DescriptorHeap> samplerDescHeap;
+	std::map<std::string, UINT32> samplerParameters{};
+	DescriptorHeap samplerDescHeap;
 
 	std::map<std::string, Texture*> cachedTextures{};
 	std::map<std::string, Sampler> cachedSamplers{};
@@ -36,7 +38,7 @@ public:
 	Sampler GetSampler(const std::string& name);
 
 	void UpdateTexture(const std::string& name, Texture* texture);
-	void Bind(CommandRecorder* recorder);
+	void Bind(CommandRecorder* recorder, PipelineProfile profile);
 
 	template<typename T>
 	void SetParameter(const std::string& name, T data)

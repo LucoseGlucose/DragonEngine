@@ -9,38 +9,43 @@
 
 #include "Layer.h"
 #include "Scene.h"
+#include "Utils.h"
 
 using namespace DirectX;
 
 class Application
 {
-	static inline bool fullscreen{};
-	static inline XMINT2 lastWindowedSize{};
-	static inline XMINT2 lastWindowedPos{};
+	STATIC(bool fullscreen);
+	STATIC(Vector2 lastWindowedSize);
+	STATIC(Vector2 lastWindowedPos);
 
-	static inline std::list<Layer*> layers{};
+	STATIC(std::list<Layer*> layers);
 
-	static inline double lastFrameTime{};
-	static inline double deltaTime{};
+	STATIC(double lastFrameTime);
+	STATIC(double deltaTime);
+	STATIC(double totalTime);
 
 public:
-	static void Init();
+
+	STATIC(float targetFrameRate);
+
+	static void Init(Vector2 windowStartSize, Vector2 windowStartPos, const char* windowTitle,
+		const std::filesystem::path& windowIconPathFromSolution, bool windowStartMaximized);
 	static void Run();
 
-	static XMINT2 GetFramebufferSize();
-	static XMUINT2 GetUnsignedFramebufferSize();
-	static XMUINT2 GetViewportSize();
+	static Vector2 GetFramebufferSize();
 
-	static XMINT2 GetWindowSize();
-	static XMINT2 GetWindowPosition();
+	static Vector2 GetWindowSize();
+	static Vector2 GetWindowPosition();
 
-	static double GetDeltaTime();
+	static GETTER(GetDeltaTime, deltaTime);
+	static GETTER(GetTotalTime, totalTime);
 
 	static HWND GetWindowHandle();
 	static std::filesystem::path GetApplicationPath();
 	static void SetWindowIcon(const std::filesystem::path& path);
 
-	static bool GetFullscreen();
+	static GETTER(GetFullscreen, fullscreen);
 	static void SetFullscreen(bool fs);
 
 	static void PushLayer(Layer* layer);

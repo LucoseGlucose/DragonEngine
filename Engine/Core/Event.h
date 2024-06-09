@@ -6,56 +6,32 @@
 template<typename T>
 struct Event
 {
-	using FuncType = std::function<void(T)>;
-
-	void operator()(T param);
-	void operator+=(FuncType func);
-	void operator-=(FuncType func);
-
-	void Invoke(T param);
-	void Subscribe(FuncType func);
-	void Unsubscribe(FuncType func);
-
 private:
-	std::list<FuncType> subscribers;
-};
+	std::list<std::function<void(T)>> subscribers;
 
-template<typename T>
-void Event<T>::operator()(T param)
-{
-	Invoke(param);
-}
+public:
 
-template<typename T>
-inline void Event<T>::operator+=(FuncType func)
-{
-	Subscribe(func);
-}
-
-template<typename T>
-inline void Event<T>::operator-=(FuncType func)
-{
-	Unsubscribe(func);
-}
-
-template<typename T>
-inline void Event<T>::Invoke(T param)
-{
-	for (FuncType func : subscribers)
+	void operator()(T param)
 	{
-		if (func == nullptr) continue;
-		func(param);
+		Invoke(param);
 	}
-}
 
-template<typename T>
-inline void Event<T>::Subscribe(FuncType func)
-{
-	subscribers.push_back(func);
-}
+	void Invoke(T param)
+	{
+		for (const std::function<void(T)>& func : subscribers)
+		{
+			if (func == nullptr) continue;
+			func(param);
+		}
+	}
 
-template<typename T>
-inline void Event<T>::Unsubscribe(FuncType func)
-{
-	subscribers.erase(std::remove(subscribers.begin(), subscribers.end(), func));
-}
+	void Subscribe(const std::function<void(T)>& func)
+	{
+		subscribers.push_back(func);
+	}
+
+	void Unsubscribe(const std::function<void(T)>& func)
+	{
+		subscribers.erase(std::remove(subscribers.begin(), subscribers.end(), func));
+	}
+};

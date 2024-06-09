@@ -24,7 +24,7 @@ void RenderPass::Execute(Framebuffer* inputFB, CommandRecorder* recorder)
 
 }
 
-void RenderPass::Resize(Framebuffer* inputFB, XMUINT2 newSize)
+void RenderPass::Resize(Framebuffer* inputFB, Vector2 newSize)
 {
 	outputFB->Resize(newSize);
 }

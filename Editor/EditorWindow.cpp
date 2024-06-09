@@ -3,17 +3,17 @@
 
 #include "EditorLayer.h"
 
-EditorWindow::EditorWindow(const std::string& title, const ImVec2& minSize) : title(title), minSize(minSize)
+EditorWindow::EditorWindow(EditorLayer* editorLayer, EditorWindowIndex windowIndex, const std::string& title, const ImVec2& minSize) :
+	editorLayer(editorLayer), title(title), minSize(minSize), windowIndex(windowIndex)
 {
 
 }
 
 void EditorWindow::Show()
 {
-	if (!open) return;
-
 	BeforeShow();
 	ImGui::GetStyle().WindowMinSize = minSize;
+
 	ImGui::Begin(title.c_str(), &open, windowFlags);
 
 	ImVec2 windowSize = ImGui::GetContentRegionAvail();
@@ -38,6 +38,8 @@ void EditorWindow::Show()
 	ImGui::End();
 
 	AfterShow();
+
+	if (!open) editorLayer->CloseEditorWindow(this);
 }
 
 void EditorWindow::BeforeShow()

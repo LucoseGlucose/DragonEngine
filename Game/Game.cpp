@@ -6,13 +6,13 @@
 #include "Texture2D.h"
 #include "Rendering.h"
 #include "CameraControllerComponent.h"
-#include "SkyboxObject.h"
 #include "TextureCubemap.h"
 #include "PointLightComponent.h"
 #include "DirectionalLightComponent.h"
 
 Scene* Game::Init()
 {
+	Application::targetFrameRate = 60.f;
 	Scene* scene = new Scene("MainScene");
 
 	CameraComponent* cam = scene->AddObject(new SceneObject("Camera"))->AddComponent<CameraComponent>();
@@ -31,12 +31,11 @@ Scene* Game::Init()
 
 	RendererComponent* object = scene->AddObject(new SceneObject("Mesh"))->AddComponent<RendererComponent>();
 	object->SetMesh(mesh);
-	object->SetMaterial(new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitV.cso"),
-		Utils::GetPathFromExe("LitP.cso"), Rendering::scenePass->outputFB)));
+	object->SetMaterial(new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitV.cso"), Utils::GetPathFromExe("LitP.cso"))));
 	
 	object->GetMaterial()->SetParameter("p_albedo", Color(DirectX::ColorsLinear::DodgerBlue));
-	object->GetMaterial()->SetParameter("p_metallic", .1f);
-	object->GetMaterial()->SetParameter("p_roughness", .9f);
+	object->GetMaterial()->SetParameter("p_metallic", .9f);
+	object->GetMaterial()->SetParameter("p_roughness", .3f);
 
 	return scene;
 }

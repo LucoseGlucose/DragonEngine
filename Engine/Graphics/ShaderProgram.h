@@ -2,20 +2,26 @@
 
 #include "Shader.h"
 #include "Framebuffer.h"
+#include "PipelineProfile.h"
 
 class ShaderProgram
 {
-	ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList, uint32_t samples, DXGI_FORMAT format);
+	ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList);
 
 public:
+
+	~ShaderProgram();
+
 	static inline std::map<std::map<SHADER_TYPE, Shader*>, ShaderProgram*> createdPrograms{};
 
 	std::map<SHADER_TYPE, Shader*> shaders;
 	ComPtr<ID3D12RootSignature> rootSignature;
-	ComPtr<ID3D12PipelineState> pipeline;
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc;
 
-	static ShaderProgram* Create(const std::map<SHADER_TYPE, Shader*>& shaderList, uint32_t samples, DXGI_FORMAT format);
-	static ShaderProgram* Create(const std::filesystem::path& vertexShader,
-		const std::filesystem::path& pixelShader, uint32_t samples, DXGI_FORMAT format);
-	static ShaderProgram* Create(const std::filesystem::path& vertexShader, const std::filesystem::path& pixelShader, Framebuffer* fb);
+	std::map<PipelineProfile, ComPtr<ID3D12PipelineState>> compiledPipelines;
+
+	void CompileShaderForProfile(const PipelineProfile& profile);
+
+	static ShaderProgram* Create(const std::map<SHADER_TYPE, Shader*>& shaderList);
+	static ShaderProgram* Create(const std::filesystem::path& vertexShader, const std::filesystem::path& pixelShader);
 };

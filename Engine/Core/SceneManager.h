@@ -1,13 +1,15 @@
 #pragma once
 
+#include "Utils.h"
 #include "Scene.h"
 
 class SceneManager
 {
-	static inline std::vector<Scene*> scenes{};
-	static inline uint32_t activeIndex{};
+	STATIC(std::vector<Scene*> scenes);
+	STATIC(uint32_t activeIndex);
 
 public:
+
 	static Scene* GetActiveScene();
 	static void SetActiveScene(Scene* scene);
 	static void SetActiveScene(uint32_t scene);

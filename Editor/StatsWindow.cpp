@@ -1,9 +1,7 @@
 #include "stdafx.h"
 #include "StatsWindow.h"
 
-#include "IconsMaterialDesign.h"
-
-StatsWindow::StatsWindow() : EditorWindow(ICON_MD_FORMAT_LIST_NUMBERED" Stats", ImVec2(256, 72))
+StatsWindow::StatsWindow(EditorLayer* el, EditorWindowIndex windowIndex) : EditorWindow(el, windowIndex, GetTitle(), ImVec2(256, 72))
 {
 	startupTime = glfwGetTime();
 }

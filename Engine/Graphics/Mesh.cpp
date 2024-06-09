@@ -16,7 +16,7 @@ Mesh::Mesh(std::filesystem::path path) : vertices(), indices(), aabb()
 	aiVector3D center = mesh->mAABB.mMax + mesh->mAABB.mMin;
 	aiVector3D extents = mesh->mAABB.mMax - mesh->mAABB.mMin;
 
-	aabb = BoundingBox(XMFLOAT3(center.x, center.y, center.z), XMFLOAT3(extents.x, extents.y, extents.z));
+	aabb = BoundingBox(Vector3(center.x, center.y, center.z), Vector3(extents.x, extents.y, extents.z));
 
 	vertices.resize(mesh->mNumVertices);
 
@@ -24,11 +24,11 @@ Mesh::Mesh(std::filesystem::path path) : vertices(), indices(), aabb()
 	{
 		VertexData vertex{};
 
-		vertex.position = XMFLOAT3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-		vertex.normal = XMFLOAT3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-		vertex.uv = XMFLOAT2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
-		vertex.tangent = XMFLOAT3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
-		vertex.bitangent = XMFLOAT3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
+		vertex.position = Vector3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+		vertex.normal = Vector3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+		vertex.uv = Vector2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+		vertex.tangent = Vector3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+		vertex.bitangent = Vector3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
 
 		vertices[i] = vertex;
 	}
@@ -49,79 +49,46 @@ void Mesh::UploadMeshData()
 {
 	if (vertices.empty()) Utils::CrashWithMessage(L"Mesh is empty!");
 
-	if (vertexBuffer != nullptr) vertexBuffer->Release();
-	if (vertexUploadBuffer != nullptr) vertexUploadBuffer->Release();
-	if (indexBuffer != nullptr) indexBuffer->Release();
-	if (indexUploadBuffer != nullptr) indexUploadBuffer->Release();
-
-	vertexBuffer.Reset();
-	vertexUploadBuffer.Reset();
-	indexBuffer.Reset();
-	indexUploadBuffer.Reset();
+	vertexBuffer.resourceBuffer.Reset();
+	indexBuffer.resourceBuffer.Reset();
 
 	CommandRecorder* recorder = Rendering::GetRecorder();
 	recorder->StartRecording();
 
-	uint32_t vBufferSize = vertices.size() * sizeof(VertexData);
+	vertexBuffer = Buffer(vertices.size() * sizeof(VertexData), D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COMMON);
 
-	CD3DX12_HEAP_PROPERTIES defaultHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-	CD3DX12_RESOURCE_DESC vertexResourceDesc = CD3DX12_RESOURCE_DESC::Buffer(vBufferSize);
+	Buffer vertexUploadBuffer = Buffer(vertexBuffer.size, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ);
 
-	Utils::ThrowIfFailed(Rendering::device->CreateCommittedResource(&defaultHeapProps, D3D12_HEAP_FLAG_NONE,
-		&vertexResourceDesc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&vertexBuffer)));
-	NAME_D3D_OBJECT(vertexBuffer);
+	D3D12_SUBRESOURCE_DATA vertexData{ vertices.data(), vertexBuffer.size, vertexBuffer.size };
+	UpdateSubresources(recorder->list.Get(), vertexBuffer.resourceBuffer.Get(), vertexUploadBuffer.resourceBuffer.Get(), 0, 0, 1, &vertexData);
 
-	CD3DX12_HEAP_PROPERTIES uploadHeapProps = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	vertexBuffer.currentState = D3D12_RESOURCE_STATE_COPY_DEST;
+	CD3DX12_RESOURCE_BARRIER vertexBufferTransition = vertexBuffer.TransitionToState(D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 
-	Utils::ThrowIfFailed(Rendering::device->CreateCommittedResource(&uploadHeapProps, D3D12_HEAP_FLAG_NONE,
-		&vertexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&vertexUploadBuffer)));
-	NAME_D3D_OBJECT(vertexUploadBuffer);
+	indexBuffer = Buffer(indices.size() * sizeof(UINT32), D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COMMON);
 
-	D3D12_SUBRESOURCE_DATA vertexData{};
-	vertexData.pData = vertices.data();
-	vertexData.RowPitch = vBufferSize;
-	vertexData.SlicePitch = vBufferSize;
+	Buffer indexUploadBuffer = Buffer(indexBuffer.size, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ);
 
-	UpdateSubresources(recorder->list.Get(), vertexBuffer.Get(), vertexUploadBuffer.Get(), 0, 0, 1, &vertexData);
+	D3D12_SUBRESOURCE_DATA indexData{ indices.data(), indexBuffer.size, indexBuffer.size };
+	UpdateSubresources(recorder->list.Get(), indexBuffer.resourceBuffer.Get(), indexUploadBuffer.resourceBuffer.Get(), 0, 0, 1, &indexData);
 
-	CD3DX12_RESOURCE_BARRIER vBufferTransition = CD3DX12_RESOURCE_BARRIER::Transition(
-		vertexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+	indexBuffer.currentState = D3D12_RESOURCE_STATE_COPY_DEST;
+	CD3DX12_RESOURCE_BARRIER indexBufferTransition = indexBuffer.TransitionToState(D3D12_RESOURCE_STATE_INDEX_BUFFER);
 
-	uint32_t iBufferSize = indices.size() * sizeof(uint32_t);
-
-	CD3DX12_RESOURCE_DESC indexResourceDesc = CD3DX12_RESOURCE_DESC::Buffer(iBufferSize);
-
-	Utils::ThrowIfFailed(Rendering::device->CreateCommittedResource(&defaultHeapProps, D3D12_HEAP_FLAG_NONE,
-		&indexResourceDesc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&indexBuffer)));
-	NAME_D3D_OBJECT(indexBuffer);
-
-	Utils::ThrowIfFailed(Rendering::device->CreateCommittedResource(&uploadHeapProps, D3D12_HEAP_FLAG_NONE,
-		&indexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&indexUploadBuffer)));
-	NAME_D3D_OBJECT(indexUploadBuffer);
-
-	D3D12_SUBRESOURCE_DATA indexData{};
-	indexData.pData = indices.data();
-	indexData.RowPitch = iBufferSize;
-	indexData.SlicePitch = iBufferSize;
-
-	UpdateSubresources(recorder->list.Get(), indexBuffer.Get(), indexUploadBuffer.Get(), 0, 0, 1, &indexData);
-
-	CD3DX12_RESOURCE_BARRIER iBufferTransition = CD3DX12_RESOURCE_BARRIER::Transition(
-		indexBuffer.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
-
-	CD3DX12_RESOURCE_BARRIER barriers[] = { vBufferTransition, iBufferTransition };
-	recorder->list->ResourceBarrier(_countof(barriers), barriers);
+	Rendering::RecordBarriers(recorder, { vertexBufferTransition, indexBufferTransition });
 
 	recorder->Execute();
 	Rendering::RecycleRecorder(recorder);
 
-	vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
-	vertexBufferView.SizeInBytes = vBufferSize;
+	vertexBufferView.BufferLocation = vertexBuffer.resourceBuffer->GetGPUVirtualAddress();
+	vertexBufferView.SizeInBytes = vertexBuffer.size;
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
-	indexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
-	indexBufferView.SizeInBytes = iBufferSize;
+	indexBufferView.BufferLocation = indexBuffer.resourceBuffer->GetGPUVirtualAddress();
+	indexBufferView.SizeInBytes = indexBuffer.size;
 	indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+
+	Rendering::commandQueue->WaitForAllCommands();
 }
 
 void Mesh::Draw(CommandRecorder* recorder)

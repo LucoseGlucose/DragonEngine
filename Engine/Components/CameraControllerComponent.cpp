@@ -22,8 +22,8 @@ void CameraControllerComponent::OnUpdate()
 
 	if (Input::GetMouseButton(GLFW_MOUSE_BUTTON_MIDDLE))
 	{
-		Vector3 newPos = GetTransform()->GetPosition() + GetTransform()->GetRight() * -posDelta.x * panSpeed * TimeManager::GetDeltaTime()
-			+ GetTransform()->GetUp() * posDelta.y * panSpeed * TimeManager::GetDeltaTime();
+		Vector3 newPos = GetTransform()->GetPosition() + GetTransform()->GetRight() * -posDelta.x * panSpeed * Application::GetDeltaTime()
+			+ GetTransform()->GetUp() * posDelta.y * panSpeed * Application::GetDeltaTime();
 
 		GetTransform()->SetPosition(newPos);
 	}
@@ -32,10 +32,10 @@ void CameraControllerComponent::OnUpdate()
 	{
 		glfwSetInputMode(Application::window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-		float yaw = posDelta.x * (float)TimeManager::GetDeltaTime() * rotateSpeed;
+		float yaw = posDelta.x * (float)Application::GetDeltaTime() * rotateSpeed;
 		yaw = DirectX::XMConvertToRadians(yaw);
 
-		float pitch = posDelta.y * (float)TimeManager::GetDeltaTime() * rotateSpeed;
+		float pitch = posDelta.y * (float)Application::GetDeltaTime() * rotateSpeed;
 		pitch = DirectX::XMConvertToRadians(pitch);
 
 		XMFLOAT4 rot = GetTransform()->GetRotation();
@@ -58,32 +58,32 @@ void CameraControllerComponent::OnUpdate()
 
 		if (Input::GetKey(GLFW_KEY_W))
 		{
-			Vector3 newPos = GetTransform()->GetPosition() + GetTransform()->GetForward() * flySpeed * TimeManager::GetDeltaTime();
+			Vector3 newPos = GetTransform()->GetPosition() + GetTransform()->GetForward() * flySpeed * Application::GetDeltaTime();
 			GetTransform()->SetPosition(newPos);
 		}
 		if (Input::GetKey(GLFW_KEY_S))
 		{
-			Vector3 newPos = GetTransform()->GetPosition() - GetTransform()->GetForward() * flySpeed * TimeManager::GetDeltaTime();
+			Vector3 newPos = GetTransform()->GetPosition() - GetTransform()->GetForward() * flySpeed * Application::GetDeltaTime();
 			GetTransform()->SetPosition(newPos);
 		}
 		if (Input::GetKey(GLFW_KEY_D))
 		{
-			Vector3 newPos = GetTransform()->GetPosition() + GetTransform()->GetRight() * flySpeed * TimeManager::GetDeltaTime();
+			Vector3 newPos = GetTransform()->GetPosition() + GetTransform()->GetRight() * flySpeed * Application::GetDeltaTime();
 			GetTransform()->SetPosition(newPos);
 		}
 		if (Input::GetKey(GLFW_KEY_A))
 		{
-			Vector3 newPos = GetTransform()->GetPosition() - GetTransform()->GetRight() * flySpeed * TimeManager::GetDeltaTime();
+			Vector3 newPos = GetTransform()->GetPosition() - GetTransform()->GetRight() * flySpeed * Application::GetDeltaTime();
 			GetTransform()->SetPosition(newPos);
 		}
 		if (Input::GetKey(GLFW_KEY_E))
 		{
-			Vector3 newPos = GetTransform()->GetPosition() + GetTransform()->GetUp() * flySpeed * TimeManager::GetDeltaTime();
+			Vector3 newPos = GetTransform()->GetPosition() + GetTransform()->GetUp() * flySpeed * Application::GetDeltaTime();
 			GetTransform()->SetPosition(newPos);
 		}
 		if (Input::GetKey(GLFW_KEY_Q))
 		{
-			Vector3 newPos = GetTransform()->GetPosition() - GetTransform()->GetUp() * flySpeed * TimeManager::GetDeltaTime();
+			Vector3 newPos = GetTransform()->GetPosition() - GetTransform()->GetUp() * flySpeed * Application::GetDeltaTime();
 			GetTransform()->SetPosition(newPos);
 		}
 	}

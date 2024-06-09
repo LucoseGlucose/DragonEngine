@@ -5,11 +5,11 @@
 #include <d3d12shader.h>
 #include <dxcapi.h>
 
-ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList, uint32_t samples, DXGI_FORMAT format) : shaders(shaderList)
+ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList) : shaders(shaderList)
 {
-    uint32_t numConstantBuffers = 0;
-    uint32_t numTextures = 0;
-    uint32_t numSamplers = 0;
+    UINT32 numConstantBuffers = 0;
+    UINT32 numTextures = 0;
+    UINT32 numSamplers = 0;
 
     std::vector<D3D12_ROOT_PARAMETER> rootParams{};
     std::vector<D3D12_ROOT_PARAMETER> textureParams{};
@@ -111,7 +111,7 @@ ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList, u
         }
     }
 
-    uint32_t numParams = rootParams.size() + textureParams.size() + samplerParams.size();
+    UINT32 numParams = rootParams.size() + textureParams.size() + samplerParams.size();
     D3D12_ROOT_PARAMETER* allParams = new D3D12_ROOT_PARAMETER[numParams];
     D3D12_ROOT_PARAMETER* ptrCpy = allParams;
 
@@ -147,7 +147,7 @@ ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList, u
     }
     delete[] ptrCpy;
 
-    std::vector<D3D12_INPUT_ELEMENT_DESC> inputLayout;
+    D3D12_INPUT_ELEMENT_DESC* inputs = new D3D12_INPUT_ELEMENT_DESC[vertexShaderDesc.InputParameters];
 
     for (size_t i = 0; i < vertexShaderDesc.InputParameters; i++)
     {
@@ -155,7 +155,11 @@ ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList, u
         vertexShaderReflection->GetInputParameterDesc(i, &paramDesc);
 
         D3D12_INPUT_ELEMENT_DESC elementDesc{};
-        elementDesc.SemanticName = paramDesc.SemanticName;
+
+        SIZE_T size = sizeof(paramDesc.SemanticName) + 1;
+        elementDesc.SemanticName = new char[size];
+        memcpy((void*)elementDesc.SemanticName, (void*)paramDesc.SemanticName, size);
+
         elementDesc.SemanticIndex = paramDesc.SemanticIndex;
         elementDesc.InputSlot = 0;
         elementDesc.AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
@@ -187,57 +191,65 @@ ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList, u
             else if (paramDesc.ComponentType == D3D_REGISTER_COMPONENT_FLOAT32) elementDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
         }
 
-        inputLayout.push_back(elementDesc);
+        inputs[i] = elementDesc;
     }
 
-    D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
-    inputLayoutDesc.NumElements = inputLayout.size();
-    inputLayoutDesc.pInputElementDescs = inputLayout.data();
+    inputLayoutDesc.NumElements = vertexShaderDesc.InputParameters;
+    inputLayoutDesc.pInputElementDescs = inputs;
+}
 
-    DXGI_SAMPLE_DESC sampleDesc{};
-    sampleDesc.Count = samples;
+ShaderProgram::~ShaderProgram()
+{
+    for (size_t i = 0; i < inputLayoutDesc.NumElements; i++)
+    {
+        delete[] inputLayoutDesc.pInputElementDescs[i].SemanticName;
+    }
 
-    CD3DX12_DEPTH_STENCIL_DESC dsDesc = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-    dsDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+    delete[] inputLayoutDesc.pInputElementDescs;
+}
 
+void ShaderProgram::CompileShaderForProfile(const PipelineProfile& profile)
+{
     D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelineDesc{};
     pipelineDesc.InputLayout = inputLayoutDesc;
     pipelineDesc.pRootSignature = rootSignature.Get();
     pipelineDesc.VS = shaders[SHADER_TYPE_VERTEX]->bytecode;
     pipelineDesc.PS = shaders[SHADER_TYPE_PIXEL]->bytecode;
-    pipelineDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-    pipelineDesc.RTVFormats[0] = format;
-    pipelineDesc.SampleDesc = sampleDesc;
     pipelineDesc.SampleMask = 0xffffffff;
-    pipelineDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-    pipelineDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-    pipelineDesc.NumRenderTargets = 1;
-    pipelineDesc.DepthStencilState = dsDesc;
-    pipelineDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 
+    pipelineDesc.PrimitiveTopologyType = profile.topologyType;
+    pipelineDesc.NumRenderTargets = min(8, profile.rtvFormats.size());
+
+    for (size_t i = 0; i < pipelineDesc.NumRenderTargets; i++)
+    {
+        pipelineDesc.RTVFormats[i] = profile.rtvFormats[i];
+    }
+
+    pipelineDesc.SampleDesc = profile.sampleDesc;
+    pipelineDesc.RasterizerState = profile.rasterizerState;
+    pipelineDesc.BlendState = profile.blendState;
+    pipelineDesc.DepthStencilState = profile.depthStencilState;
+    pipelineDesc.DSVFormat = profile.dsvFormat;
+
+    ComPtr<ID3D12PipelineState> pipeline;
     Utils::ThrowIfFailed(Rendering::device->CreateGraphicsPipelineState(&pipelineDesc, IID_PPV_ARGS(&pipeline)));
     NAME_D3D_OBJECT(pipeline);
+
+    compiledPipelines.emplace(profile, pipeline);
 }
 
-ShaderProgram* ShaderProgram::Create(const std::map<SHADER_TYPE, Shader*>& shaderList, uint32_t samples, DXGI_FORMAT format)
+ShaderProgram* ShaderProgram::Create(const std::map<SHADER_TYPE, Shader*>& shaderList)
 {
     if (createdPrograms.contains(shaderList)) return createdPrograms[shaderList];
-    return new ShaderProgram(shaderList, samples, format);
+    return new ShaderProgram(shaderList);
 }
 
-ShaderProgram* ShaderProgram::Create(const std::filesystem::path& vertexShader,
-    const std::filesystem::path& pixelShader, uint32_t samples, DXGI_FORMAT format)
+ShaderProgram* ShaderProgram::Create(const std::filesystem::path& vertexShader, const std::filesystem::path& pixelShader)
 {
     std::map<SHADER_TYPE, Shader*> shaderList = std::map<SHADER_TYPE, Shader*>();
 
     shaderList[SHADER_TYPE_VERTEX] = Shader::Create(vertexShader, SHADER_TYPE_VERTEX);
     shaderList[SHADER_TYPE_PIXEL] = Shader::Create(pixelShader, SHADER_TYPE_PIXEL);
 
-    if (createdPrograms.contains(shaderList)) return createdPrograms[shaderList];
-    return new ShaderProgram(shaderList, samples, format);
-}
-
-ShaderProgram* ShaderProgram::Create(const std::filesystem::path& vertexShader, const std::filesystem::path& pixelShader, Framebuffer* fb)
-{
-    return Create(vertexShader, pixelShader, fb->colorTexture->samples, fb->colorTexture->format);
+    return Create(shaderList);
 }

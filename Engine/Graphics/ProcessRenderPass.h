@@ -12,5 +12,5 @@ public:
 	Material* material;
 
 	virtual void Execute(Framebuffer* inputFB, CommandRecorder* recorder) override;
-	virtual void Resize(Framebuffer* inputFB, XMUINT2 newSize) override;
+	virtual void Resize(Framebuffer* inputFB, Vector2 newSize) override;
 };

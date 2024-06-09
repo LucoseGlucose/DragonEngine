@@ -5,10 +5,8 @@
 
 RendererComponent::RendererComponent(SceneObject* owner) : Component(owner)
 {
-	shaderDefaultFunc = GetLitShaderDefaultFunc();
-	shaderParamFunc = GetLitShaderParamFunc();
-
-	GetTransform()->onMatrixChanged += [this](Matrix m) { CalculateBoundingBoxes(); };
+	std::function<void(Matrix)> func = [this](Matrix m) { CalculateBoundingBoxes(); };
+	GetTransform()->onMatrixChanged.Subscribe(func);
 }
 
 RendererComponent::~RendererComponent()
@@ -17,91 +15,17 @@ RendererComponent::~RendererComponent()
 	delete material;
 }
 
-ShaderParamFunc RendererComponent::GetLitShaderDefaultFunc()
-{
-	return [](RendererComponent* renderer)
-	{
-		renderer->material->SetParameter("p_albedo", XMFLOAT4(1.f, 1.f, 1.f, 1.f));
-		renderer->material->SetParameter("p_roughness", .5f);
-		renderer->material->SetParameter("p_metallic", .5f);
-		renderer->material->SetParameter("p_normalStrength", 1.f);
-		renderer->material->SetParameter("p_aoStrength", 1.f);
-		renderer->material->SetParameter("p_emissive", XMFLOAT3(0.f, 0.f, 0.f));
-		renderer->material->SetParameter("p_ambientColor", XMFLOAT3(.25f, .25f, .25f));
-	};
-}
-
-ShaderParamFunc RendererComponent::GetLitShaderParamFunc()
-{
-	return [](RendererComponent* renderer)
-	{
-		XMFLOAT4X4 projMat = Rendering::outputCam->GetProjectionMat();
-		XMFLOAT4X4 viewMat = Rendering::outputCam->GetViewMat();
-		XMFLOAT4X4 modelMat = renderer->GetTransform()->GetMatrix();
-
-		XMMATRIX modelMatMat = DirectX::XMLoadFloat4x4(&modelMat);
-		XMMATRIX multiplied = modelMatMat * DirectX::XMLoadFloat4x4(&viewMat) * DirectX::XMLoadFloat4x4(&projMat);
-
-		XMFLOAT4X4 mvpMat;
-		DirectX::XMStoreFloat4x4(&mvpMat, DirectX::XMMatrixTranspose(multiplied));
-
-		renderer->material->SetParameter("p_mvpMat", &mvpMat);
-
-		XMFLOAT4X4 shaderModelMat;
-		DirectX::XMStoreFloat4x4(&shaderModelMat, DirectX::XMMatrixTranspose(modelMatMat));
-
-		renderer->material->SetParameter("p_modelMat", &shaderModelMat);
-
-		XMFLOAT3 cameraPosition = Rendering::outputCam->GetTransform()->GetPosition();
-		renderer->material->SetParameter("p_cameraPosition", &cameraPosition);
-
-		std::vector<LightComponent*> lights = Rendering::scenePass->lights;
-		std::map<LightComponent*, float> distances{};
-
-		for (size_t i = 0; i < lights.size(); i++)
-		{
-			distances[lights[i]] = lights[i]->GetTransform()->GetDistance(renderer->GetTransform());
-		}
-
-		std::sort(lights.begin(), lights.end(), [distances](LightComponent* l1, LightComponent* l2)
-			{ return distances.at(l1) < distances.at(l2); });
-
-		LightData lightData[5]{};
-		for (size_t i = 0; i < 5; i++)
-		{
-			LightData data{};
-
-			if (i >= lights.size())
-			{
-				data.color = XMFLOAT3(0.f, 0.f, 0.f);
-
-				lightData[i] = data;
-				continue;
-			}
-
-			LightComponent* light = lights[i];
-			light->GetLightData(&data);
-
-			lightData[i] = data;
-		}
-
-		renderer->material->SetParameter<LightData>("p_lights", lightData);
-		renderer->material->SetParameter("p_ambientColor", Rendering::scenePass->skyboxObj->ambientColor);
-
-		renderer->material->SetTexture("t_irradiance", Rendering::scenePass->skyboxObj->irradiance);
-		renderer->material->SetTexture("t_specularReflections", Rendering::scenePass->skyboxObj->specular);
-	};
-}
-
 void RendererComponent::SetMaterial(Material* material)
 {
 	this->material = material;
-	if (shaderDefaultFunc != nullptr) shaderDefaultFunc(this);
-}
-
-Material* RendererComponent::GetMaterial()
-{
-	return material;
+	
+	material->SetParameter("p_albedo", Vector4::One);
+	material->SetParameter("p_roughness", .5f);
+	material->SetParameter("p_metallic", .5f);
+	material->SetParameter("p_normalStrength", 1.f);
+	material->SetParameter("p_aoStrength", 1.f);
+	material->SetParameter("p_emissive", Vector3::Zero);
+	material->SetParameter("p_ambientColor", Vector3::One);
 }
 
 void RendererComponent::SetMesh(Mesh* mesh)
@@ -109,26 +33,92 @@ void RendererComponent::SetMesh(Mesh* mesh)
 	this->mesh = mesh;
 }
 
-Mesh* RendererComponent::GetMesh()
+void RendererComponent::SetMaterialParameters()
 {
-	return mesh;
+	if (material->cbParameters.contains("p_mvpMat")) SetMVPMatrix();
+
+	Matrix modelMat = GetTransform()->GetMatrix();
+	material->SetParameter("p_modelMat", &modelMat);
+
+	Vector3 cameraPosition = Rendering::outputCam->GetTransform()->GetPosition();
+	material->SetParameter("p_cameraPosition", &cameraPosition);
+
+	if (material->cbParameters.contains("p_lights")) SetLightData();
+
+	material->SetTexture("t_irradiance", Rendering::scenePass->diffuseSkybox);
+	material->SetTexture("t_specularReflections", Rendering::scenePass->specularSkybox);
 }
 
-void RendererComponent::Render(CommandRecorder* recorder)
+void RendererComponent::SetMVPMatrix()
 {
-	if (mesh == nullptr || material == nullptr) return;
+	Matrix projMat = Rendering::outputCam->GetProjectionMat();
+	Matrix viewMat = Rendering::outputCam->GetViewMat();
+	Matrix modelMat = GetTransform()->GetMatrix();
 
-	XMFLOAT4X4 currentMat = GetOwner()->GetTransform()->GetMatrix();
+	Matrix multiplied = modelMat * viewMat * projMat;
+	Matrix transpose = multiplied.Transpose();
 
-	CalculateBoundingBoxes();
-	shaderParamFunc(this);
+	material->SetParameter("p_mvpMat", &transpose);
+}
 
-	material->Bind(recorder);
+void RendererComponent::SetLightData()
+{
+	std::vector<LightComponent*> lights = Rendering::scenePass->lights;
+	std::map<LightComponent*, float> distances{};
+
+	for (size_t i = 0; i < lights.size(); i++)
+	{
+		distances[lights[i]] = lights[i]->GetTransform()->GetDistance(GetTransform());
+	}
+
+	std::sort(lights.begin(), lights.end(), [distances](LightComponent* l1, LightComponent* l2)
+		{ return distances.at(l1) < distances.at(l2); });
+
+	LightData lightData[5]{};
+	for (size_t i = 0; i < 5; i++)
+	{
+		LightData data{};
+
+		if (i >= lights.size())
+		{
+			data.color = Vector3(0.f, 0.f, 0.f);
+
+			lightData[i] = data;
+			continue;
+		}
+
+		LightComponent* light = lights[i];
+		light->GetLightData(&data);
+
+		lightData[i] = data;
+	}
+
+	material->SetParameter<LightData>("p_lights", lightData);
+}
+
+void RendererComponent::Render(CommandRecorder* recorder, PipelineProfile profile)
+{
+	if (mesh == nullptr) return;
+
+	if (material != nullptr)
+	{
+		SetMaterialParameters();
+		material->Bind(recorder, profile);
+	}
+	else
+	{
+		material = Rendering::missingMaterial;
+		SetMVPMatrix();
+
+		material->Bind(recorder, profile);
+		material = nullptr;
+	}
+
 	mesh->Draw(recorder);
 }
 
 void RendererComponent::CalculateBoundingBoxes()
 {
-	XMFLOAT3 pos = GetTransform()->GetPosition();
+	Vector3 pos = GetTransform()->GetPosition();
 
 }

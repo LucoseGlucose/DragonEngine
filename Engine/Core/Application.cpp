@@ -2,7 +2,6 @@
 #include "Application.h"
 
 #include "Rendering.h"
-#include "TimeManager.h"
 #include "SceneManager.h"
 #include "Input.h"
 #include "stb_image.h"
@@ -10,28 +9,39 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
-void Application::Init()
+void Application::Init(Vector2 windowStartSize, Vector2 windowStartPos, const char* windowTitle,
+	const std::filesystem::path& windowIconPathFromSolution, bool windowStartMaximized)
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-	window = glfwCreateWindow(1280, 720, "DragonEngine", nullptr, nullptr);
-	glfwSetWindowPos(window, 320, 180);
+	window = glfwCreateWindow(windowStartSize.x, windowStartSize.y, windowTitle, nullptr, nullptr);
+	glfwSetWindowPos(window, windowStartPos.x, windowStartPos.y);
 
-	Rendering::Init();
+	SetWindowIcon(Utils::GetPathFromSolution(windowIconPathFromSolution));
+
+	glfwSetWindowAttrib(window, GLFW_ICONIFIED, windowStartMaximized);
 }
 
 void Application::Run()
 {
 	while (!glfwWindowShouldClose(window))
 	{
-		XMUINT2 preWindowSize = GetUnsignedFramebufferSize();
+		Vector2 preWindowSize = GetFramebufferSize();
 		glfwPollEvents();
 
-		deltaTime = glfwGetTime() - lastFrameTime;
-		lastFrameTime = glfwGetTime();
+		if (targetFrameRate != 0)
+		{
+			double targetDeltaTime = 1.0 / targetFrameRate;
+			if (deltaTime < targetDeltaTime) Sleep((targetDeltaTime - deltaTime) * 1000);
+		}
 
-		XMUINT2 postWindowSize = GetUnsignedFramebufferSize();
+		deltaTime = glfwGetTime() - lastFrameTime;
+
+		lastFrameTime = glfwGetTime();
+		totalTime += deltaTime;
+
+		Vector2 postWindowSize = GetFramebufferSize();
 		if (postWindowSize.x != preWindowSize.x || postWindowSize.y != preWindowSize.y)
 		{
 			for (Layer*& l : layers)
@@ -61,42 +71,28 @@ void Application::Run()
 	glfwTerminate();
 }
 
-XMINT2 Application::GetFramebufferSize()
+Vector2 Application::GetFramebufferSize()
 {
-	XMINT2 size{};
-	glfwGetFramebufferSize(window, &size.x, &size.y);
-	return size;
+	int x;
+	int y;
+	glfwGetFramebufferSize(window, &x, &y);
+
+	return Vector2(x, y);
 }
 
-XMUINT2 Application::GetUnsignedFramebufferSize()
-{
-	int width, height;
-	glfwGetFramebufferSize(window, &width, &height);
-	return XMUINT2(width, height);
-}
-
-XMUINT2 Application::GetViewportSize()
-{
-	return layers.front()->GetViewportSize();
-}
-
-XMINT2 Application::GetWindowSize()
+Vector2 Application::GetWindowSize()
 {
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);
-	return XMINT2(width, height);
+
+	return Vector2(width, height);
 }
 
-XMINT2 Application::GetWindowPosition()
+Vector2 Application::GetWindowPosition()
 {
 	int x, y;
 	glfwGetWindowPos(window, &x, &y);
-	return XMINT2(x, y);
-}
-
-double Application::GetDeltaTime()
-{
-	return deltaTime;
+	return Vector2(x, y);
 }
 
 HWND Application::GetWindowHandle()
@@ -135,11 +131,6 @@ void Application::SetWindowIcon(const std::filesystem::path& path)
 	glfwSetWindowIcon(window, 1, &icon);
 }
 
-bool Application::GetFullscreen()
-{
-	return fullscreen;
-}
-
 void Application::SetFullscreen(bool fs)
 {
 	if (fs && !fullscreen)
@@ -152,14 +143,14 @@ void Application::SetFullscreen(bool fs)
 
 		glfwSetWindowMonitor(window, monitor, 0, 0, vidMode->width, vidMode->height, GLFW_DONT_CARE);
 
-		Rendering::Resize(GetUnsignedFramebufferSize());
+		Rendering::Resize(GetFramebufferSize());
 		fullscreen = true;
 	}
 	else if (!fs && fullscreen)
 	{
 		glfwSetWindowMonitor(window, nullptr, lastWindowedPos.x, lastWindowedPos.y, lastWindowedSize.x, lastWindowedSize.y, GLFW_DONT_CARE);
 
-		Rendering::Resize(GetUnsignedFramebufferSize());
+		Rendering::Resize(GetFramebufferSize());
 		fullscreen = false;
 	}
 }

@@ -34,6 +34,7 @@ void CommandQueue::WaitToValue(const UINT64 value)
 	{
 		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
 		Utils::ThrowIfFailed(fence->SetEventOnCompletion(value, event));
+
 		WaitForSingleObjectEx(event, INFINITE, FALSE);
 		CloseHandle(event);
 	}

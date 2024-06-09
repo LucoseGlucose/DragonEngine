@@ -10,11 +10,10 @@ class Texture2D : public Texture
 	static inline Texture2D* brdfTexture{};
 
 public:
-	Texture2D(void* data, XMUINT2 size, uint32_t bytesPerPixel, uint32_t mipCount, DXGI_FORMAT format);
+	Texture2D(void* data, Vector2 size, UINT32 bytesPerPixel, UINT32 mipCount, DXGI_FORMAT format);
 
-	XMUINT2 size;
-	ComPtr<ID3D12Resource> uploadBuffer;
-	uint32_t mipCount;
+	Vector2 size;
+	UINT32 mipCount;
 	DXGI_FORMAT format;
 
 	static Texture2D* Import(const std::filesystem::path& file, bool sRGB, bool generateMips);

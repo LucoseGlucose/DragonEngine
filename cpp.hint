@@ -1,0 +1,3 @@
+#define GETTER(name, obj) inline auto name() { return obj; };
+#define STATIC(decl) static inline decl{}#define WINDOW_ENTRY(name, defOpen) EditorWindowData(name##::GetTitle(), []() -> name##* { return new name##(); }, defOpen)
+#define WINDOW_ENTRY(name, defOpen) EditorWindowData(name##::GetTitle(), []() -> name##* { return new name##(); }, defOpen)

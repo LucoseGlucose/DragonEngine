@@ -21,9 +21,6 @@
     <ClCompile Include="Core\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\TimeManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -69,9 +66,6 @@
     <ClCompile Include="Components\RendererComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\Texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\Texture2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -94,9 +88,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\TextureCubemap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Objects\SkyboxObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Components\LightComponent.cpp">
@@ -132,15 +123,27 @@
     <ClCompile Include="Graphics\GraphicsResource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\DepthTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\ColorTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\DescriptorHeap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Buffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\PipelineProfile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graphics\Rendering.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Application.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\TimeManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\Mesh.h">
@@ -215,9 +218,6 @@
     <ClInclude Include="Graphics\TextureCubemap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\SkyboxObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Components\LightComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -281,6 +281,24 @@
     <ClInclude Include="Graphics\GraphicsResource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\PipelineProfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RenderTextureProfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\DepthTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\ColorTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\DescriptorHeap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Buffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\Quad.fbx" />
@@ -290,6 +308,7 @@
     <None Include="Models\Sphere.fbx" />
     <None Include="Models\Smooth Monkey.fbx" />
     <None Include="Models\Monkey.fbx" />
+    <None Include="Images\citrus_orchard_4k.hdr" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\UV Checker.png">
@@ -345,5 +364,7 @@
     <FxCompile Include="Shaders\OutputV.hlsl" />
     <FxCompile Include="Shaders\SkyboxP.hlsl" />
     <FxCompile Include="Shaders\SkyboxV.hlsl" />
+    <FxCompile Include="Shaders\UnlitP.hlsl" />
+    <FxCompile Include="Shaders\UnlitV.hlsl" />
   </ItemGroup>
 </Project>

@@ -2,10 +2,14 @@
 
 #include "EditorWindow.h"
 
+#include "IconsMaterialDesign.h"
+
 class ViewportWindow : public EditorWindow
 {
 public:
-	ViewportWindow();
+	ViewportWindow(EditorLayer* el, EditorWindowIndex windowIndex);
+
+	static inline std::string GetTitle() { return ICON_MD_TV" Viewport"; };
 
 	virtual void BeforeShow() override;
 	virtual void OnGui() override;

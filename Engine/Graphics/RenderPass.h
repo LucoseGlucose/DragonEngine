@@ -12,5 +12,5 @@ public:
 	virtual void Render(Framebuffer* inputFB);
 	virtual void Execute(Framebuffer* inputFB, CommandRecorder* recorder);
 
-	virtual void Resize(Framebuffer* inputFB, XMUINT2 newSize);
+	virtual void Resize(Framebuffer* inputFB, Vector2 newSize);
 };

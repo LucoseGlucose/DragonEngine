@@ -1,15 +1,14 @@
 #pragma once
 
-#include <DirectXMath.h>
+#include "SimpleMath.h"
 
-using namespace DirectX;
+using namespace DirectX::SimpleMath;
 
 class Layer
 {
 public:
 	virtual void OnPush();
 	virtual void Update();
-	virtual void Resize(XMUINT2 newSize);
+	virtual void Resize(Vector2 newSize);
 	virtual void OnPop();
-	virtual XMUINT2 GetViewportSize();
 };

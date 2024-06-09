@@ -9,5 +9,9 @@ using namespace DirectX::SimpleMath;
 
 namespace Settings
 {
-	SETTING std::filesystem::path iconPathFromSolution = "Engine/Images/DragonEngine Logo.png";
+	SETTING std::filesystem::path windowIconPathFromSolution = "Engine/Images/DragonEngine Logo.png";
+	SETTING Vector2 windowStartSize = Vector2(1280, 720);
+	SETTING Vector2 windowStartPos = Vector2(320, 180);
+	SETTING char* windowTitle = "DragonEngine";
+	SETTING bool windowStartMaximized = false;
 }

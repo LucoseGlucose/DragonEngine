@@ -1,29 +1,55 @@
 #pragma once
 
+#include <array>
+
 #include "Layer.h"
 #include "CommandRecorder.h"
 #include "EditorWindow.h"
 #include "imgui.h"
 #include "ViewportWindow.h"
+#include "SceneWindow.h"
+#include "StatsWindow.h"
+#include "Utils.h"
+#include "EditorWindowData.h"
+
+enum class EditorWindowIndex
+{
+	ViewportWindow,
+	SceneWindow,
+	StatsWindow,
+};
+
+#define WINDOW_ENTRY(name, defOpen) EditorWindowData(name##::GetTitle(), [](EditorLayer* el) -> name##* { return new name##(el, EditorWindowIndex::##name); }, defOpen, EditorWindowIndex::##name)
 
 class EditorLayer : public Layer
 {
-	ViewportWindow* viewport;
+	static inline std::array<EditorWindowData, 3> availableWindows
+	{
+		WINDOW_ENTRY(ViewportWindow, true),
+		WINDOW_ENTRY(SceneWindow, true),
+		WINDOW_ENTRY(StatsWindow, true),
+	};
 
 public:
-	static inline ComPtr<ID3D12DescriptorHeap> descHeap{};
-	static inline std::vector<EditorWindow*> windows{};
 
-	static ImTextureID GetViewportTextureID();
+	STATIC(ComPtr<ID3D12DescriptorHeap> descHeap);
+	STATIC(std::vector<EditorWindow*> windows);
+
+	ImTextureID GetViewportTextureID();
+
+	void OpenEditorWindow(EditorWindowIndex windowIndex);
+	void CloseEditorWindow(EditorWindow* window);
 
 	virtual void OnPush() override;
 	virtual void Update() override;
-	virtual void Resize(XMUINT2 newSize) override;
+	virtual void Resize(Vector2 newSize) override;
 	virtual void OnPop() override;
-	virtual XMUINT2 GetViewportSize() override;
+
+	EditorWindow* GetWindowByTitle(std::string title);
+	bool TryGetWindowByTitle(std::string title, EditorWindow** out);
 
 	template<typename T>
-	T* GetWindow() requires std::is_base_of_v<EditorWindow, T>
+	T* GetWindowOfType() requires std::is_base_of_v<EditorWindow, T>
 	{
 		for (size_t i = 0; i < windows.size(); i++)
 		{

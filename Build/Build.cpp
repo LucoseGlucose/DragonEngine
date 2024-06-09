@@ -6,14 +6,16 @@
 #include "BuildLayer.h"
 #include "SceneLayer.h"
 #include "Game.h"
+#include "Rendering.h"
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
-	Application::Init();
-	Application::SetWindowIcon(Utils::GetPathFromSolution(Settings::iconPathFromSolution));
+	Application::Init(Settings::windowStartSize, Settings::windowStartPos,
+		Settings::windowTitle, Settings::windowIconPathFromSolution, Settings::windowStartMaximized);
+
+	Rendering::Init();
 
 	Application::PushLayer(new BuildLayer());
-
 	SceneManager::AddScene(Game::Init());
 
 	Application::PushLayer(new SceneLayer());

@@ -4,8 +4,6 @@
 #include "Mesh.h"
 #include "Material.h"
 
-typedef void(*ShaderParamFunc)(class RendererComponent* renderer);
-
 class RendererComponent : public Component
 {
 	Mesh* mesh;
@@ -15,21 +13,19 @@ public:
 	RendererComponent(SceneObject* owner);
 	~RendererComponent();
 
-	ShaderParamFunc shaderParamFunc;
-	ShaderParamFunc shaderDefaultFunc;
-
 	BoundingBox aabb;
 	BoundingOrientedBox obb;
 
-	static ShaderParamFunc GetLitShaderDefaultFunc();
-	static ShaderParamFunc GetLitShaderParamFunc();
-
 	virtual void SetMaterial(Material* material);
-	virtual Material* GetMaterial();
+	GETTER(GetMaterial, material);
 
 	virtual void SetMesh(Mesh* mesh);
-	virtual Mesh* GetMesh();
+	GETTER(GetMesh, mesh);
 
-	virtual void Render(CommandRecorder* recorder);
+	virtual void SetMaterialParameters();
+	virtual void SetMVPMatrix();
+	virtual void SetLightData();
+
+	virtual void Render(CommandRecorder* recorder, PipelineProfile profile);
 	virtual void CalculateBoundingBoxes();
 };

@@ -4,9 +4,9 @@
 #include "Rendering.h"
 #include <GLFW/glfw3.h>
 
-PresentationBuffer::PresentationBuffer()
+PresentationBuffer::PresentationBuffer() : colorTextures(), pipelineProfile()//, depthTexture(nullptr)
 {
-	XMUINT2 windowSize = Application::GetUnsignedFramebufferSize();
+	Vector2 windowSize = Application::GetFramebufferSize();
 
 	DXGI_SWAP_CHAIN_FULLSCREEN_DESC fsDesc{};
 	fsDesc.Windowed = true;
@@ -24,7 +24,7 @@ PresentationBuffer::PresentationBuffer()
 	swapChainDesc.Height = windowSize.y;
 	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapChainDesc.BufferCount = 2;
+	swapChainDesc.BufferCount = Settings::numPresentationFrames;
 	swapChainDesc.SampleDesc.Count = 1;
 	swapChainDesc.SampleDesc.Quality = 0;
 	swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
@@ -36,127 +36,78 @@ PresentationBuffer::PresentationBuffer()
 	Utils::ThrowIfFailed(Rendering::factory->CreateSwapChainForHwnd(Rendering::commandQueue->commandQueue.Get(), Application::GetWindowHandle(),
 		&swapChainDesc, &fsDesc, nullptr, tempSC.GetAddressOf()));
 
-	tempSC.As<IDXGISwapChain3>(&swapchain);
+	Utils::ThrowIfFailed(tempSC.As<IDXGISwapChain3>(&swapchain));
 
-	D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc{};
-	rtvHeapDesc.NumDescriptors = 2;
-	rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-	rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	rtvDescHeap = DescriptorHeap(Settings::numPresentationFrames, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
+	//dsDescHeap = DescriptorHeap(1, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
 
-	Utils::ThrowIfFailed(Rendering::device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&rtvDescHeap)));
-	NAME_D3D_OBJECT(rtvDescHeap);
+	for (size_t i = 0; i < Settings::numPresentationFrames; i++)
+	{
+		ID3D12Resource* res;
+		Utils::ThrowIfFailed(swapchain->GetBuffer(i, IID_PPV_ARGS(&res)));
 
-	D3D12_DESCRIPTOR_HEAP_DESC dsHeapDesc{};
-	dsHeapDesc.NumDescriptors = 1;
-	dsHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-	dsHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		colorTextures[i] = new ColorTexture(&res, CD3DX12_CLEAR_VALUE(DXGI_FORMAT_R8G8B8A8_UNORM, &clearColor.x));
+		colorTextures[i]->currentState = D3D12_RESOURCE_STATE_PRESENT;
 
-	Utils::ThrowIfFailed(Rendering::device->CreateDescriptorHeap(&dsHeapDesc, IID_PPV_ARGS(&dsDescHeap)));
-	NAME_D3D_OBJECT(dsDescHeap);
+		Rendering::device->CreateRenderTargetView(colorTextures[i]->resourceBuffer.Get(),
+			&colorTextures[i]->rtvDesc, rtvDescHeap.GetCPUHandleForIndex(i));
+	}
 
-	View rtvView{};
-	rtvView.rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	rtvView.rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-
-	ID3D12Resource* res;
-	Utils::ThrowIfFailed(swapchain->GetBuffer(0, IID_PPV_ARGS(&res)));
-	colorTextures[0] = new RenderTexture(&res, rtvView);
-
-	Utils::ThrowIfFailed(swapchain->GetBuffer(1, IID_PPV_ARGS(&res)));
-	colorTextures[1] = new RenderTexture(&res, rtvView);
-
-	UINT rtvHandleSize = Rendering::device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvDescHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(rtvDescHeap->GetCPUDescriptorHandleForHeapStart());
-
-	Rendering::device->CreateRenderTargetView(colorTextures[0]->textureBuffer.Get(), &colorTextures[0]->descriptor.rtvDesc, rtvDescHandle);
-	rtvDescHandle.Offset(1, rtvHandleSize);
-	Rendering::device->CreateRenderTargetView(colorTextures[1]->textureBuffer.Get(), &colorTextures[1]->descriptor.rtvDesc, rtvDescHandle);
-
-	View dsView{};
-	dsView.dsDesc.Format = DXGI_FORMAT_D32_FLOAT;
-	dsView.dsDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-	dsView.dsDesc.Flags = D3D12_DSV_FLAG_NONE;
-
-	D3D12_CLEAR_VALUE dsClearValue{};
-	dsClearValue.Format = DXGI_FORMAT_D32_FLOAT;
-	dsClearValue.DepthStencil.Depth = 1.0f;
-	dsClearValue.DepthStencil.Stencil = 0;
-
-	depthStencilTexture = new RenderTexture(Application::GetUnsignedFramebufferSize(), DXGI_FORMAT_D32_FLOAT,
-		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, dsClearValue, dsView, D3D12_RESOURCE_STATE_DEPTH_WRITE, 1);
-
-	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvDescHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(dsDescHeap->GetCPUDescriptorHandleForHeapStart());
-	Rendering::device->CreateDepthStencilView(depthStencilTexture->textureBuffer.Get(), &depthStencilTexture->descriptor.dsDesc, dsvDescHandle);
+	pipelineProfile.rtvFormats.push_back(DXGI_FORMAT_R8G8B8A8_UNORM);
+	pipelineProfile.depthStencilState.DepthEnable = false;
 }
 
 PresentationBuffer::~PresentationBuffer()
 {
-	delete colorTextures[0];
-	delete colorTextures[1];
-	delete depthStencilTexture;
+	for (size_t i = 0; i < colorTextures.size(); i++)
+	{
+		delete colorTextures[i];
+	}
 }
 
-void PresentationBuffer::Resize(XMUINT2 newSize)
+void PresentationBuffer::Resize(Vector2 newSize)
 {
 	if (newSize.x == 0 || newSize.y == 0) return;
 
-	colorTextures[0]->textureBuffer->Release();
-	colorTextures[1]->textureBuffer->Release();
+	for (size_t i = 0; i < colorTextures.size(); i++)
+	{
+		colorTextures[i]->resourceBuffer->Release();
+		colorTextures[i]->resourceBuffer.Reset();
+	}
 
-	colorTextures[0]->textureBuffer.Reset();
-	colorTextures[1]->textureBuffer.Reset();
-
-	swapchain->ResizeBuffers(2, newSize.x, newSize.y, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+	Utils::ThrowIfFailed(swapchain->ResizeBuffers(Settings::numPresentationFrames, newSize.x, newSize.y, DXGI_FORMAT_R8G8B8A8_UNORM, 0));
 	ID3D12Resource* tempRes = nullptr;
 
-	Utils::ThrowIfFailed(swapchain->GetBuffer(0, IID_PPV_ARGS(&tempRes)));
-	colorTextures[0]->Resize(newSize, &tempRes);
+	for (size_t i = 0; i < colorTextures.size(); i++)
+	{
+		Utils::ThrowIfFailed(swapchain->GetBuffer(i, IID_PPV_ARGS(&tempRes)));
+		colorTextures[i]->Resize(newSize, &tempRes);
 
-	Utils::ThrowIfFailed(swapchain->GetBuffer(1, IID_PPV_ARGS(&tempRes)));
-	colorTextures[1]->Resize(newSize, &tempRes);
-
-	depthStencilTexture->Resize(newSize, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-
-	UINT rtvHandleSize = Rendering::device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvDescHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(rtvDescHeap->GetCPUDescriptorHandleForHeapStart());
-
-	Rendering::device->CreateRenderTargetView(colorTextures[0]->textureBuffer.Get(), &colorTextures[0]->descriptor.rtvDesc, rtvDescHandle);
-	rtvDescHandle.Offset(1, rtvHandleSize);
-	Rendering::device->CreateRenderTargetView(colorTextures[1]->textureBuffer.Get(), &colorTextures[1]->descriptor.rtvDesc, rtvDescHandle);
-
-	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvDescHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(dsDescHeap->GetCPUDescriptorHandleForHeapStart());
-	Rendering::device->CreateDepthStencilView(depthStencilTexture->textureBuffer.Get(), &depthStencilTexture->descriptor.dsDesc, dsvDescHandle);
+		Rendering::device->CreateRenderTargetView(colorTextures[i]->resourceBuffer.Get(),
+			&colorTextures[i]->rtvDesc, rtvDescHeap.GetCPUHandleForIndex(i));
+	}
 }
 
 void PresentationBuffer::Setup(CommandRecorder* recorder)
 {
-	uint32_t frameIndex = swapchain->GetCurrentBackBufferIndex();
+	UINT32 frameIndex = swapchain->GetCurrentBackBufferIndex();
 
 	recorder->list->RSSetViewports(1, &Rendering::viewport);
 	recorder->list->RSSetScissorRects(1, &Rendering::scissorRect);
 	recorder->list->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	CD3DX12_RESOURCE_BARRIER transitionToRT = CD3DX12_RESOURCE_BARRIER::Transition(
-		colorTextures[frameIndex]->textureBuffer.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	recorder->list->ResourceBarrier(1, &transitionToRT);
+	Rendering::RecordBarriers(recorder, { colorTextures[frameIndex]->TransitionToState(D3D12_RESOURCE_STATE_RENDER_TARGET) });
 
-	UINT handleSize = Rendering::device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvCPUHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		rtvDescHeap->GetCPUDescriptorHandleForHeapStart(), frameIndex, handleSize);
-	CD3DX12_CPU_DESCRIPTOR_HANDLE dsCPUHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(dsDescHeap->GetCPUDescriptorHandleForHeapStart());
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvCPUHandle = rtvDescHeap.GetCPUHandleForIndex(frameIndex);
 
-	recorder->list->OMSetRenderTargets(1, &rtvCPUHandle, false, &dsCPUHandle);
+	recorder->list->OMSetRenderTargets(1, &rtvCPUHandle, false, nullptr);
 	recorder->list->ClearRenderTargetView(rtvCPUHandle, &clearColor.x, 0, nullptr);
-	recorder->list->ClearDepthStencilView(dsCPUHandle, D3D12_CLEAR_FLAG_DEPTH, clearDepth, 0, 0, nullptr);
 }
 
 void PresentationBuffer::Present(CommandRecorder* recorder)
 {
-	uint32_t frameIndex = swapchain->GetCurrentBackBufferIndex();
-
-	CD3DX12_RESOURCE_BARRIER transitionToPresent = CD3DX12_RESOURCE_BARRIER::Transition(
-		colorTextures[frameIndex]->textureBuffer.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	recorder->list->ResourceBarrier(1, &transitionToPresent);
+	UINT32 frameIndex = swapchain->GetCurrentBackBufferIndex();
+	Rendering::RecordBarriers(recorder, { colorTextures[frameIndex]->TransitionToState(D3D12_RESOURCE_STATE_PRESENT) });
 
 	recorder->Execute();
 	Utils::ThrowIfFailed(swapchain->Present(0, 0));

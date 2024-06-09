@@ -1,7 +1,11 @@
 #pragma once
 
-#include "RenderTexture.h"
+#include "ColorTexture.h"
+#include "DepthTexture.h"
 #include "CommandRecorder.h"
+#include "EngineSettings.h"
+#include "DescriptorHeap.h"
+#include "PipelineProfile.h"
 
 class PresentationBuffer
 {
@@ -10,16 +14,14 @@ public:
 	~PresentationBuffer();
 
 	ComPtr<IDXGISwapChain3> swapchain;
-	std::array<RenderTexture*, 2> colorTextures;
-	RenderTexture* depthStencilTexture;
+	std::array<ColorTexture*, Settings::numPresentationFrames> colorTextures;
 
-	ComPtr<ID3D12DescriptorHeap> rtvDescHeap;
-	ComPtr<ID3D12DescriptorHeap> dsDescHeap;
+	DescriptorHeap rtvDescHeap;
 
-	XMFLOAT4 clearColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	float clearDepth = 1.0f;
+	Vector4 clearColor = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
+	PipelineProfile pipelineProfile;
 
-	void Resize(XMUINT2 newSize);
+	void Resize(Vector2 newSize);
 	void Setup(CommandRecorder* recorder);
 	void Present(CommandRecorder* recorder);
 };

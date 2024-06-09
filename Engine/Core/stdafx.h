@@ -30,12 +30,8 @@
 #include <utility>
 #include <future>
 
-#define TRACY_ENABLE
-#include "tracy/Tracy.hpp"
-
 #include "Utils.h"
 #include "Application.h"
-#include "TimeManager.h"
 
 using namespace Microsoft::WRL;
 using namespace DirectX;

@@ -6,7 +6,6 @@
     "stb",
     "directx-dxc",
     "meshoptimizer",
-    "tracy",
     {
       "name": "imgui",
       "features": [

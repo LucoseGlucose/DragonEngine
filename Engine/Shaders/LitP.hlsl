@@ -15,6 +15,7 @@ cbuffer SurfaceParameters : register(b1)
     float p_normalStrength;
     float p_aoStrength;
     float3 p_emissive;
+    float p_alphaClip;
 }
 
 struct Light
@@ -109,6 +110,8 @@ float4 main(PS_INPUT input) : SV_TARGET
 {
     float4 albedo = t_albedoW.Sample(s_sampler, input.uv) * p_albedo;
     float alpha = albedo.a;
+
+    if (alpha <= p_alphaClip) discard;
     
     float3 albedoColor = albedo.rgb;
     

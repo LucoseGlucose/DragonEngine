@@ -186,6 +186,7 @@
     <ClInclude Include="EditorLayer.h" />
     <ClInclude Include="EditorWindow.h" />
     <ClInclude Include="EditorSettings.h" />
+    <ClInclude Include="EditorWindowData.h" />
     <ClInclude Include="IconsMaterialDesign.h" />
     <ClInclude Include="ImGuiRenderPass.h" />
     <ClInclude Include="SceneWindow.h" />

@@ -9,25 +9,17 @@ CameraComponent::CameraComponent(SceneObject* owner) : Component(owner)
 
 void CameraComponent::CalculateProjection()
 {
-	XMUINT2 windowSize = Application::GetViewportSize();
-
-	DirectX::XMStoreFloat4x4(&projectionMat, DirectX::XMMatrixPerspectiveFovLH(
-		DirectX::XMConvertToRadians(fieldOfView), (float)windowSize.x / windowSize.y, nearClip, farClip));
+	projectionMat = Matrix::CreatePerspectiveFieldOfView(DirectX::XMConvertToRadians(fieldOfView), size.x / size.y, nearClip, farClip);
 }
 
 void CameraComponent::CalculateView()
 {
-	XMFLOAT3 pos = GetTransform()->GetPosition();
-	XMFLOAT3 fwd = GetTransform()->GetForward();
-	XMFLOAT3 up = GetTransform()->GetUp();
+	Vector3 pos = GetTransform()->GetPosition();
+	Vector3 fwd = GetTransform()->GetForward();
+	Vector3 up = GetTransform()->GetUp();
 
 	DirectX::XMStoreFloat4x4(&viewMat, DirectX::XMMatrixLookToLH(DirectX::XMLoadFloat3(&pos),
 		DirectX::XMLoadFloat3(&fwd), DirectX::XMLoadFloat3(&up)));
-}
-
-float CameraComponent::GetFOV()
-{
-	return fieldOfView;
 }
 
 void CameraComponent::SetFOV(float fov)
@@ -38,11 +30,6 @@ void CameraComponent::SetFOV(float fov)
 	CalculateProjection();
 }
 
-float CameraComponent::GetNear()
-{
-	return nearClip;
-}
-
 void CameraComponent::SetNear(float nearVal)
 {
 	if (nearClip == nearVal) return;
@@ -51,16 +38,17 @@ void CameraComponent::SetNear(float nearVal)
 	CalculateProjection();
 }
 
-float CameraComponent::GetFar()
-{
-	return farClip;
-}
-
 void CameraComponent::SetFar(float farVal)
 {
 	if (farClip == farVal) return;
 
 	farClip = farVal;
+	CalculateProjection();
+}
+
+void CameraComponent::SetSize(Vector2 size)
+{
+	this->size = size;
 	CalculateProjection();
 }
 

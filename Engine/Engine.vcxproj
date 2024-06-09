@@ -254,12 +254,17 @@
     <ClCompile Include="Core\SceneLayer.cpp" />
     <ClCompile Include="Core\Layer.cpp" />
     <ClCompile Include="Core\SimpleMath.cpp" />
+    <ClCompile Include="Graphics\Buffer.cpp" />
+    <ClCompile Include="Graphics\ColorTexture.cpp" />
     <ClCompile Include="Graphics\CommandRecorder.cpp" />
     <ClCompile Include="Core\Component.cpp" />
+    <ClCompile Include="Graphics\DepthTexture.cpp" />
+    <ClCompile Include="Graphics\DescriptorHeap.cpp" />
     <ClCompile Include="Graphics\Framebuffer.cpp" />
     <ClCompile Include="Graphics\CommandQueue.cpp" />
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Graphics\GraphicsResource.cpp" />
+    <ClCompile Include="Graphics\PipelineProfile.cpp" />
     <ClCompile Include="Graphics\ProcessRenderPass.cpp" />
     <ClCompile Include="Graphics\RenderPass.cpp" />
     <ClCompile Include="Graphics\ResolveRenderPass.cpp" />
@@ -282,14 +287,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Core\TimeManager.cpp" />
     <ClCompile Include="Components\RendererComponent.cpp" />
-    <ClCompile Include="Graphics\Texture.cpp" />
     <ClCompile Include="Graphics\Texture2D.cpp" />
     <ClCompile Include="Graphics\RenderTexture.cpp" />
     <ClCompile Include="Graphics\PresentationBuffer.cpp" />
     <ClCompile Include="Core\Input.cpp" />
-    <ClCompile Include="Objects\SkyboxObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\CameraComponent.h" />
@@ -302,16 +304,22 @@
     <ClInclude Include="Core\SceneLayer.h" />
     <ClInclude Include="Core\Layer.h" />
     <ClInclude Include="Core\SimpleMath.h" />
+    <ClInclude Include="Graphics\Buffer.h" />
+    <ClInclude Include="Graphics\ColorTexture.h" />
     <ClInclude Include="Graphics\CommandRecorder.h" />
     <ClInclude Include="Core\Component.h" />
+    <ClInclude Include="Graphics\DepthTexture.h" />
+    <ClInclude Include="Graphics\DescriptorHeap.h" />
     <ClInclude Include="Graphics\Framebuffer.h" />
     <ClInclude Include="Graphics\CommandQueue.h" />
     <ClInclude Include="Core\Application.h" />
     <ClInclude Include="Graphics\GraphicsResource.h" />
     <ClInclude Include="Graphics\Mesh.h" />
+    <ClInclude Include="Graphics\PipelineProfile.h" />
     <ClInclude Include="Graphics\ProcessRenderPass.h" />
     <ClInclude Include="Graphics\Rendering.h" />
     <ClInclude Include="Graphics\RenderPass.h" />
+    <ClInclude Include="Graphics\RenderTextureProfile.h" />
     <ClInclude Include="Graphics\ResolveRenderPass.h" />
     <ClInclude Include="Graphics\SceneRenderPass.h" />
     <ClInclude Include="Graphics\Shader.h" />
@@ -323,7 +331,6 @@
     <ClInclude Include="Core\SceneObject.h" />
     <ClInclude Include="Core\Object.h" />
     <ClInclude Include="Core\stdafx.h" />
-    <ClInclude Include="Core\TimeManager.h" />
     <ClInclude Include="Core\Transform.h" />
     <ClInclude Include="Core\Utils.h" />
     <ClInclude Include="Components\RendererComponent.h" />
@@ -340,9 +347,9 @@
     <ClInclude Include="NvidiaMathLib\NdcConfig.h" />
     <ClInclude Include="NvidiaMathLib\Packed.h" />
     <ClInclude Include="NvidiaMathLib\Platform.h" />
-    <ClInclude Include="Objects\SkyboxObject.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Images\citrus_orchard_4k.hdr" />
     <None Include="Images\limpopo_golf_course_4k.hdr" />
     <None Include="Models\Cube.fbx" />
     <None Include="Models\Inverted Cube.fbx" />
@@ -455,6 +462,12 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.6</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\UnlitP.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\UnlitV.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

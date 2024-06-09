@@ -95,7 +95,7 @@ float4 main(PS_INPUT input) : SV_TARGET
             float pdf = D * NdotH / (4.0 * HdotV) + 0.0001;
 
             float saSample = 1.0 / (p_sampleCount * pdf + 0.0001);
-            float mipLevel = p_roughness == 0.0 ? 0.0 : 0.75 * log2(saSample / saTexel);
+            float mipLevel = p_roughness == 0.0 ? 0.0 : 0.5 * log2(saSample / saTexel);
             
             prefilteredColor += t_skybox.SampleLevel(s_sampler, L, mipLevel).rgb * NdotL;
             totalWeight += NdotL;

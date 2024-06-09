@@ -15,7 +15,7 @@ struct VS_OUTPUT
 
 cbuffer VertexParams : register(b0)
 {
-    float4x4 p_mvpMat = float4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    float4x4 p_mvpMat;
 };
 
 VS_OUTPUT main(VS_INPUT input)

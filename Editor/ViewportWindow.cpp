@@ -1,12 +1,11 @@
 #include "stdafx.h"
 #include "ViewportWindow.h"
 
-#include "IconsMaterialDesign.h"
 #include "EditorLayer.h"
 #include "Rendering.h"
 #include "ImGuiRenderPass.h"
 
-ViewportWindow::ViewportWindow() : EditorWindow(ICON_MD_TV" Viewport", ImVec2(256, 144))
+ViewportWindow::ViewportWindow(EditorLayer* el, EditorWindowIndex windowIndex) : EditorWindow(el, windowIndex, GetTitle(), ImVec2(256, 144))
 {
 	
 }
@@ -18,7 +17,7 @@ void ViewportWindow::BeforeShow()
 
 void ViewportWindow::OnGui()
 {
-	ImGui::Image(EditorLayer::GetViewportTextureID(), lastWindowSize);
+	ImGui::Image(editorLayer->GetViewportTextureID(), lastWindowSize);
 }
 
 void ViewportWindow::AfterShow()
@@ -28,10 +27,10 @@ void ViewportWindow::AfterShow()
 
 void ViewportWindow::OnResizeWindow(ImVec2 newSize)
 {
-	Rendering::commandQueue->WaitForAllCommands();
-	Rendering::outputCam->CalculateProjection();
+	Vector2 xmNewSize = Vector2(newSize.x, newSize.y);
 
-	XMUINT2 xmNewSize = XMUINT2(newSize.x, newSize.y);
+	Rendering::commandQueue->WaitForAllCommands();
+	Rendering::outputCam->SetSize(xmNewSize);
 
 	for (size_t i = 0; i < Rendering::renderPasses.size(); i++)
 	{

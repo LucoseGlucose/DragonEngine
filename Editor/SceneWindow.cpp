@@ -1,10 +1,9 @@
 #include "stdafx.h"
 #include "SceneWindow.h"
 
-#include "IconsMaterialDesign.h"
 #include "SceneManager.h"
 
-SceneWindow::SceneWindow() : EditorWindow(ICON_MD_PUBLIC" Scene", ImVec2(256, 72))
+SceneWindow::SceneWindow(EditorLayer* el, EditorWindowIndex windowIndex) : EditorWindow(el, windowIndex, GetTitle(), ImVec2(256, 72))
 {
 
 }

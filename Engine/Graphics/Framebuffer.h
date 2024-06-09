@@ -1,26 +1,35 @@
 #pragma once
 
-#include "RenderTexture.h"
+#include "ColorTexture.h"
+#include "DepthTexture.h"
 #include "CommandRecorder.h"
+#include "PipelineProfile.h"
+#include "DescriptorHeap.h"
 
 class Framebuffer
 {
 public:
-	Framebuffer(XMUINT2 size, DXGI_FORMAT rtvFormat, DXGI_FORMAT dsFormat,
-		D3D12_CLEAR_VALUE rtvClear, D3D12_CLEAR_VALUE dsClear, uint32_t samples);
+	Framebuffer(RenderTextureProfile dsProfile, std::initializer_list<RenderTextureProfile> rtvProfiles);
+	Framebuffer(std::initializer_list<RenderTextureProfile> rtvProfiles);
+	Framebuffer(RenderTextureProfile dsProfile);
 	~Framebuffer();
 
-	RenderTexture* colorTexture;
-	RenderTexture* depthStencilTexture;
+	std::vector<ColorTexture*> colorTextures;
+	DepthTexture* depthTexture;
 
-	ComPtr<ID3D12DescriptorHeap> rtvDescHeap;
-	ComPtr<ID3D12DescriptorHeap> dsDescHeap;
+	DescriptorHeap colorDescHeap;
+	DescriptorHeap depthDescHeap;
 
-	XMFLOAT4 clearColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	float clearDepth = 1.0f;
+	PipelineProfile pipelineProfile;
 
-	void Resize(XMUINT2 newSize);
-	void Setup(CommandRecorder* recorder, bool clearTargets);
-	void Blit(CommandRecorder* recorder, Framebuffer* dest, bool color, DXGI_FORMAT colorFormat, bool depthStencil, DXGI_FORMAT dsFormat);
-	void Clear(CommandRecorder* recorder, bool color, bool depth);
+	Vector2 size;
+	UINT8 samples;
+
+	void Resize(Vector2 newSize);
+	void Setup(CommandRecorder* recorder, UINT8 colorClearMask = 0b11111111, bool clearDepth = true);
+	void Clear(CommandRecorder* recorder, UINT8 colorMask = 0b11111111, bool depth = true);
+
+	void BlitTo(CommandRecorder* recorder, Framebuffer* dest, UINT8 colorMask = 0xff, bool depthStencil = false);
+	void CopyTo(CommandRecorder* recorder, Framebuffer* dest, UINT8 colorMask = 0xff, bool depthStencil = false);
+	void ResolveTo(CommandRecorder* recorder, Framebuffer* dest, UINT8 colorMask = 0xff, bool depthStencil = false);
 };

@@ -21,6 +21,22 @@ ImTextureID EditorLayer::GetViewportTextureID()
 	return (ImTextureID)texDescHnd.ptr;
 }
 
+void EditorLayer::OpenEditorWindow(EditorWindowIndex windowIndex)
+{
+	EditorWindowData* data = &availableWindows[(int)windowIndex];
+
+	data->open = true;
+	windows.push_back(data->creationFunc(this));
+}
+
+void EditorLayer::CloseEditorWindow(EditorWindow* window)
+{
+	availableWindows[(int)window->windowIndex].open = false;
+
+	Utils::RemoveFromVector(&windows, window);
+	delete window;
+}
+
 void EditorLayer::OnPush()
 {
 	IMGUI_CHECKVERSION();
@@ -54,17 +70,19 @@ void EditorLayer::OnPush()
 	ImGuiRenderPass* imRenderPass = new ImGuiRenderPass();
 	Rendering::renderPasses.push_back(imRenderPass);
 
-	viewport = new ViewportWindow();
-	windows.push_back(viewport);
-
-	windows.push_back(new SceneWindow());
-	windows.push_back(new StatsWindow());
+	for (size_t i = 0; i < availableWindows.size(); i++)
+	{
+		EditorWindowData data = availableWindows[i];
+		if (data.open) OpenEditorWindow(data.index);
+	}
 }
 
 void EditorLayer::Update()
 {
-	Rendering::outputCam->OnUpdate();
+	if (Application::GetFramebufferSize().x == 0 || Application::GetFramebufferSize().y == 0) return;
 
+	Rendering::outputCam->OnUpdate();
+	
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
@@ -72,9 +90,22 @@ void EditorLayer::Update()
 	ImGui::BeginMainMenuBar();
 	if (ImGui::BeginMenu("Windows"))
 	{
-		for (size_t i = 0; i < windows.size(); i++)
+		for (size_t i = 0; i < availableWindows.size(); i++)
 		{
-			ImGui::MenuItem(windows[i]->title.c_str(), nullptr, &windows[i]->open);
+			EditorWindowData* data = &availableWindows[i];
+
+			bool open = data->open;
+			ImGui::MenuItem(data->title.c_str(), nullptr, &open);
+
+			if (open != data->open)
+			{
+				if (open) OpenEditorWindow(data->index);
+				else
+				{
+					EditorWindow* w = GetWindowByTitle(data->title);
+					if (w != nullptr) CloseEditorWindow(w);
+				}
+			}
 		}
 		ImGui::EndMenu();
 	}
@@ -88,7 +119,7 @@ void EditorLayer::Update()
 	}
 }
 
-void EditorLayer::Resize(XMUINT2 newSize)
+void EditorLayer::Resize(Vector2 newSize)
 {
 	Rendering::Resize(newSize);
 }
@@ -101,7 +132,16 @@ void EditorLayer::OnPop()
 	ImGui_ImplGlfw_Shutdown();
 }
 
-XMUINT2 EditorLayer::GetViewportSize()
+EditorWindow* EditorLayer::GetWindowByTitle(std::string title)
 {
-	return XMUINT2(viewport->lastWindowSize.x, viewport->lastWindowSize.y);
+	auto it = std::find_if(windows.begin(), windows.end(), [=](EditorWindow* w) -> bool { return w->title == title; });
+
+	if (it != windows.end()) return it[0];
+	return nullptr;
+}
+
+bool EditorLayer::TryGetWindowByTitle(std::string title, EditorWindow** out)
+{
+	*out = GetWindowByTitle(title);
+	return *out == nullptr;
 }

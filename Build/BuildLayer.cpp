@@ -13,7 +13,7 @@ void BuildLayer::Update()
 	
 }
 
-void BuildLayer::Resize(XMUINT2 newSize)
+void BuildLayer::Resize(Vector2 newSize)
 {
 	Rendering::Resize(newSize);
 }
@@ -21,9 +21,4 @@ void BuildLayer::Resize(XMUINT2 newSize)
 void BuildLayer::OnPop()
 {
 
-}
-
-XMUINT2 BuildLayer::GetViewportSize()
-{
-	return Application::GetUnsignedFramebufferSize();
 }
