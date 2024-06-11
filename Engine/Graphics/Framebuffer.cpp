@@ -20,10 +20,10 @@ Framebuffer::Framebuffer(RenderTextureProfile dsProfile, std::initializer_list<R
 		if (tex->samples != samples) Utils::CrashWithMessage(L"Sample count must be equal for all attachments");
 
 		colorTextures.push_back(tex);
-		Rendering::device->CreateRenderTargetView(tex->resourceBuffer.Get(), &tex->rtvDesc, colorDescHeap.GetCPUHandleForIndex(i));
+		tex->CreateRTV(colorDescHeap.GetCPUHandleForIndex(i));
 	}
 
-	Rendering::device->CreateDepthStencilView(depthTexture->resourceBuffer.Get(), &depthTexture->dsDesc, depthDescHeap.GetCPUHandle());
+	depthTexture->CreateDSV(depthDescHeap.GetCPUHandle());
 
 	pipelineProfile.dsvFormat = depthTexture->format;
 	pipelineProfile.sampleDesc.Count = samples;
@@ -51,7 +51,7 @@ Framebuffer::Framebuffer(std::initializer_list<RenderTextureProfile> rtvProfiles
 		if (tex->samples != samples) Utils::CrashWithMessage(L"Sample count must be equal for all attachments");
 
 		colorTextures.push_back(tex);
-		Rendering::device->CreateRenderTargetView(tex->resourceBuffer.Get(), &tex->rtvDesc, colorDescHeap.GetCPUHandleForIndex(i));
+		tex->CreateRTV(colorDescHeap.GetCPUHandleForIndex(i));
 	}
 
 	pipelineProfile.sampleDesc.Count = samples;
@@ -72,7 +72,7 @@ Framebuffer::Framebuffer(RenderTextureProfile dsProfile)
 	depthDescHeap(1, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE),
 	depthTexture(new DepthTexture(dsProfile))
 {
-	Rendering::device->CreateDepthStencilView(depthTexture->resourceBuffer.Get(), &depthTexture->dsDesc, depthDescHeap.GetCPUHandle());
+	depthTexture->CreateDSV(depthDescHeap.GetCPUHandle());
 
 	pipelineProfile.dsvFormat = depthTexture->format;
 	pipelineProfile.sampleDesc.Count = samples;
@@ -95,13 +95,11 @@ void Framebuffer::Resize(Vector2 newSize)
 	for (size_t i = 0; i < colorTextures.size(); i++)
 	{
 		colorTextures[i]->Resize(newSize);
-
-		Rendering::device->CreateRenderTargetView(colorTextures[i]->resourceBuffer.Get(),
-			&colorTextures[i]->rtvDesc, colorDescHeap.GetCPUHandleForIndex(i));
+		colorTextures[i]->CreateRTV(colorDescHeap.GetCPUHandleForIndex(i));
 	}
 
 	depthTexture->Resize(newSize);
-	Rendering::device->CreateDepthStencilView(depthTexture->resourceBuffer.Get(), &depthTexture->dsDesc, depthDescHeap.GetCPUHandle());
+	depthTexture->CreateDSV(depthDescHeap.GetCPUHandle());
 }
 
 void Framebuffer::Setup(CommandRecorder* recorder, UINT8 colorClearMask, bool clearDepth)

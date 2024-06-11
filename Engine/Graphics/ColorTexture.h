@@ -10,4 +10,6 @@ public:
 	ColorTexture(ID3D12Resource** existingResource, D3D12_CLEAR_VALUE clearValue);
 
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
+
+	void CreateRTV(const D3D12_CPU_DESCRIPTOR_HANDLE& handle);
 };

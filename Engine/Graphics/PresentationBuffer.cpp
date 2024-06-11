@@ -49,8 +49,7 @@ PresentationBuffer::PresentationBuffer() : colorTextures(), pipelineProfile()//,
 		colorTextures[i] = new ColorTexture(&res, CD3DX12_CLEAR_VALUE(DXGI_FORMAT_R8G8B8A8_UNORM, &clearColor.x));
 		colorTextures[i]->currentState = D3D12_RESOURCE_STATE_PRESENT;
 
-		Rendering::device->CreateRenderTargetView(colorTextures[i]->resourceBuffer.Get(),
-			&colorTextures[i]->rtvDesc, rtvDescHeap.GetCPUHandleForIndex(i));
+		colorTextures[i]->CreateRTV(rtvDescHeap.GetCPUHandleForIndex(i));
 	}
 
 	pipelineProfile.rtvFormats.push_back(DXGI_FORMAT_R8G8B8A8_UNORM);
@@ -83,8 +82,7 @@ void PresentationBuffer::Resize(Vector2 newSize)
 		Utils::ThrowIfFailed(swapchain->GetBuffer(i, IID_PPV_ARGS(&tempRes)));
 		colorTextures[i]->Resize(newSize, &tempRes);
 
-		Rendering::device->CreateRenderTargetView(colorTextures[i]->resourceBuffer.Get(),
-			&colorTextures[i]->rtvDesc, rtvDescHeap.GetCPUHandleForIndex(i));
+		colorTextures[i]->CreateRTV(rtvDescHeap.GetCPUHandleForIndex(i));
 	}
 }
 

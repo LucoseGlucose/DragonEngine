@@ -12,7 +12,6 @@
 
 Scene* Game::Init()
 {
-	Application::targetFrameRate = 60.f;
 	Scene* scene = new Scene("MainScene");
 
 	CameraComponent* cam = scene->AddObject(new SceneObject("Camera"))->AddComponent<CameraComponent>();
