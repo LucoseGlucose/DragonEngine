@@ -91,23 +91,21 @@ void Rendering::Init()
 
 	quadMesh = new Mesh(Utils::GetPathFromProject("Models/Quad.fbx"));
 
-	missingMaterial = new Material(ShaderProgram::Create(Utils::GetPathFromExe("UnlitV.cso"), Utils::GetPathFromExe("UnlitP.cso")));
+	missingMaterial = new Material(ShaderProgram::Create("UnlitV.cso", "UnlitP.cso"));
 	missingMaterial->SetParameter("p_albedo", Vector3(1.f, 0.f, 1.f));
 
 	outputObj = (new SceneObject("Render Output"))->AddComponent<RendererComponent>();
 	outputObj->SetMesh(quadMesh);
 
-	outputObj->SetMaterial(new Material(ShaderProgram::Create(Utils::GetPathFromExe("OutputV.cso"), Utils::GetPathFromExe("OutputP.cso"))));
+	outputObj->SetMaterial(new Material(ShaderProgram::Create("OutputV.cso", "OutputP.cso")));
 
 	scenePass = new SceneRenderPass();
 	resolvePass = new ResolveRenderPass();
 
-	tonemapPass = new ProcessRenderPass(new Material(ShaderProgram::Create(
-		Utils::GetPathFromExe("OutputV.cso"), Utils::GetPathFromExe("TonemapP.cso"))));
+	tonemapPass = new ProcessRenderPass(new Material(ShaderProgram::Create("OutputV.cso", "TonemapP.cso")));
 	tonemapPass->material->SetParameter("p_tonemappingMode", 1);
 
-	gammaPass = new ProcessRenderPass(new Material(ShaderProgram::Create(
-		Utils::GetPathFromExe("OutputV.cso"), Utils::GetPathFromExe("GammaP.cso"))));
+	gammaPass = new ProcessRenderPass(new Material(ShaderProgram::Create("OutputV.cso", "GammaP.cso")));
 
 	renderPasses = std::vector<RenderPass*>{ scenePass, resolvePass, tonemapPass, gammaPass };
 	outputObj->GetMaterial()->SetTexture("t_inputTexture", renderPasses.back()->outputFB->colorTextures.front());

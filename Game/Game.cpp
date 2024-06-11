@@ -30,7 +30,7 @@ Scene* Game::Init()
 
 	RendererComponent* object = scene->AddObject(new SceneObject("Mesh"))->AddComponent<RendererComponent>();
 	object->SetMesh(mesh);
-	object->SetMaterial(new Material(ShaderProgram::Create(Utils::GetPathFromExe("LitV.cso"), Utils::GetPathFromExe("LitP.cso"))));
+	object->SetMaterial(new Material(ShaderProgram::Create("LitV.cso", "LitP.cso")));
 	
 	object->GetMaterial()->SetParameter("p_albedo", Color(DirectX::ColorsLinear::DodgerBlue));
 	object->GetMaterial()->SetParameter("p_metallic", .9f);

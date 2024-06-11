@@ -21,6 +21,8 @@ Shader::Shader(const std::filesystem::path& file, SHADER_TYPE shaderType)
 
 Shader* Shader::Create(const std::filesystem::path& file, SHADER_TYPE shaderType)
 {
-	if (createdShaders.contains(file)) return createdShaders[file];
-	return new Shader(file, shaderType);
+	std::filesystem::path fullPath = Utils::GetPathFromExe(file);
+
+	if (createdShaders.contains(fullPath)) return createdShaders[fullPath];
+	return new Shader(fullPath, shaderType);
 }

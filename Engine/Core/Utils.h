@@ -7,21 +7,23 @@
 #endif
 
 #define GETTER(name, obj) inline auto name() { return obj; };
+#define SETTER(name, obj) inline void name(auto val) { obj = val; };
+
 #define STATIC(decl) static inline decl{}
+#define INLINE(decl) inline decl{}
 
-class Utils
+namespace Utils
 {
-public:
-	static void ThrowIfFailed(HRESULT result);
-	static void ThrowIfFailed(HRESULT result, LPCWSTR message);
-	static void CrashWithMessage(LPCWSTR message);
+	void ThrowIfFailed(HRESULT result);
+	void ThrowIfFailed(HRESULT result, LPCWSTR message);
+	void CrashWithMessage(LPCWSTR message);
 
-	static std::filesystem::path GetPathFromExe(std::filesystem::path path);
-	static std::filesystem::path GetPathFromProject(std::filesystem::path path);
-	static std::filesystem::path GetPathFromSolution(std::filesystem::path path);
+	std::filesystem::path GetPathFromExe(std::filesystem::path path);
+	std::filesystem::path GetPathFromProject(std::filesystem::path path);
+	std::filesystem::path GetPathFromSolution(std::filesystem::path path);
 
 	template<typename T>
-	static void RemoveFromVector(std::vector<T>* vec, const T& item)
+	void RemoveFromVector(std::vector<T>* vec, const T& item)
 	{
 		vec->erase(std::find(vec->begin(), vec->end(), item));
 	}

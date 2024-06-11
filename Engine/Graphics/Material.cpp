@@ -12,6 +12,7 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 	UINT32 numConstantBuffers = 0;
 	UINT32 numTextures = 0;
 	UINT32 numSamplers = 0;
+	UINT32 numUAVs = 0;
 
 	std::vector<std::pair<std::string, char>> defaultTextures{};
 	std::vector<std::pair<std::string, char>> defaultSamplers{};
@@ -82,10 +83,10 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 			{
 				textureParameters[bindDesc.Name] = numTextures;
 				cachedTextures[bindDesc.Name] = nullptr;
-				numTextures++;
 
 				std::string varName = bindDesc.Name;
 				defaultTextures.push_back(std::pair<std::string, char>(varName, varName.back()));
+				numTextures++;
 			}
 			if (bindDesc.Type == D3D_SIT_SAMPLER)
 			{
@@ -95,6 +96,13 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 				std::string varName = bindDesc.Name;
 				defaultSamplers.push_back(std::pair<std::string, char>(varName, varName.back()));
 				numSamplers++;
+			}
+			if (bindDesc.Type == D3D_SIT_STRUCTURED || bindDesc.Type == D3D11_SIT_UAV_RWSTRUCTURED || bindDesc.Type == D3D11_SIT_UAV_RWTYPED)
+			{
+				uavParameters[bindDesc.Name] = numUAVs;
+				cachedUAVs[bindDesc.Name] = nullptr;
+
+				numUAVs++;
 			}
 		}
 	}
@@ -124,6 +132,11 @@ Material::Material(ShaderProgram* shader) : shader(shader)
 
 		if (code == 'L') SetSampler(defaultSamplers[i].first, Rendering::GetBRDFSampler());
 		else SetSampler(defaultSamplers[i].first, Rendering::GetDefaultSampler());
+	}
+
+	if (uavParameters.size() > 0)
+	{
+		uavDescHeap = DescriptorHeap(numUAVs, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
 	}
 }
 
@@ -160,6 +173,16 @@ void Material::SetSampler(const std::string& name, Sampler sampler)
 	cachedSamplers[name] = sampler;
 }
 
+void Material::SetUAV(const std::string& name, GraphicsResource* uav)
+{
+	if (!uavParameters.contains(name) || cachedUAVs[name] == uav) return;
+
+	UINT32 index = uavParameters[name];
+	Rendering::device->CreateUnorderedAccessView(uav->resourceBuffer.Get(), nullptr, &uav->uavDesc, uavDescHeap.GetCPUHandleForIndex(index));
+
+	cachedUAVs[name] = uav;
+}
+
 void Material::GetParameter(const std::string& name, void* data, size_t size)
 {
 	if (!cbParameters.contains(name)) return;
@@ -181,12 +204,25 @@ Sampler Material::GetSampler(const std::string& name)
 	return cachedSamplers[name];
 }
 
+GraphicsResource* Material::GetUAV(const std::string& name)
+{
+	return nullptr;
+}
+
 void Material::UpdateTexture(const std::string& name, Texture* texture)
 {
 	if (!textureParameters.contains(name) || cachedTextures[name] != texture) return;
 
 	UINT32 index = textureParameters[name];
 	Rendering::device->CreateShaderResourceView(texture->resourceBuffer.Get(), &texture->srvDesc, textureDescHeap.GetCPUHandleForIndex(index));
+}
+
+void Material::UpdateUAV(const std::string& name, GraphicsResource* uav)
+{
+	if (!uavParameters.contains(name) || cachedUAVs[name] != uav) return;
+
+	UINT32 index = uavParameters[name];
+	Rendering::device->CreateUnorderedAccessView(uav->resourceBuffer.Get(), nullptr, &uav->uavDesc, uavDescHeap.GetCPUHandleForIndex(index));
 }
 
 void Material::Bind(CommandRecorder* recorder, PipelineProfile profile)

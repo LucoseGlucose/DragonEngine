@@ -18,7 +18,7 @@ SceneRenderPass::SceneRenderPass()
 	diffuseSkybox = TextureCubemap::ComputeDiffuseIrradiance(skyboxTexture, Vector2(32, 32));
 	specularSkybox = TextureCubemap::ComputeAmbientSpecular(skyboxTexture, Vector2(1024, 1024), 5, 4096);
 
-	skyboxMat = new Material(ShaderProgram::Create(Utils::GetPathFromExe("SkyboxV.cso"), Utils::GetPathFromExe("SkyboxP.cso")));
+	skyboxMat = new Material(ShaderProgram::Create("SkyboxV.cso", "SkyboxP.cso"));
 	skyboxMat->SetTexture("t_texture", skyboxTexture);
 
 	skyboxMesh = new Mesh(Utils::GetPathFromProject("Models/Inverted Cube.fbx"));

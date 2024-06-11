@@ -27,6 +27,7 @@ class Application
 
 public:
 
+	STATIC(GLFWwindow* window);
 	STATIC(float targetFrameRate);
 
 	static void Init(Vector2 windowStartSize, Vector2 windowStartPos, const char* windowTitle,
@@ -52,6 +53,4 @@ public:
 	static void PopLayer();
 
 	static bool Closing();
-
-	static inline GLFWwindow* window{};
 };

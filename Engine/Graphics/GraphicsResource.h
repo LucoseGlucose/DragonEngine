@@ -12,4 +12,5 @@ public:
 	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc;
 
 	virtual CD3DX12_RESOURCE_BARRIER TransitionToState(D3D12_RESOURCE_STATES newState);
+	virtual void CreateUAV(const D3D12_CPU_DESCRIPTOR_HANDLE& handle);
 };

@@ -26,18 +26,26 @@ public:
 	std::map<std::string, UINT32> samplerParameters{};
 	DescriptorHeap samplerDescHeap;
 
+	std::map<std::string, UINT32> uavParameters{};
+	DescriptorHeap uavDescHeap;
+
 	std::map<std::string, Texture*> cachedTextures{};
 	std::map<std::string, Sampler> cachedSamplers{};
+	std::map<std::string, GraphicsResource*> cachedUAVs{};
 
 	void SetParameter(const std::string& name, void* data, size_t size);
 	void SetTexture(const std::string& name, Texture* texture);
 	void SetSampler(const std::string& name, Sampler sampler);
+	void SetUAV(const std::string& name, GraphicsResource* uav);
 
 	void GetParameter(const std::string& name, void* data, size_t size);
 	Texture* GetTexture(const std::string& name);
 	Sampler GetSampler(const std::string& name);
+	GraphicsResource* GetUAV(const std::string& name);
 
 	void UpdateTexture(const std::string& name, Texture* texture);
+	void UpdateUAV(const std::string& name, GraphicsResource* uav);
+
 	void Bind(CommandRecorder* recorder, PipelineProfile profile);
 
 	template<typename T>
