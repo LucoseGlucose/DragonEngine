@@ -3,11 +3,8 @@
 
 #include "RendererComponent.h"
 #include "Material.h"
-#include "Texture2D.h"
 #include "Rendering.h"
 #include "CameraControllerComponent.h"
-#include "TextureCubemap.h"
-#include "PointLightComponent.h"
 #include "DirectionalLightComponent.h"
 
 Scene* Game::Init()
@@ -26,7 +23,7 @@ Scene* Game::Init()
 	light->GetTransform()->SetPosition(Vector3(2.f, 2.5f, -1.5f));
 	light->GetTransform()->SetEulerAngles(Vector3(28.f, 53.f, 0.f));
 
-	Mesh* mesh = new Mesh(Utils::GetPathFromProject("Models/Cube.fbx"));
+	Mesh* mesh = new Mesh(Utils::GetPathFromProject("Models/Sphere.fbx"));
 
 	RendererComponent* object = scene->AddObject(new SceneObject("Mesh"))->AddComponent<RendererComponent>();
 	object->SetMesh(mesh);

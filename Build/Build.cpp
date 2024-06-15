@@ -15,8 +15,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 	Rendering::Init();
 
-	Application::PushLayer(new BuildLayer());
 	SceneManager::AddScene(Game::Init());
+	Application::PushLayer(new BuildLayer());
 
 	Application::PushLayer(new SceneLayer());
 	Application::Run();

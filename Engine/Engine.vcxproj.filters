@@ -138,6 +138,9 @@
     <ClCompile Include="Graphics\PipelineProfile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\RayTracingRenderPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graphics\Rendering.h">
@@ -299,6 +302,9 @@
     <ClInclude Include="Graphics\Buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Graphics\RayTracingRenderPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Models\Quad.fbx" />
@@ -366,5 +372,6 @@
     <FxCompile Include="Shaders\SkyboxV.hlsl" />
     <FxCompile Include="Shaders\UnlitP.hlsl" />
     <FxCompile Include="Shaders\UnlitV.hlsl" />
+    <FxCompile Include="Shaders\RayTracingP.hlsl" />
   </ItemGroup>
 </Project>

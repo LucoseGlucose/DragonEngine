@@ -1,10 +1,17 @@
 #include "stdafx.h"
 #include "CameraComponent.h"
 
-CameraComponent::CameraComponent(SceneObject* owner) : Component(owner)
+CameraComponent::CameraComponent(SceneObject* owner) : Component(owner), viewMatCalcSub([this](Matrix m) { CalculateView(); })
 {
 	CalculateProjection();
 	CalculateView();
+
+	GetTransform()->onMatrixChanged.Subscribe(&viewMatCalcSub);
+}
+
+CameraComponent::~CameraComponent()
+{
+	GetTransform()->onMatrixChanged.Unsubscribe(&viewMatCalcSub);
 }
 
 void CameraComponent::CalculateProjection()
@@ -18,8 +25,7 @@ void CameraComponent::CalculateView()
 	Vector3 fwd = GetTransform()->GetForward();
 	Vector3 up = GetTransform()->GetUp();
 
-	DirectX::XMStoreFloat4x4(&viewMat, DirectX::XMMatrixLookToLH(DirectX::XMLoadFloat3(&pos),
-		DirectX::XMLoadFloat3(&fwd), DirectX::XMLoadFloat3(&up)));
+	viewMat = Matrix::CreateLookAt(pos, pos + fwd, up);
 }
 
 void CameraComponent::SetFOV(float fov)
@@ -52,17 +58,12 @@ void CameraComponent::SetSize(Vector2 size)
 	CalculateProjection();
 }
 
-XMFLOAT4X4 CameraComponent::GetProjectionMat()
+Matrix CameraComponent::GetProjectionMat()
 {
 	return projectionMat;
 }
 
-XMFLOAT4X4 CameraComponent::GetViewMat()
+Matrix CameraComponent::GetViewMat()
 {
 	return viewMat;
-}
-
-void CameraComponent::OnUpdate()
-{
-	CalculateView();
 }

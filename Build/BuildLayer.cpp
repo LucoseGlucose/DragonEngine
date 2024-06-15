@@ -2,10 +2,14 @@
 #include "BuildLayer.h"
 
 #include "Rendering.h"
+#include "RayTracingRenderPass.h"
 
 void BuildLayer::OnPush()
 {
+	RayTracingRenderPass* rtPass = new RayTracingRenderPass();
+	Rendering::renderPasses.insert(Rendering::renderPasses.begin() + 2, rtPass);
 
+	rtPass->CreateBuffers();
 }
 
 void BuildLayer::Update()

@@ -17,6 +17,8 @@ void RenderPass::Render(Framebuffer* inputFB)
 
 	recorder->Execute();
 	Rendering::RecycleRecorder(recorder);
+
+	Rendering::commandQueue->WaitForAllCommands();
 }
 
 void RenderPass::Execute(Framebuffer* inputFB, CommandRecorder* recorder)

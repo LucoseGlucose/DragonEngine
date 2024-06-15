@@ -25,3 +25,11 @@ Buffer::Buffer(UINT64 size, D3D12_HEAP_TYPE type, D3D12_RESOURCE_STATES starting
 {
 
 }
+
+void Buffer::UploadData(CommandRecorder* recorder, Buffer* uploadBuffer, void* data)
+{
+	D3D12_SUBRESOURCE_DATA subData{ data, size, size };
+
+	UpdateSubresources(recorder->list.Get(), resourceBuffer.Get(), uploadBuffer->resourceBuffer.Get(), 0, 0, 1, &subData);
+	currentState = D3D12_RESOURCE_STATE_COPY_DEST;
+}

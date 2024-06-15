@@ -21,13 +21,12 @@ public:
 	std::vector<UINT8*> cbGPUAddresses{};
 
 	std::map<std::string, UINT32> textureParameters{};
-	DescriptorHeap textureDescHeap;
+	DescriptorHeap resourceDescHeap;
 
 	std::map<std::string, UINT32> samplerParameters{};
 	DescriptorHeap samplerDescHeap;
 
 	std::map<std::string, UINT32> uavParameters{};
-	DescriptorHeap uavDescHeap;
 
 	std::map<std::string, Texture*> cachedTextures{};
 	std::map<std::string, Sampler> cachedSamplers{};

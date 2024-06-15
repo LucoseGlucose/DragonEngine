@@ -17,6 +17,7 @@ struct VertexData
 class Mesh
 {
 public:
+
 	Mesh(std::filesystem::path path);
 
 	std::vector<VertexData> vertices = std::vector<VertexData>();

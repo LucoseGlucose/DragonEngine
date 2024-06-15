@@ -13,4 +13,6 @@ public:
 
 	UINT64 size;
 	D3D12_HEAP_TYPE type;
+
+	void UploadData(CommandRecorder* recorder, Buffer* uploadBuffer, void* data);
 };

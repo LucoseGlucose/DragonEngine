@@ -266,6 +266,7 @@
     <ClCompile Include="Graphics\GraphicsResource.cpp" />
     <ClCompile Include="Graphics\PipelineProfile.cpp" />
     <ClCompile Include="Graphics\ProcessRenderPass.cpp" />
+    <ClCompile Include="Graphics\RayTracingRenderPass.cpp" />
     <ClCompile Include="Graphics\RenderPass.cpp" />
     <ClCompile Include="Graphics\ResolveRenderPass.cpp" />
     <ClCompile Include="Graphics\SceneRenderPass.cpp" />
@@ -317,6 +318,7 @@
     <ClInclude Include="Graphics\Mesh.h" />
     <ClInclude Include="Graphics\PipelineProfile.h" />
     <ClInclude Include="Graphics\ProcessRenderPass.h" />
+    <ClInclude Include="Graphics\RayTracingRenderPass.h" />
     <ClInclude Include="Graphics\Rendering.h" />
     <ClInclude Include="Graphics\RenderPass.h" />
     <ClInclude Include="Graphics\RenderTextureProfile.h" />
@@ -444,6 +446,12 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.6</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Shaders\RayTracingP.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
     <FxCompile Include="Shaders\SkyboxP.hlsl">
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">6.6</ShaderModel>

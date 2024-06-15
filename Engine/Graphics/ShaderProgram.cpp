@@ -10,10 +10,12 @@ ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList) :
     UINT32 numConstantBuffers = 0;
     UINT32 numTextures = 0;
     UINT32 numSamplers = 0;
+    UINT32 numUAVs = 0;
 
     std::vector<D3D12_ROOT_PARAMETER> rootParams{};
     std::vector<D3D12_ROOT_PARAMETER> textureParams{};
     std::vector<D3D12_ROOT_PARAMETER> samplerParams{};
+    std::vector<D3D12_ROOT_PARAMETER> uavParams{};
 
     std::vector<D3D12_DESCRIPTOR_RANGE*> rangePtrs{};
 
@@ -108,21 +110,46 @@ ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList) :
                 samplerParams.push_back(rootParam);
                 numSamplers++;
             }
+            if (bindDesc.Type == D3D_SIT_UAV_RWSTRUCTURED || bindDesc.Type == D3D_SIT_UAV_RWTYPED || bindDesc.Type == D3D_SIT_UAV_RWBYTEADDRESS)
+            {
+                D3D12_DESCRIPTOR_RANGE* descRange = new D3D12_DESCRIPTOR_RANGE();
+                descRange->BaseShaderRegister = numUAVs;
+                descRange->NumDescriptors = 1;
+                descRange->OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+                descRange->RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+                descRange->RegisterSpace = 0;
+
+                rangePtrs.push_back(descRange);
+
+                D3D12_ROOT_DESCRIPTOR_TABLE descTable{};
+                descTable.NumDescriptorRanges = 1;
+                descTable.pDescriptorRanges = descRange;
+
+                D3D12_ROOT_PARAMETER rootParam{};
+                rootParam.DescriptorTable = descTable;
+                rootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+                rootParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+                uavParams.push_back(rootParam);
+                numUAVs++;
+            }
         }
     }
 
-    UINT32 numParams = rootParams.size() + textureParams.size() + samplerParams.size();
+    UINT32 numParams = rootParams.size() + textureParams.size() + samplerParams.size() + uavParams.size();
     D3D12_ROOT_PARAMETER* allParams = new D3D12_ROOT_PARAMETER[numParams];
-    D3D12_ROOT_PARAMETER* ptrCpy = allParams;
+    D3D12_ROOT_PARAMETER* ptrCopy = allParams;
 
     memcpy(allParams, rootParams.data(), rootParams.size() * sizeof(D3D12_ROOT_PARAMETER));
     allParams += rootParams.size();
     memcpy(allParams, textureParams.data(), textureParams.size() * sizeof(D3D12_ROOT_PARAMETER));
     allParams += textureParams.size();
     memcpy(allParams, samplerParams.data(), samplerParams.size() * sizeof(D3D12_ROOT_PARAMETER));
+    allParams += samplerParams.size();
+    memcpy(allParams, uavParams.data(), uavParams.size() * sizeof(D3D12_ROOT_PARAMETER));
 
     CD3DX12_ROOT_SIGNATURE_DESC rsDesc{};
-    rsDesc.Init(numParams, ptrCpy, 0, nullptr,
+    rsDesc.Init(numParams, ptrCopy, 0, nullptr,
         D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
         D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS |
         D3D12_ROOT_SIGNATURE_FLAG_DENY_AMPLIFICATION_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_MESH_SHADER_ROOT_ACCESS);
@@ -145,7 +172,7 @@ ShaderProgram::ShaderProgram(const std::map<SHADER_TYPE, Shader*>& shaderList) :
     {
         delete rangePtrs[i];
     }
-    delete[] ptrCpy;
+    delete[] ptrCopy;
 
     D3D12_INPUT_ELEMENT_DESC* inputs = new D3D12_INPUT_ELEMENT_DESC[vertexShaderDesc.InputParameters];
 

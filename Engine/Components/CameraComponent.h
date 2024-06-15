@@ -13,8 +13,12 @@ class CameraComponent : public Component
 	float farClip = 75.f;
 	Vector2 size = Application::GetFramebufferSize();
 
+	Subscription<Matrix> viewMatCalcSub;
+
 public:
+
 	CameraComponent(SceneObject* owner);
+	~CameraComponent();
 
 	void CalculateProjection();
 	void CalculateView();
@@ -31,8 +35,6 @@ public:
 	GETTER(GetSize, size);
 	void SetSize(Vector2 size);
 
-	XMFLOAT4X4 GetProjectionMat();
-	XMFLOAT4X4 GetViewMat();
-
-	virtual void OnUpdate() override;
+	Matrix GetProjectionMat();
+	Matrix GetViewMat();
 };
